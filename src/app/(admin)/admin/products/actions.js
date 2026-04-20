@@ -37,6 +37,7 @@ export async function createProduct(formData) {
   const seoDescription = formData.get('seoDescription') || shortDescription;
 
   const highlights = formData.get('highlights') ? JSON.parse(formData.get('highlights')) : [];
+  const shippingPrice = parseFloat(formData.get('shippingPrice') || '0');
   
   // Insert product
   const { data: product, error: productError } = await supabase
@@ -50,6 +51,7 @@ export async function createProduct(formData) {
       sku,
       price,
       compare_at_price: compareAtPrice,
+      shipping_price: shippingPrice,
       stock_quantity: stockQuantity,
       category_id: categoryId,
       featured,
@@ -107,6 +109,7 @@ export async function updateProduct(productId, formData) {
   const title = formData.get('title');
   const slug = formData.get('slug') || slugify(title);
   const highlights = formData.get('highlights') ? JSON.parse(formData.get('highlights')) : [];
+  const shippingPrice = parseFloat(formData.get('shippingPrice') || '0');
   const { error } = await supabase.from('products').update({
     title,
     slug,
@@ -116,6 +119,7 @@ export async function updateProduct(productId, formData) {
     sku: formData.get('sku') || null,
     price: parseFloat(formData.get('price')),
     compare_at_price: formData.get('compareAtPrice') ? parseFloat(formData.get('compareAtPrice')) : null,
+    shipping_price: shippingPrice,
     stock_quantity: parseInt(formData.get('stockQuantity') || '0'),
     category_id: formData.get('categoryId') || null,
     featured: formData.get('featured') === 'true',

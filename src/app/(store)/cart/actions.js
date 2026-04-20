@@ -36,7 +36,7 @@ export async function getCart() {
       quantity,
       unit_price,
       products (
-        id, title, slug, price, product_images(image_url)
+        id, title, slug, price, shipping_price, product_images(image_url)
       )
     `)
     .eq('cart_id', cart.id);
@@ -47,13 +47,15 @@ export async function getCart() {
     title: item.products.title,
     slug: item.products.slug,
     price: item.products.price,
+    shippingPrice: item.products.shipping_price || 0,
     quantity: item.quantity,
     image: item.products.product_images?.[0]?.image_url
   })) || [];
 
   const subtotal = formattedItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const totalShipping = formattedItems.reduce((acc, item) => acc + (item.shippingPrice * item.quantity), 0);
 
-  return { items: formattedItems, subtotal };
+  return { items: formattedItems, subtotal, totalShipping };
 }
 
 export async function addToCart(productId, quantity = 1) {

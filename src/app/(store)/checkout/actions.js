@@ -77,7 +77,7 @@ export async function createCheckoutSession(formData) {
     return { error: 'Not authenticated' };
   }
 
-  const { items, subtotal } = await getCart();
+  const { items, subtotal, totalShipping } = await getCart();
   if (items.length === 0) {
     return { error: 'Cart is empty' };
   }
@@ -96,7 +96,7 @@ export async function createCheckoutSession(formData) {
   }
 
   // Calculate totals
-  const shipping = subtotal >= 2000 ? 0 : 100;
+  const shipping = totalShipping;
   const grandTotal = Math.max(0, subtotal - discount + shipping);
 
   // Extract address info

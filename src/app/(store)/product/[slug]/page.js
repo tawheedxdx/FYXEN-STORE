@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import AddToCartButton from '@/components/cart/AddToCartButton';
 import ImageGallery from '@/components/product/ImageGallery';
 import ProductHighlights from '@/components/product/ProductHighlights';
-import { ShieldCheck, Truck, RotateCcw } from 'lucide-react';
+import { ShieldCheck, Truck, RotateCcw, CheckCircle2 } from 'lucide-react';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -37,10 +37,22 @@ export default async function ProductPage({ params }) {
             <span className="text-sm font-semibold text-accent mb-2 block">{product.brand || 'Fyxen'}</span>
             <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-primary-900 dark:text-white">{product.title}</h1>
             
-            <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center gap-4 mb-2">
               <span className="text-2xl font-bold text-primary-900 dark:text-white">₹{product.price}</span>
               {product.compare_at_price > product.price && (
                 <span className="text-lg text-primary-400 line-through">₹{product.compare_at_price}</span>
+              )}
+            </div>
+
+            <div className="mb-6">
+              {product.shipping_price > 0 ? (
+                <span className="text-sm font-medium text-primary-500 flex items-center gap-1.5">
+                  <Truck className="w-4 h-4" /> Shipping: ₹{product.shipping_price}
+                </span>
+              ) : (
+                <span className="text-sm font-bold text-green-600 dark:text-green-400 flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4" /> Zero Shipping Charges
+                </span>
               )}
             </div>
             
