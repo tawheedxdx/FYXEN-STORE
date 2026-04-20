@@ -1,6 +1,7 @@
 import { getProductBySlug } from '@/services/products';
 import { notFound } from 'next/navigation';
 import AddToCartButton from '@/components/cart/AddToCartButton';
+import ImageGallery from '@/components/product/ImageGallery';
 import { ShieldCheck, Truck, RotateCcw } from 'lucide-react';
 
 export async function generateMetadata({ params }) {
@@ -23,34 +24,11 @@ export default async function ProductPage({ params }) {
     notFound();
   }
 
-  // Fallback image if none
-  const mainImage = product.product_images?.[0]?.image_url || null;
-
   return (
     <div className="container-custom py-8 md:py-12">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
         {/* Product Images */}
-        <div className="space-y-3">
-          <div className="aspect-[4/5] bg-primary-100 dark:bg-primary-800 rounded-xl overflow-hidden relative border border-primary-200 dark:border-white/10">
-            {mainImage ? (
-              <img src={mainImage} alt={product.title} className="w-full h-full object-cover" />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center text-primary-300 dark:text-primary-600 font-bold text-4xl tracking-widest">
-                Fyxen
-              </div>
-            )}
-          </div>
-          {/* Gallery thumbnails with scroll snap */}
-          {product.product_images?.length > 1 && (
-            <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-hide">
-              {product.product_images.map((img) => (
-                <div key={img.id} className="w-20 h-20 md:w-24 md:h-24 shrink-0 snap-start rounded-md overflow-hidden border border-primary-200 cursor-pointer hover:border-accent transition-colors">
-                  <img src={img.image_url} alt={img.alt_text} className="w-full h-full object-cover" />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <ImageGallery images={product.product_images} title={product.title} />
 
         {/* Product Info */}
         <div className="flex flex-col">
