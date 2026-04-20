@@ -2,6 +2,7 @@ import { getProductBySlug } from '@/services/products';
 import { notFound } from 'next/navigation';
 import AddToCartButton from '@/components/cart/AddToCartButton';
 import ImageGallery from '@/components/product/ImageGallery';
+import ProductHighlights from '@/components/product/ProductHighlights';
 import { ShieldCheck, Truck, RotateCcw } from 'lucide-react';
 
 export async function generateMetadata({ params }) {
@@ -90,6 +91,9 @@ export default async function ProductPage({ params }) {
               <span className="text-sm">15-Day Hassle-Free Returns</span>
             </div>
           </div>
+
+          {/* Dynamic Product Highlights */}
+          <ProductHighlights highlights={product.highlights} />
 
           {/* Full Description Accordion (Mocked for now) */}
           <div className="mt-8 prose prose-primary dark:prose-invert">
