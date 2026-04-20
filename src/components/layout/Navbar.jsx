@@ -9,6 +9,7 @@ import ThemeToggle from '@/components/ui/ThemeToggle';
 import SearchBar from '@/components/ui/SearchBar';
 
 const navLinks = [
+  { href: '/', label: 'Home' },
   { href: '/shop', label: 'Shop All' },
   { href: '/category/new-arrivals', label: 'New Arrivals' },
   { href: '/category/best-sellers', label: 'Best Sellers' },

@@ -43,8 +43,9 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal }) {
       key: res.key,
       amount: res.amount,
       currency: 'INR',
-      name: 'Fyxen by Bytread',
+      name: 'Fyxen',
       description: 'Premium Lifestyle Products',
+      image: 'https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/brand-assets/logo.png', // Replace with your actual logo URL
       order_id: res.rzpOrderId,
       handler: async function (response) {
         setIsLoading(true);
