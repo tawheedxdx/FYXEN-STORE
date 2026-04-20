@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import OrderCard from '@/components/account/OrderCard';
+import { Package, ShoppingBag } from 'lucide-react';
 
 export const metadata = {
   title: 'My Orders | Fyxen',
@@ -21,50 +23,32 @@ export default async function OrdersPage() {
     .order('created_at', { ascending: false });
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Order History</h1>
+    <div className="max-w-4xl mx-auto">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="bg-primary-900 dark:bg-white p-2.5 rounded-xl">
+          <Package className="w-6 h-6 text-white dark:text-primary-900" />
+        </div>
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-primary-900 dark:text-white">Order History</h1>
+          <p className="text-sm text-primary-500 dark:text-primary-400">Manage and track your recent orders</p>
+        </div>
+      </div>
       
       {!orders || orders.length === 0 ? (
-        <div className="text-center py-12 border border-primary-100 rounded-lg bg-primary-50">
-          <p className="text-primary-600 mb-4">You haven't placed any orders yet.</p>
-          <Link href="/shop" className="btn-primary inline-flex">Start Shopping</Link>
+        <div className="text-center py-20 border-2 border-dashed border-primary-100 dark:border-white/5 rounded-3xl bg-primary-50/30 dark:bg-white/[0.02]">
+          <div className="bg-white dark:bg-white/5 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+            <ShoppingBag className="w-8 h-8 text-primary-300" />
+          </div>
+          <h3 className="text-lg font-bold text-primary-900 dark:text-white mb-2">No orders found</h3>
+          <p className="text-primary-500 dark:text-primary-400 mb-8 max-w-xs mx-auto text-sm">
+            You haven't placed any orders yet. Start shopping to see your history here!
+          </p>
+          <Link href="/shop" className="btn-primary px-8 inline-flex">Explore Shop</Link>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="grid grid-cols-1 gap-4 md:gap-6">
           {orders.map(order => (
-            <div key={order.id} className="border border-primary-200 rounded-lg p-6">
-              <div className="flex flex-wrap justify-between gap-4 mb-4 pb-4 border-b border-primary-100">
-                <div>
-                  <p className="text-sm text-primary-500">Order Number</p>
-                  <p className="font-semibold">{order.order_number}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-primary-500">Date Placed</p>
-                  <p className="font-semibold">{new Date(order.created_at).toLocaleDateString()}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-primary-500">Total Amount</p>
-                  <p className="font-semibold">₹{order.grand_total}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-primary-500">Status</p>
-                  <span className={`inline-block px-2 py-1 rounded text-xs font-bold uppercase ${
-                    order.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {order.payment_status}
-                  </span>
-                </div>
-              </div>
-              
-              <div className="space-y-4">
-                {order.order_items?.map(item => (
-                  <div key={item.id} className="flex justify-between items-center text-sm">
-                    <p className="font-medium text-primary-800">{item.quantity}x {item.product_title_snapshot}</p>
-                    <p>₹{item.total_price}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <OrderCard key={order.id} order={order} />
           ))}
         </div>
       )}

@@ -262,6 +262,64 @@ export async function verifyPayment(paymentData) {
   }
 }
 
+export async function retryPayment(orderId) {
+  const supabase = await createClient();
+  const supabaseAdmin = createAdminClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'Not authenticated' };
+  }
+
+  // 1. Fetch order details
+  const { data: order, error: orderError } = await supabaseAdmin
+    .from('orders')
+    .select('*')
+    .eq('id', orderId)
+    .eq('user_id', user.id)
+    .single();
+
+  if (orderError || !order) {
+    return { error: 'Order not found' };
+  }
+
+  if (order.payment_status === 'paid') {
+    return { error: 'Order already paid' };
+  }
+
+  // 2. Create Razorpay Order
+  try {
+    const rzpOrder = await razorpay.orders.create({
+      amount: Math.round(order.grand_total * 100),
+      currency: 'INR',
+      receipt: order.id,
+      notes: { orderNumber: order.order_number }
+    });
+
+    // Update our DB order with NEW RZP Order ID
+    await supabaseAdmin
+      .from('orders')
+      .update({ razorpay_order_id: rzpOrder.id })
+      .eq('id', order.id);
+
+    return { 
+      success: true, 
+      orderId: order.id, 
+      rzpOrderId: rzpOrder.id, 
+      amount: rzpOrder.amount,
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID,
+      userEmail: user.email,
+      shippingInfo: {
+        full_name: order.shipping_full_name,
+        phone: order.shipping_phone,
+      }
+    };
+  } catch (error) {
+    console.error('Razorpay Retry Error:', error);
+    return { error: 'Failed to re-initialize payment gateway' };
+  }
+}
+
 function generateOrderNumber() {
   const timestamp = Date.now().toString().slice(-6);
   const random = Math.floor(1000 + Math.random() * 9000);
