@@ -16,7 +16,7 @@ export const metadata = {
   },
   description: "Experience premium shopping with Fyxen by Bytread International Private Limited.",
   icons: {
-    icon: 'https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/brand-assets/logo.png',
+    icon: 'https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/brand-assets/logo-transparent.png',
   },
 };
 
