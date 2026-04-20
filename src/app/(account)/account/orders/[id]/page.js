@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronLeft, Package, MapPin, CreditCard, Calendar, Truck, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import PayNowButton from '@/components/account/PayNowButton';
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
@@ -99,14 +100,17 @@ export default async function OrderDetailsPage({ params }) {
             <h3 className="text-lg font-bold mb-6 flex items-center gap-2">
               <Truck className="w-5 h-5" /> Order Status
             </h3>
-            <div className="flex items-center gap-4">
-              <div className="bg-primary-50 dark:bg-white/5 p-3 rounded-2xl">
-                {getOrderStatusIcon(order.order_status)}
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="bg-primary-50 dark:bg-white/5 p-3 rounded-2xl">
+                  {getOrderStatusIcon(order.order_status)}
+                </div>
+                <div>
+                  <p className="font-bold text-primary-900 dark:text-white uppercase tracking-wide text-sm">{order.order_status}</p>
+                  <p className="text-xs text-primary-500 mt-0.5">Your order is currently being processed.</p>
+                </div>
               </div>
-              <div>
-                <p className="font-bold text-primary-900 dark:text-white uppercase tracking-wide text-sm">{order.order_status}</p>
-                <p className="text-xs text-primary-500 mt-0.5">Your order is currently being processed.</p>
-              </div>
+              <PayNowButton order={order} />
             </div>
           </div>
 

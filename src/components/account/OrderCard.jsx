@@ -1,87 +1,13 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { retryPayment, verifyPayment } from '@/app/(store)/checkout/actions';
+import PayNowButton from './PayNowButton';
 import Script from 'next/script';
-import { Loader2, ChevronRight, CreditCard, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ChevronRight, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export default function OrderCard({ order }) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-
-  async function handlePayNow(e) {
-    e.stopPropagation();
-    e.preventDefault();
-    
-    setIsLoading(true);
-    setError(null);
-
-    // Guard: Razorpay script must be loaded
-    if (!window.Razorpay) {
-      setError('Payment gateway is still loading. Please wait.');
-      setIsLoading(false);
-      return;
-    }
-
-    const res = await retryPayment(order.id);
-
-    if (res?.error) {
-      setError(res.error);
-      setIsLoading(false);
-      return;
-    }
-
-    const options = {
-      key: res.key,
-      amount: res.amount,
-      currency: 'INR',
-      name: 'Fyxen',
-      description: `Payment for Order ${order.order_number}`,
-      image: 'https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/brand-assets/logo.png',
-      order_id: res.rzpOrderId,
-      handler: async function (response) {
-        setIsLoading(true);
-        const verifyRes = await verifyPayment({
-          razorpay_order_id: response.razorpay_order_id,
-          razorpay_payment_id: response.razorpay_payment_id,
-          razorpay_signature: response.razorpay_signature,
-          orderId: order.id,
-        });
-
-        if (verifyRes.success) {
-          router.refresh(); // Reload to show updated status
-        } else {
-          setError('Payment verification failed.');
-        }
-        setIsLoading(false);
-      },
-      prefill: {
-        name: res.shippingInfo.full_name,
-        email: res.userEmail,
-        contact: res.shippingInfo.phone,
-      },
-      theme: {
-        color: '#09090b',
-      },
-      modal: {
-        ondismiss: function () {
-          setIsLoading(false);
-        },
-      },
-    };
-
-    try {
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-    } catch (err) {
-      console.error('Razorpay init error:', err);
-      setError('Could not open payment window.');
-      setIsLoading(false);
-    }
-  }
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -155,33 +81,13 @@ export default function OrderCard({ order }) {
           </div>
 
           <div className="flex flex-row md:flex-col justify-between items-end gap-4 shrink-0">
-            {(order.payment_status === 'pending' || order.payment_status === 'failed') && (
-              <button
-                onClick={handlePayNow}
-                disabled={isLoading}
-                className="btn-primary px-5 py-2 text-xs rounded-xl shadow-lg shadow-primary-900/10 flex items-center gap-2 whitespace-nowrap"
-              >
-                {isLoading ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <CreditCard className="w-3.5 h-3.5" />
-                )}
-                Pay Now
-              </button>
-            )}
+            <PayNowButton order={order} className="px-5 py-2 text-xs" />
             
             <div className="flex items-center gap-1 text-xs font-bold text-primary-400 group-hover:text-primary-900 dark:group-hover:text-white transition-colors">
               View Details <ChevronRight className="w-4 h-4" />
             </div>
           </div>
         </div>
-
-        {error && (
-          <div className="mt-4 p-3 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-lg text-[11px] text-red-600 dark:text-red-400 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            {error}
-          </div>
-        )}
       </Link>
     </>
   );
