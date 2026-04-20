@@ -65,6 +65,12 @@ export async function completeSignup(formData) {
 
   if (error) return { error: error.message };
 
+  // Sync with public.profiles table
+  await supabase
+    .from('profiles')
+    .update({ email, full_name: fullName })
+    .eq('id', data.user.id);
+
   revalidatePath('/', 'layout');
   redirect('/account');
 }
