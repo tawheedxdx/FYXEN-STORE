@@ -133,11 +133,24 @@ export default function OrderCard({ order }) {
               </p>
             </div>
 
-            <div className="flex -space-x-2 overflow-hidden py-1">
-              {/* Could add product thumbnails here if available */}
-              <div className="text-xs font-medium text-primary-500 dark:text-primary-400 line-clamp-1 italic">
-                {order.order_items?.map(i => i.product_title_snapshot).join(', ')}
-              </div>
+            <div className="flex -space-x-3 overflow-hidden py-1">
+              {order.order_items?.slice(0, 4).map((item, idx) => {
+                const imgUrl = item.image_snapshot || item.products?.product_images?.[0]?.image_url;
+                return (
+                  <div key={item.id} className="relative w-10 h-10 rounded-xl border-2 border-white dark:border-black bg-primary-50 dark:bg-white/5 overflow-hidden flex-shrink-0 shadow-sm" style={{ zIndex: 10 - idx }}>
+                    {imgUrl ? (
+                      <img src={imgUrl} alt={item.product_title_snapshot} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[8px] text-primary-300 font-bold">FX</div>
+                    )}
+                  </div>
+                );
+              })}
+              {order.order_items?.length > 4 && (
+                <div className="w-10 h-10 rounded-xl border-2 border-white dark:border-black bg-primary-900 text-white flex items-center justify-center text-[10px] font-bold shadow-sm relative" style={{ zIndex: 5 }}>
+                  +{order.order_items.length - 4}
+                </div>
+              )}
             </div>
           </div>
 

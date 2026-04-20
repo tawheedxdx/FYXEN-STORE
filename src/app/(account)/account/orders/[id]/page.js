@@ -24,7 +24,17 @@ export default async function OrderDetailsPage({ params }) {
   // Fetch order with items
   const { data: order, error } = await supabaseAdmin
     .from('orders')
-    .select('*, order_items(*)')
+    .select(`
+      *,
+      order_items (
+        *,
+        products (
+          product_images (
+            image_url
+          )
+        )
+      )
+    `)
     .eq('id', id)
     .eq('user_id', user.id)
     .single();
@@ -108,7 +118,19 @@ export default async function OrderDetailsPage({ params }) {
             <div className="divide-y divide-primary-50 dark:divide-white/5">
               {order.order_items?.map((item) => (
                 <div key={item.id} className="p-6 flex gap-4">
-                  <div className="w-20 h-24 bg-primary-50 dark:bg-white/5 rounded-2xl flex-shrink-0" />
+                  <div className="w-20 h-24 bg-primary-50 dark:bg-white/5 rounded-2xl flex-shrink-0 overflow-hidden border border-primary-100 dark:border-white/10">
+                    {(item.image_snapshot || item.products?.product_images?.[0]?.image_url) ? (
+                      <img 
+                        src={item.image_snapshot || item.products?.product_images?.[0]?.image_url} 
+                        alt={item.product_title_snapshot}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-[10px] text-primary-300 font-bold uppercase tracking-widest">
+                        Fyxen
+                      </div>
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-bold text-primary-900 dark:text-white line-clamp-1">{item.product_title_snapshot}</h4>
                     <p className="text-sm text-primary-500 mt-1">Qty: {item.quantity}</p>

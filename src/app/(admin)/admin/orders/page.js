@@ -14,7 +14,7 @@ export default async function AdminOrdersPage() {
 
   const { data: orders } = await supabase
     .from('orders')
-    .select('*, profiles(full_name, email), order_items(count)')
+    .select('*, profiles(full_name, email), order_items(count, image_snapshot)')
     .order('created_at', { ascending: false });
 
   const statusColors = {
@@ -62,7 +62,12 @@ export default async function AdminOrdersPage() {
                     <p className="text-primary-400 text-xs">{order.profiles?.email || '—'}</p>
                   </td>
                   <td className="p-4 text-primary-600">
-                    {order.order_items?.[0]?.count || 0} item(s)
+                    <div className="flex items-center gap-2">
+                      {order.order_items?.[0]?.image_snapshot && (
+                        <img src={order.order_items[0].image_snapshot} className="w-8 h-8 rounded object-cover border border-primary-100" />
+                      )}
+                      <span>{order.order_items?.[0]?.count || 0} item(s)</span>
+                    </div>
                   </td>
                   <td className="p-4 font-semibold">₹{order.grand_total}</td>
                   <td className="p-4">

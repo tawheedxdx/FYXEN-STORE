@@ -145,6 +145,7 @@ export async function createCheckoutSession(formData) {
     order_id: order.id,
     product_id: item.productId,
     product_title_snapshot: item.title,
+    image_snapshot: item.image,
     quantity: item.quantity,
     unit_price: item.price,
     total_price: item.price * item.quantity,
