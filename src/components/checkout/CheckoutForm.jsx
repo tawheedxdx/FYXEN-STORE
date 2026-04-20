@@ -1,18 +1,63 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { createCheckoutSession, verifyPayment } from '@/app/(store)/checkout/actions';
+import { createCheckoutSession, verifyPayment, validateCoupon } from '@/app/(store)/checkout/actions';
 import Script from 'next/script';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Ticket, CheckCircle2, X } from 'lucide-react';
 
-export default function CheckoutForm({ subtotal, shipping, grandTotal }) {
+export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGrandTotal }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [rzpReady, setRzpReady] = useState(false);
 
-  async function handlePayment(formData) {
+  // Coupon State
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [isValidating, setIsValidating] = useState(false);
+  const [couponError, setCouponError] = useState(null);
+
+  const [currentDiscount, setCurrentDiscount] = useState(0);
+  const [finalGrandTotal, setFinalGrandTotal] = useState(initialGrandTotal);
+
+  useEffect(() => {
+    setFinalGrandTotal(Math.max(0, subtotal - currentDiscount + shipping));
+  }, [subtotal, currentDiscount, shipping]);
+
+  async function handleApplyCoupon() {
+    if (!couponCode) return;
+    setIsValidating(true);
+    setCouponError(null);
+    
+    const res = await validateCoupon(couponCode, subtotal);
+    if (res.error) {
+      setCouponError(res.error);
+      setAppliedCoupon(null);
+      setCurrentDiscount(0);
+    } else {
+      setAppliedCoupon(res.coupon);
+      setCurrentDiscount(res.coupon.discountAmount);
+      setCouponError(null);
+    }
+    setIsValidating(false);
+  }
+
+  function removeCoupon() {
+    setAppliedCoupon(null);
+    setCouponCode('');
+    setCurrentDiscount(0);
+  }
+
+  async function handlePayment(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    
+    // Add applied coupon code if any
+    if (appliedCoupon) {
+      formData.append('couponCode', appliedCoupon.code);
+    }
+
     setIsLoading(true);
     setError(null);
 
@@ -107,7 +152,7 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal }) {
         onError={() => setError('Failed to load payment gateway. Please refresh the page.')}
       />
 
-      <form action={handlePayment} className="bg-white dark:bg-black p-6 md:p-8 rounded-xl border border-primary-200 dark:border-white/10 shadow-sm">
+      <form onSubmit={handlePayment} className="bg-white dark:bg-black p-6 md:p-8 rounded-xl border border-primary-200 dark:border-white/10 shadow-sm">
         <h2 className="text-xl font-bold mb-6 border-b border-primary-100 dark:border-white/10 pb-4">Shipping Information</h2>
 
         {error && (
@@ -149,7 +194,78 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal }) {
           </div>
         </div>
 
+        {/* Coupon Section */}
+        <div className="mt-8 pt-6 border-t border-primary-100 dark:border-white/10">
+          <label className="block text-sm font-medium text-primary-900 dark:text-primary-200 mb-2">Discount Coupon</label>
+          
+          {appliedCoupon ? (
+            <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-green-600" />
+                <div>
+                  <p className="text-sm font-bold text-green-700 uppercase">{appliedCoupon.code} Applied</p>
+                  <p className="text-xs text-green-600">Saved ₹{currentDiscount.toFixed(2)}</p>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                onClick={removeCoupon}
+                className="p-1 hover:bg-green-100 dark:hover:bg-white/5 rounded-full transition-colors"
+              >
+                <X className="w-4 h-4 text-green-700" />
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400" />
+                  <input 
+                    type="text" 
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    className="input-field pl-10 uppercase" 
+                    placeholder="Enter code (e.g. SAVE20)" 
+                  />
+                </div>
+                <button 
+                  type="button"
+                  onClick={handleApplyCoupon}
+                  disabled={isValidating || !couponCode}
+                  className="btn-outline px-6 disabled:opacity-50"
+                >
+                  {isValidating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
+                </button>
+              </div>
+              {couponError && (
+                <p className="text-xs text-red-500 font-medium">{couponError}</p>
+              )}
+            </div>
+          )}
+        </div>
+
         <div className="mt-10 pt-6 border-t border-primary-100 dark:border-white/10">
+          <div className="space-y-2 mb-6">
+            <div className="flex justify-between text-sm text-primary-500">
+              <span>Subtotal</span>
+              <span>₹{subtotal.toFixed(2)}</span>
+            </div>
+            {currentDiscount > 0 && (
+              <div className="flex justify-between text-sm text-green-600 font-medium">
+                <span>Discount</span>
+                <span>-₹{currentDiscount.toFixed(2)}</span>
+              </div>
+            )}
+            <div className="flex justify-between text-sm text-primary-500">
+              <span>Shipping</span>
+              <span>{shipping === 0 ? 'FREE' : `₹${shipping.toFixed(2)}`}</span>
+            </div>
+            <div className="flex justify-between text-xl font-bold text-primary-900 dark:text-white pt-2 border-t border-primary-50 dark:border-white/5">
+              <span>Total</span>
+              <span>₹{finalGrandTotal.toFixed(2)}</span>
+            </div>
+          </div>
+
           <button
             type="submit"
             disabled={isLoading || !rzpReady}
@@ -164,7 +280,7 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal }) {
                 <Loader2 className="w-4 h-4 animate-spin" /> Loading Payment Gateway...
               </span>
             ) : (
-              `Pay ₹${grandTotal.toFixed(2)} Securely`
+              `Pay ₹${finalGrandTotal.toFixed(2)} Securely`
             )}
           </button>
           <div className="flex justify-center mt-4 opacity-70">

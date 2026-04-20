@@ -13,8 +13,59 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummy_secret',
 });
 
-function generateOrderNumber() {
-  return `FYX-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+export async function validateCoupon(code, currentSubtotal) {
+  const supabase = await createClient();
+  const upperCode = code.toUpperCase();
+
+  const { data: coupon, error } = await supabase
+    .from('coupons')
+    .select('*')
+    .eq('code', upperCode)
+    .eq('active', true)
+    .single();
+
+  if (error || !coupon) {
+    return { error: 'Invalid or inactive coupon code.' };
+  }
+
+  // 1. Check Date Validity
+  const now = new Date();
+  if (coupon.starts_at && new Date(coupon.starts_at) > now) {
+    return { error: 'This coupon is not active yet.' };
+  }
+  if (coupon.ends_at && new Date(coupon.ends_at) < now) {
+    return { error: 'This coupon has expired.' };
+  }
+
+  // 2. Check Usage Limit
+  if (coupon.usage_limit && coupon.used_count >= coupon.usage_limit) {
+    return { error: 'This coupon usage limit has been reached.' };
+  }
+
+  // 3. Check Minimum Order Amount
+  if (currentSubtotal < coupon.min_order_amount) {
+    return { error: `Minimum order amount of ₹${coupon.min_order_amount} required.` };
+  }
+
+  // 4. Calculate Discount
+  let discountAmount = 0;
+  if (coupon.discount_type === 'percentage') {
+    discountAmount = (currentSubtotal * coupon.discount_value) / 100;
+    if (coupon.max_discount_amount && discountAmount > coupon.max_discount_amount) {
+      discountAmount = coupon.max_discount_amount;
+    }
+  } else {
+    discountAmount = coupon.discount_value;
+  }
+
+  return { 
+    success: true, 
+    coupon: {
+      id: coupon.id,
+      code: coupon.code,
+      discountAmount: Math.min(discountAmount, currentSubtotal)
+    } 
+  };
 }
 
 export async function createCheckoutSession(formData) {
@@ -31,9 +82,22 @@ export async function createCheckoutSession(formData) {
     return { error: 'Cart is empty' };
   }
 
-  // Calculate totals (shipping fixed at 100 if subtotal < 2000)
+  // Check for coupon in formData
+  const couponCode = formData.get('couponCode');
+  let discount = 0;
+  let couponId = null;
+
+  if (couponCode) {
+    const vRes = await validateCoupon(couponCode, subtotal);
+    if (!vRes.error) {
+      discount = vRes.coupon.discountAmount;
+      couponId = vRes.coupon.id;
+    }
+  }
+
+  // Calculate totals
   const shipping = subtotal >= 2000 ? 0 : 100;
-  const grandTotal = subtotal + shipping;
+  const grandTotal = Math.max(0, subtotal - discount + shipping);
 
   // Extract address info
   const shippingInfo = {
@@ -55,6 +119,7 @@ export async function createCheckoutSession(formData) {
       order_number: orderNumber,
       user_id: user.id,
       subtotal,
+      discount_amount: discount,
       shipping_amount: shipping,
       grand_total: grandTotal,
       payment_status: 'pending',
@@ -90,16 +155,19 @@ export async function createCheckoutSession(formData) {
   // 3. Create Razorpay Order
   try {
     const rzpOrder = await razorpay.orders.create({
-      amount: grandTotal * 100, // in paise
+      amount: Math.round(grandTotal * 100), // in paise, must be integer
       currency: 'INR',
       receipt: order.id,
-      notes: { orderNumber }
+      notes: { orderNumber, couponCode: couponCode || 'none' }
     });
 
-    // Update our DB order with RZP Order ID
+    // Update our DB order with RZP Order ID and Coupon ID
     await supabaseAdmin
       .from('orders')
-      .update({ razorpay_order_id: rzpOrder.id })
+      .update({ 
+        razorpay_order_id: rzpOrder.id,
+        coupon_id: couponId // Need to add this col optionally
+      })
       .eq('id', order.id);
 
     return { 
@@ -138,7 +206,7 @@ export async function verifyPayment(paymentData) {
     // Payment verified
     
     // Update Order Status
-    await supabaseAdmin
+    const { data: updatedOrder } = await supabaseAdmin
       .from('orders')
       .update({ 
         payment_status: 'paid', 
@@ -147,7 +215,14 @@ export async function verifyPayment(paymentData) {
         razorpay_signature,
         placed_at: new Date().toISOString()
       })
-      .eq('id', orderId);
+      .eq('id', orderId)
+      .select('coupon_id')
+      .single();
+
+    // If a coupon was used, increment its count
+    if (updatedOrder?.coupon_id) {
+      await supabaseAdmin.rpc('increment_coupon_usage', { coupon_uuid: updatedOrder.coupon_id });
+    }
 
     // Save Payment Record
     await supabaseAdmin
