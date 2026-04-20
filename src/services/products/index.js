@@ -21,10 +21,27 @@ export async function getProducts(options = {}) {
   }
 
   if (options.searchQuery) {
-    query = query.ilike('title', `%${options.searchQuery}%`);
+    query = query.or(`title.ilike.%${options.searchQuery}%,description.ilike.%${options.searchQuery}%,brand.ilike.%${options.searchQuery}%`);
+  }
+
+  if (options.minPrice !== undefined && options.minPrice !== null && options.minPrice !== '') {
+    query = query.gte('price', Number(options.minPrice));
+  }
+
+  if (options.maxPrice !== undefined && options.maxPrice !== null && options.maxPrice !== '') {
+    query = query.lte('price', Number(options.maxPrice));
   }
 
   query = query.eq('is_active', true);
+
+  // Sort
+  if (options.sort === 'price_asc') {
+    query = query.order('price', { ascending: true });
+  } else if (options.sort === 'price_desc') {
+    query = query.order('price', { ascending: false });
+  } else {
+    query = query.order('created_at', { ascending: false }); // newest first (default)
+  }
   
   const { data, error } = await query;
   if (error) {

@@ -3,9 +3,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ShoppingBag, Search, User, Menu, X } from 'lucide-react';
+import { ShoppingBag, User, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '@/components/ui/ThemeToggle';
+import SearchBar from '@/components/ui/SearchBar';
 
 const navLinks = [
   { href: '/shop', label: 'Shop All' },
@@ -80,6 +81,7 @@ export default function Navbar() {
           {/* Icons */}
           <div className="flex items-center gap-1 md:gap-4">
             <ThemeToggle />
+            <SearchBar />
             <Link href="/account" className="hidden md:block p-2 text-primary-900 dark:text-white hover:text-accent transition-colors" aria-label="Account">
               <User className="w-5 h-5" />
             </Link>
