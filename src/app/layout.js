@@ -1,5 +1,8 @@
 import { Outfit } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import CookieConsent from "@/components/common/CookieConsent";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -29,6 +32,9 @@ export default function RootLayout({ children }) {
     <html lang="en" className={`${outfit.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans bg-background text-foreground">
         {children}
+        <CookieConsent />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
