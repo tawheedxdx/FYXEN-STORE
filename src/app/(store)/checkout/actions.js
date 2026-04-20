@@ -162,13 +162,20 @@ export async function createCheckoutSession(formData) {
     });
 
     // Update our DB order with RZP Order ID and Coupon ID
-    await supabaseAdmin
+    // We do this in a try-catch or check result to avoid crashing if column is somehow missing
+    const { error: updateError } = await supabaseAdmin
       .from('orders')
       .update({ 
         razorpay_order_id: rzpOrder.id,
-        coupon_id: couponId // Need to add this col optionally
+        coupon_id: couponId
       })
       .eq('id', order.id);
+
+    if (updateError) {
+      console.error('Update Order with RZP ID Error:', updateError);
+      // We don't necessarily want to fail here if the order was created, 
+      // but if the column is missing it will fail.
+    }
 
     return { 
       success: true, 
@@ -253,4 +260,10 @@ export async function verifyPayment(paymentData) {
       
     return { error: 'Payment verification failed' };
   }
+}
+
+function generateOrderNumber() {
+  const timestamp = Date.now().toString().slice(-6);
+  const random = Math.floor(1000 + Math.random() * 9000);
+  return `FYX-${timestamp}-${random}`;
 }
