@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { login } from '@/app/(auth)/actions';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { ArrowRight, Loader2, User } from 'lucide-react';
 
 export default function LoginForm() {
   const [error, setError] = useState(null);
@@ -28,15 +28,18 @@ export default function LoginForm() {
       )}
       
       <div>
-        <label htmlFor="email" className="block text-sm font-medium text-primary-900 mb-2">Email Address</label>
-        <input 
-          id="email" 
-          name="email" 
-          type="email" 
-          required 
-          className="input-field" 
-          placeholder="you@example.com"
-        />
+        <label htmlFor="identifier" className="block text-sm font-medium text-primary-900 mb-2">Email or Phone Number</label>
+        <div className="relative">
+          <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-primary-400" />
+          <input 
+            id="identifier" 
+            name="identifier" 
+            type="text" 
+            required 
+            className="input-field pl-10" 
+            placeholder="Email or +91..."
+          />
+        </div>
       </div>
       
       <div>
