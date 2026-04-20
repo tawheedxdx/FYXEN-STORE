@@ -65,11 +65,15 @@ export async function completeSignup(formData) {
 
   if (error) return { error: error.message };
 
-  // Sync with public.profiles table
+  // Sync with public.profiles table (using upsert in case the trigger failed earlier)
   await supabase
     .from('profiles')
-    .update({ email, full_name: fullName })
-    .eq('id', data.user.id);
+    .upsert({ 
+      id: data.user.id,
+      email, 
+      full_name: fullName,
+      updated_at: new Date().toISOString()
+    });
 
   revalidatePath('/', 'layout');
   redirect('/account');

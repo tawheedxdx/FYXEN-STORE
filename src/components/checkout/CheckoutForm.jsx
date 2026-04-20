@@ -6,7 +6,7 @@ import { createCheckoutSession, verifyPayment, validateCoupon } from '@/app/(sto
 import Script from 'next/script';
 import { Loader2, Ticket, CheckCircle2, X } from 'lucide-react';
 
-export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGrandTotal }) {
+export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGrandTotal, profile, user }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -165,11 +165,27 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGr
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-primary-900 dark:text-primary-200 mb-2">Full Name *</label>
-              <input id="fullName" name="fullName" type="text" required className="input-field" placeholder="John Doe" />
+              <input 
+                id="fullName" 
+                name="fullName" 
+                type="text" 
+                required 
+                defaultValue={profile?.full_name || ''}
+                className="input-field" 
+                placeholder="John Doe" 
+              />
             </div>
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-primary-900 dark:text-primary-200 mb-2">Phone Number *</label>
-              <input id="phone" name="phone" type="tel" required className="input-field" placeholder="9876543210" />
+              <input 
+                id="phone" 
+                name="phone" 
+                type="tel" 
+                required 
+                defaultValue={profile?.phone || user?.phone || ''}
+                className="input-field" 
+                placeholder="9876543210" 
+              />
             </div>
           </div>
 

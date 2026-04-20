@@ -21,6 +21,13 @@ export default async function CheckoutPage() {
     redirect('/cart');
   }
 
+  // Fetch profile for pre-filling
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('full_name, phone, email')
+    .eq('id', user.id)
+    .single();
+
   const shipping = subtotal >= 2000 ? 0 : 100;
   const grandTotal = subtotal + shipping;
 
@@ -32,7 +39,13 @@ export default async function CheckoutPage() {
         <div className="flex flex-col-reverse lg:flex-row gap-8 lg:gap-12">
           {/* Checkout Form (Shipping & Payment) */}
           <div className="flex-1">
-            <CheckoutForm subtotal={subtotal} shipping={shipping} grandTotal={grandTotal} />
+            <CheckoutForm 
+              subtotal={subtotal} 
+              shipping={shipping} 
+              grandTotal={grandTotal} 
+              profile={profile}
+              user={user}
+            />
           </div>
           
           {/* Order Summary Sidebar */}
