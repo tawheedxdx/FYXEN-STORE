@@ -15,7 +15,7 @@ export default async function CheckoutPage() {
     redirect('/login?redirect=/checkout');
   }
 
-  const { items, subtotal } = await getCart();
+  const { items, subtotal, totalShipping } = await getCart();
 
   if (items.length === 0) {
     redirect('/cart');
@@ -28,7 +28,7 @@ export default async function CheckoutPage() {
     .eq('id', user.id)
     .single();
 
-  const shipping = subtotal >= 2000 ? 0 : 100;
+  const shipping = totalShipping;
   const grandTotal = subtotal + shipping;
 
   return (
