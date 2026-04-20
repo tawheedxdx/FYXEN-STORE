@@ -6,13 +6,5 @@ export const metadata = {
 };
 
 export default function LoginPage() {
-  return (
-    <>
-      <div className="text-center mb-8">
-        <h1 className="text-2xl font-bold text-primary-900 mb-2">Welcome Back</h1>
-        <p className="text-primary-500">Enter your credentials to access your account.</p>
-      </div>
-      <LoginForm />
-    </>
-  );
+  return <LoginForm />;
 }
