@@ -36,6 +36,8 @@ export async function createProduct(formData) {
   const seoTitle = formData.get('seoTitle') || title;
   const seoDescription = formData.get('seoDescription') || shortDescription;
 
+  const highlights = formData.get('highlights') ? JSON.parse(formData.get('highlights')) : [];
+  
   // Insert product
   const { data: product, error: productError } = await supabase
     .from('products')
@@ -54,6 +56,7 @@ export async function createProduct(formData) {
       is_active: isActive,
       seo_title: seoTitle,
       seo_description: seoDescription,
+      highlights,
     })
     .select('id')
     .single();
@@ -103,7 +106,7 @@ export async function updateProduct(productId, formData) {
 
   const title = formData.get('title');
   const slug = formData.get('slug') || slugify(title);
-
+  const highlights = formData.get('highlights') ? JSON.parse(formData.get('highlights')) : [];
   const { error } = await supabase.from('products').update({
     title,
     slug,
@@ -119,6 +122,7 @@ export async function updateProduct(productId, formData) {
     is_active: formData.get('isActive') !== 'false',
     seo_title: formData.get('seoTitle') || title,
     seo_description: formData.get('seoDescription'),
+    highlights,
     updated_at: new Date().toISOString(),
   }).eq('id', productId);
 

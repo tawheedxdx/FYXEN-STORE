@@ -19,6 +19,21 @@ export default function ProductForm({ categories, product }) {
     product?.product_images?.sort((a, b) => a.sort_order - b.sort_order) || []
   );
   const [titleValue, setTitleValue] = useState(product?.title || '');
+  const [highlights, setHighlights] = useState(product?.highlights || []);
+
+  const addHighlight = () => {
+    setHighlights([...highlights, { icon: 'Zap', text: '' }]);
+  };
+
+  const updateHighlight = (index, field, value) => {
+    const newHighlights = [...highlights];
+    newHighlights[index][field] = value;
+    setHighlights(newHighlights);
+  };
+
+  const removeHighlight = (index) => {
+    setHighlights(highlights.filter((_, i) => i !== index));
+  };
 
   const slugify = (text) =>
     text.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '').replace(/--+/g, '-').trim();
@@ -124,6 +139,70 @@ export default function ProductForm({ categories, product }) {
               <label className="block text-sm font-medium mb-2">Full Description</label>
               <textarea name="description" rows={6} className="input-field resize-none" placeholder="Detailed product description..." defaultValue={product?.description || ''} />
             </div>
+          </div>
+          
+          {/* Product Highlights */}
+          <div className="bg-white p-6 rounded-xl border border-primary-100 shadow-sm space-y-5">
+            <div className="flex items-center justify-between border-b border-primary-100 pb-3">
+              <h2 className="font-bold text-lg">Product Highlights</h2>
+              <button 
+                type="button" 
+                onClick={addHighlight}
+                className="text-sm font-bold text-primary-600 hover:text-primary-900 flex items-center gap-1 bg-primary-50 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                <Upload className="w-3.5 h-3.5 rotate-180" /> Add Highlight
+              </button>
+            </div>
+
+            {highlights.length === 0 ? (
+              <div className="text-center py-8 border-2 border-dashed border-primary-50 rounded-xl">
+                <p className="text-sm text-primary-400">No highlights added yet. Click the button above to add one.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {highlights.map((h, i) => (
+                  <div key={i} className="flex gap-4 items-start bg-primary-50/50 p-4 rounded-xl border border-primary-50">
+                    <div className="shrink-0 pt-1">
+                      <div className="w-8 h-8 rounded-lg bg-white border border-primary-200 flex items-center justify-center text-primary-500 font-bold text-xs">
+                        {i + 1}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
+                      <div>
+                        <label className="block text-[10px] uppercase font-bold text-primary-400 mb-1">Icon Name (Lucide)</label>
+                        <input 
+                          className="input-field py-1.5 text-sm" 
+                          placeholder="e.g. Battery, Zap, Bluetooth" 
+                          value={h.icon}
+                          onChange={(e) => updateHighlight(i, 'icon', e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase font-bold text-primary-400 mb-1">Highlight Text</label>
+                        <input 
+                          className="input-field py-1.5 text-sm" 
+                          placeholder="e.g. Fast Charging Support" 
+                          value={h.text}
+                          onChange={(e) => updateHighlight(i, 'text', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <button 
+                      type="button" 
+                      onClick={() => removeHighlight(i)}
+                      className="shrink-0 p-2 text-red-400 hover:text-red-600 transition-colors mt-5"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <input type="hidden" name="highlights" value={JSON.stringify(highlights)} />
+            <p className="text-xs text-primary-400">
+              Icons use Lucide React names. Common ones: <strong>Battery, Zap, Speaker, Bluetooth, Music, Shield, Truck</strong>.
+            </p>
           </div>
 
           {/* SEO */}
