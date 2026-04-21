@@ -79,30 +79,33 @@ export default function SearchBar() {
               onClick={close}
             />
 
-            {/* ── Mobile: slide up from bottom ── */}
+            {/* ── Mobile: slide down from top ── */}
             <motion.div
               key="sb-mobile"
-              initial={{ y: '100%' }}
+              initial={{ y: '-100%' }}
               animate={{ y: 0 }}
-              exit={{ y: '100%' }}
+              exit={{ y: '-100%' }}
               transition={{ type: 'tween', duration: 0.28, ease: 'easeOut' }}
-              className="md:hidden fixed bottom-0 left-0 right-0 z-[70] bg-white dark:bg-primary-900 rounded-t-2xl shadow-2xl"
+              className="md:hidden fixed top-0 left-0 right-0 z-[100] bg-white dark:bg-primary-900 rounded-b-2xl shadow-2xl"
             >
-              {/* Drag handle */}
-              <div className="flex justify-center pt-3 pb-1">
-                <div className="w-10 h-1 rounded-full bg-primary-200 dark:bg-white/20" />
-              </div>
+              <div className="px-4 pt-4 pb-6">
+                {/* Header for mobile search */}
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold">Search Products</h2>
+                  <button onClick={close} className="p-2 -mr-2 text-primary-500 hover:text-accent transition-colors" aria-label="Close search">
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
 
-              <div className="px-4 pt-2 pb-3">
                 {/* Input row */}
-                <form onSubmit={handleSearch} className="flex items-center gap-2 bg-primary-50 dark:bg-white/5 border border-primary-200 dark:border-white/10 rounded-xl px-3 py-2">
+                <form onSubmit={handleSearch} className="flex items-center gap-2 bg-primary-50 dark:bg-white/5 border border-primary-200 dark:border-white/10 rounded-xl px-3 py-3">
                   <Search className="w-5 h-5 text-primary-400 shrink-0" />
                   <input
                     ref={inputRef}
                     type="search"
                     value={query}
                     onChange={e => setQuery(e.target.value)}
-                    placeholder="Search products..."
+                    placeholder="What are you looking for?"
                     // text-base = 16px — prevents iOS auto-zoom
                     className="flex-1 bg-transparent text-base text-primary-900 dark:text-white placeholder:text-primary-400 focus:outline-none min-w-0"
                     autoComplete="off"
@@ -124,7 +127,7 @@ export default function SearchBar() {
                 <button
                   onClick={handleSearch}
                   disabled={!query.trim()}
-                  className="btn-primary w-full mt-3 gap-2 disabled:opacity-40"
+                  className="btn-primary w-full mt-4 gap-2 disabled:opacity-40"
                 >
                   <Search className="w-4 h-4" />
                   Search
@@ -133,14 +136,14 @@ export default function SearchBar() {
 
                 {/* Quick tags */}
                 {!query && (
-                  <div className="mt-4 pb-2">
-                    <p className="text-xs font-medium text-primary-400 uppercase tracking-widest mb-2">Quick Searches</p>
+                  <div className="mt-6">
+                    <p className="text-xs font-medium text-primary-400 uppercase tracking-widest mb-3">Popular Searches</p>
                     <div className="flex flex-wrap gap-2">
                       {QUICK_TAGS.map(tag => (
                         <button
                           key={tag}
                           onClick={() => handleTag(tag)}
-                          className="text-sm px-3 py-2 rounded-full border border-primary-200 dark:border-white/10 text-primary-700 dark:text-primary-300 hover:border-accent hover:text-accent active:scale-95 transition-all min-h-[40px]"
+                          className="text-sm px-4 py-2 rounded-full border border-primary-200 dark:border-white/10 text-primary-700 dark:text-primary-300 hover:border-accent hover:text-accent active:scale-95 transition-all min-h-[44px]"
                         >
                           {tag}
                         </button>
@@ -148,9 +151,6 @@ export default function SearchBar() {
                     </div>
                   </div>
                 )}
-
-                {/* Safe area spacer for phones with home bar */}
-                <div className="h-safe-area-inset-bottom" style={{ paddingBottom: 'env(safe-area-inset-bottom)' }} />
               </div>
             </motion.div>
 

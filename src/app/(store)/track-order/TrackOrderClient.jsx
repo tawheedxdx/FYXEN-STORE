@@ -86,7 +86,7 @@ export default function TrackOrderClient() {
               name="orderNumber"
               type="text"
               required
-              className="input-field font-mono"
+              className="input-field font-mono text-[16px]"
               placeholder="FYX-1234567890-123"
             />
           </div>
@@ -96,7 +96,7 @@ export default function TrackOrderClient() {
               name="email"
               type="email"
               required
-              className="input-field"
+              className="input-field text-[16px]"
               placeholder="your@email.com"
             />
           </div>
