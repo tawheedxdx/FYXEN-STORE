@@ -29,7 +29,7 @@ export async function updateSession(request) {
 
   const {
     data: { user },
-  } = await supabase.auth.getUser().catch(() => ({ data: { user: null } }));
+  } = await supabase.auth.getUser()
 
   // Example route protection
   // if (request.nextUrl.pathname.startsWith('/account') && !user) {

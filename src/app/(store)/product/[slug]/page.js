@@ -7,7 +7,6 @@ import ProductHighlights from '@/components/product/ProductHighlights';
 import ProductReviews from '@/components/product/ProductReviews';
 import { ShieldCheck, Truck, RotateCcw, CheckCircle2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
-import RazorpayAffordabilityWidget from '@/components/common/RazorpayAffordabilityWidget';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -50,9 +49,6 @@ export default async function ProductPage({ params }) {
                   <span className="text-lg text-primary-400 line-through">₹{product.compare_at_price}</span>
                 )}
               </div>
-
-              {/* Razorpay Affordability Widget */}
-              <RazorpayAffordabilityWidget price={product.price} />
 
               <div className="mb-6">
                 {product.shipping_price > 0 ? (
