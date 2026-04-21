@@ -1,13 +1,22 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 
 export default function HeroSection() {
   return (
     <section className="relative h-[80vh] min-h-[600px] w-full bg-primary-900 flex items-center justify-center overflow-hidden">
-      {/* Placeholder for Hero Image Background */}
-      <div className="absolute inset-0 z-0 opacity-40 bg-[url('https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=2000&auto=format&fit=crop')] bg-cover bg-center" />
+      {/* Hero Image Background */}
+      <div className="absolute inset-0 z-0">
+        <Image
+          src="https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=2000&auto=format&fit=crop"
+          alt="Premium Essentials"
+          fill
+          priority
+          className="object-cover opacity-40"
+        />
+      </div>
       
       <div className="relative z-10 container-custom text-center text-white">
         <motion.h1 

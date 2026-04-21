@@ -2,7 +2,17 @@ import { createClient } from '@/lib/supabase/server';
 
 export async function getProducts(options = {}) {
   const supabase = await createClient();
-  let query = supabase.from('products').select('*, product_images(*), categories(name, slug)');
+  let query = supabase.from('products').select(`
+    id, 
+    title, 
+    slug, 
+    price, 
+    compare_at_price, 
+    featured, 
+    brand,
+    product_images(image_url, sort_order), 
+    categories(name, slug)
+  `);
 
   if (options.categorySlug) {
     const { data: category } = await supabase

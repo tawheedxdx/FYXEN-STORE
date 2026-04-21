@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function ProductCard({ product }) {
   const images = product.product_images || [];
@@ -9,10 +10,13 @@ export default function ProductCard({ product }) {
     <Link href={`/product/${product.slug}`} className="group cursor-pointer block w-full">
       <div className="relative aspect-[4/5] w-full bg-primary-100 dark:bg-primary-800 rounded-lg overflow-hidden mb-4 border border-primary-200 dark:border-white/5 shadow-sm group-hover:shadow-md transition-shadow">
         {imageUrl ? (
-          <img 
+          <Image 
             src={imageUrl} 
             alt={product.title} 
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            priority={product.featured}
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-primary-300 dark:text-primary-600 font-medium">
