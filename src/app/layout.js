@@ -10,13 +10,57 @@ const outfit = Outfit({
 });
 
 export const metadata = {
+  metadataBase: new URL('https://www.fyxen.in'),
   title: {
     template: "%s | Fyxen",
-    default: "Fyxen | Premium eCommerce Platform",
+    default: "Fyxen | Premium Lifestyle & Manufacturing Essentials",
   },
-  description: "Experience premium shopping with Fyxen by Bytread International Private Limited.",
+  description: "Experience premium shopping with Fyxen. We offer high-end manufacturing products and lifestyle essentials crafted by Bytread International Private Limited.",
+  keywords: ["eCommerce", "Premium Products", "Manufacturing", "Fyxen", "Bytread", "Lifestyle Essentials", "Online Shopping India"],
+  authors: [{ name: "Bytread International Private Limited" }],
+  creator: "Fyxen Team",
+  publisher: "Bytread International Private Limited",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    title: 'Fyxen | Premium Lifestyle & Manufacturing Essentials',
+    description: 'Experience premium shopping with Fyxen. Quality you can trust.',
+    url: 'https://www.fyxen.in',
+    siteName: 'Fyxen',
+    images: [
+      {
+        url: 'https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/brand-assets/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Fyxen Premium Essentials',
+      },
+    ],
+    locale: 'en_IN',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Fyxen | Premium Essentials',
+    description: 'Quality lifestyle and manufacturing essentials from Bytread International.',
+    images: ['https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/brand-assets/og-image.png'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   icons: {
     icon: 'https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/brand-assets/logo.png',
+    apple: 'https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/brand-assets/apple-touch-icon.png',
   },
 };
 

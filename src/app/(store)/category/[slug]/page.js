@@ -5,8 +5,21 @@ import { notFound } from 'next/navigation';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
+  const categories = await getCategories();
+  const category = categories.find(c => c.slug === slug);
+  
+  const title = category ? `${category.name} | Fyxen` : `${slug.charAt(0).toUpperCase() + slug.slice(1).replace('-', ' ')} | Fyxen`;
+  const description = category?.description || `Explore our exclusive collection of ${slug.replace('-', ' ')} at Fyxen. Quality you can trust.`;
+
   return {
-    title: `${slug.charAt(0).toUpperCase() + slug.slice(1).replace('-', ' ')}`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: `/category/${slug}`,
+    },
   };
 }
 

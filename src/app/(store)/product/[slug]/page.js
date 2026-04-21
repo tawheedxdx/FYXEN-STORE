@@ -14,9 +14,36 @@ export async function generateMetadata({ params }) {
   
   if (!product) return { title: 'Product Not Found' };
   
+  const title = product.seo_title || `${product.title} | Fyxen`;
+  const description = product.seo_description || product.short_description || `Purchase ${product.title} at Fyxen. Premium quality and express shipping.`;
+  const image = product.product_images?.[0]?.image_url || 'https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/brand-assets/og-image.png';
+
   return {
-    title: product.seo_title || product.title,
-    description: product.seo_description || product.short_description,
+    title,
+    description,
+    alternates: {
+      canonical: `/product/${slug}`,
+    },
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      url: `/product/${slug}`,
+      images: [
+        {
+          url: image,
+          width: 800,
+          height: 600,
+          alt: product.title,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [image],
+    },
   };
 }
 
