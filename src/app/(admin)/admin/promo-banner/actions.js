@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 
 async function checkAdmin(supabase) {
@@ -15,6 +16,8 @@ export async function upsertPromoBanner(formData) {
   const supabase = await createClient();
   const user = await checkAdmin(supabase);
   if (!user) return { error: 'Unauthorized' };
+
+  const supabaseAdmin = createAdminClient();
 
   const id = formData.get('id');
   const data = {
@@ -31,9 +34,9 @@ export async function upsertPromoBanner(formData) {
 
   let res;
   if (id) {
-    res = await supabase.from('promo_banners').update(data).eq('id', id);
+    res = await supabaseAdmin.from('promo_banners').update(data).eq('id', id);
   } else {
-    res = await supabase.from('promo_banners').insert(data);
+    res = await supabaseAdmin.from('promo_banners').insert(data);
   }
 
   if (res.error) return { error: res.error.message };
@@ -48,7 +51,8 @@ export async function deletePromoBanner(id) {
   const user = await checkAdmin(supabase);
   if (!user) return { error: 'Unauthorized' };
 
-  const { error } = await supabase.from('promo_banners').delete().eq('id', id);
+  const supabaseAdmin = createAdminClient();
+  const { error } = await supabaseAdmin.from('promo_banners').delete().eq('id', id);
   if (error) return { error: error.message };
 
   revalidatePath('/admin/promo-banner');
