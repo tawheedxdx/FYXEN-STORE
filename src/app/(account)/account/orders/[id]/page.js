@@ -4,6 +4,7 @@ import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronLeft, Package, MapPin, CreditCard, Calendar, Truck, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 import PayNowButton from '@/components/account/PayNowButton';
+import CancelOrderButton from '@/components/account/CancelOrderButton';
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
@@ -110,7 +111,15 @@ export default async function OrderDetailsPage({ params }) {
                   <p className="text-xs text-primary-500 mt-0.5">Your order is currently being processed.</p>
                 </div>
               </div>
-              <PayNowButton order={order} />
+              <div className="flex flex-col items-end gap-3">
+                <PayNowButton order={order} />
+                <CancelOrderButton 
+                  orderId={order.id} 
+                  orderStatus={order.order_status} 
+                  paymentStatus={order.payment_status}
+                  className="bg-red-50 dark:bg-red-500/10 px-4 py-2 rounded-xl"
+                />
+              </div>
             </div>
           </div>
 

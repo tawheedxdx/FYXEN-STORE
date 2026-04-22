@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import PayNowButton from './PayNowButton';
+import CancelOrderButton from './CancelOrderButton';
 import Script from 'next/script';
 import { ChevronRight, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
 
@@ -81,7 +82,14 @@ export default function OrderCard({ order }) {
           </div>
 
           <div className="flex flex-row md:flex-col justify-between items-end gap-4 shrink-0">
-            <PayNowButton order={order} className="px-5 py-2 text-xs" />
+            <div className="flex flex-col items-end gap-2">
+              <PayNowButton order={order} className="px-5 py-2 text-xs" />
+              <CancelOrderButton 
+                orderId={order.id} 
+                orderStatus={order.order_status} 
+                paymentStatus={order.payment_status}
+              />
+            </div>
             
             <div className="flex items-center gap-1 text-xs font-bold text-primary-400 group-hover:text-primary-900 dark:group-hover:text-white transition-colors">
               View Details <ChevronRight className="w-4 h-4" />
