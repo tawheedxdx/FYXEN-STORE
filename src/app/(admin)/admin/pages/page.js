@@ -54,7 +54,7 @@ export default async function AdminPages({ searchParams }) {
                 <h2 className="font-bold text-lg text-primary-900">{currentPage.title}</h2>
                 <span className="text-xs text-primary-400">Slug: /{currentPage.slug}</span>
               </div>
-              <PageEditor initialPage={currentPage} />
+              <PageEditor key={currentPage.slug} initialPage={currentPage} />
             </div>
           ) : (
             <div className="bg-white rounded-2xl p-12 text-center border border-primary-100 shadow-sm">
