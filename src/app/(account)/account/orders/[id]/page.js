@@ -87,10 +87,12 @@ export default async function OrderDetailsPage({ params }) {
             </span>
           </div>
         </div>
-        <div className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-bold uppercase ${getStatusColor(order.payment_status)}`}>
-          {order.payment_status === 'paid' ? <CheckCircle2 className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
-          Payment: {order.payment_status}
-        </div>
+        {order.order_status !== 'cancelled' && (
+          <div className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-bold uppercase ${getStatusColor(order.payment_status)}`}>
+            {order.payment_status === 'paid' ? <CheckCircle2 className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
+            Payment: {order.payment_status}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

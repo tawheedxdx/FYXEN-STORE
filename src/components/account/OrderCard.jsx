@@ -42,10 +42,12 @@ export default function OrderCard({ order }) {
         <div className="relative flex flex-col md:flex-row justify-between gap-6">
           <div className="space-y-4 flex-1">
             <div className="flex flex-wrap items-center gap-3">
-              <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border ${getStatusColor(order.payment_status)}`}>
-                {getStatusIcon(order.payment_status)}
-                {order.payment_status}
-              </span>
+              {order.order_status !== 'cancelled' && (
+                <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border ${getStatusColor(order.payment_status)}`}>
+                  {getStatusIcon(order.payment_status)}
+                  {order.payment_status}
+                </span>
+              )}
               <span className="text-xs text-primary-400 font-medium">
                 {new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
               </span>
