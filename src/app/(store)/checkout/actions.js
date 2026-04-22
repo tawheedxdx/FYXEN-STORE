@@ -82,6 +82,8 @@ export async function createCheckoutSession(formData) {
     return { error: 'Cart is empty' };
   }
 
+  const paymentMethod = formData.get('paymentMethod') || 'ONLINE';
+
   // Check for coupon in formData
   const couponCode = formData.get('couponCode');
   let discount = 0;
@@ -110,7 +112,7 @@ export async function createCheckoutSession(formData) {
     country: 'India',
   };
 
-  // 1. Create Order in DB (Pending)
+  // 1. Create Order in DB
   const orderNumber = generateOrderNumber();
   
   const { data: order, error: orderError } = await supabaseAdmin
@@ -122,8 +124,9 @@ export async function createCheckoutSession(formData) {
       discount_amount: discount,
       shipping_amount: shipping,
       grand_total: grandTotal,
-      payment_status: 'pending',
-      order_status: 'pending',
+      payment_status: paymentMethod === 'COD' ? 'cod' : 'pending',
+      order_status: paymentMethod === 'COD' ? 'confirmed' : 'pending',
+      payment_method: paymentMethod,
       shipping_full_name: shippingInfo.full_name,
       shipping_phone: shippingInfo.phone,
       shipping_line1: shippingInfo.line1,
@@ -131,6 +134,8 @@ export async function createCheckoutSession(formData) {
       shipping_state: shippingInfo.state,
       shipping_postal_code: shippingInfo.postal_code,
       shipping_country: shippingInfo.country,
+      placed_at: paymentMethod === 'COD' ? new Date().toISOString() : null,
+      coupon_id: couponId
     })
     .select('id')
     .single();
@@ -153,7 +158,27 @@ export async function createCheckoutSession(formData) {
 
   await supabaseAdmin.from('order_items').insert(orderItemsData);
 
-  // 3. Create Razorpay Order
+  // If COD, we are done
+  if (paymentMethod === 'COD') {
+    // Clear Cart
+    await supabase.from('carts').delete().eq('user_id', user.id);
+    
+    // Increment coupon usage if any
+    if (couponId) {
+      await supabaseAdmin.rpc('increment_coupon_usage', { coupon_uuid: couponId });
+    }
+
+    revalidatePath('/cart');
+    revalidatePath('/account');
+    
+    return { 
+      success: true, 
+      orderId: order.id, 
+      paymentMethod: 'COD'
+    };
+  }
+
+  // 3. Create Razorpay Order (for ONLINE)
   try {
     const rzpOrder = await razorpay.orders.create({
       amount: Math.round(grandTotal * 100), // in paise, must be integer
@@ -162,21 +187,11 @@ export async function createCheckoutSession(formData) {
       notes: { orderNumber, couponCode: couponCode || 'none' }
     });
 
-    // Update our DB order with RZP Order ID and Coupon ID
-    // We do this in a try-catch or check result to avoid crashing if column is somehow missing
-    const { error: updateError } = await supabaseAdmin
+    // Update our DB order with RZP Order ID
+    await supabaseAdmin
       .from('orders')
-      .update({ 
-        razorpay_order_id: rzpOrder.id,
-        coupon_id: couponId
-      })
+      .update({ razorpay_order_id: rzpOrder.id })
       .eq('id', order.id);
-
-    if (updateError) {
-      console.error('Update Order with RZP ID Error:', updateError);
-      // We don't necessarily want to fail here if the order was created, 
-      // but if the column is missing it will fail.
-    }
 
     return { 
       success: true, 
@@ -185,7 +200,8 @@ export async function createCheckoutSession(formData) {
       amount: rzpOrder.amount,
       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID,
       userEmail: user.email,
-      shippingInfo
+      shippingInfo,
+      paymentMethod: 'ONLINE'
     };
   } catch (error) {
     console.error('Razorpay Error:', error);

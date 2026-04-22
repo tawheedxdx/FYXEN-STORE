@@ -5,12 +5,15 @@ import { useRouter } from 'next/navigation';
 import { createCheckoutSession, verifyPayment, validateCoupon } from '@/app/(store)/checkout/actions';
 import Script from 'next/script';
 import { Loader2, Ticket, CheckCircle2, X } from 'lucide-react';
+import PaymentSelectionModal from './PaymentSelectionModal';
 
 export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGrandTotal, profile, user }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [rzpReady, setRzpReady] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formDataObj, setFormDataObj] = useState(null);
 
   // Coupon State
   const [couponCode, setCouponCode] = useState('');
@@ -58,25 +61,34 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGr
       formData.append('couponCode', appliedCoupon.code);
     }
 
+    setFormDataObj(formData);
+    setIsModalOpen(true);
+  }
+
+  async function onConfirmPayment(method) {
+    setIsModalOpen(false);
     setIsLoading(true);
     setError(null);
 
-    // Guard: Razorpay script must be loaded
-    if (!window.Razorpay) {
-      setError('Payment gateway is still loading. Please wait a moment and try again.');
-      setIsLoading(false);
-      return;
-    }
+    const formData = formDataObj;
+    formData.set('paymentMethod', method);
 
     // 1. Create order on backend
     const res = await createCheckoutSession(formData);
 
     if (res?.error) {
       setError(res.error);
-      setIsLoading(false);
+      setIsLoading(true); // Keep loading state if we want to show error
+      setTimeout(() => setIsLoading(false), 2000);
       return;
     }
 
+    if (method === 'COD') {
+      router.push(`/order/success?id=${res.orderId}`);
+      return;
+    }
+
+    // ONLINE Flow
     if (!res?.key || !res?.rzpOrderId) {
       setError('Failed to initialize payment. Please refresh and try again.');
       setIsLoading(false);
@@ -90,7 +102,7 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGr
       currency: 'INR',
       name: 'Fyxen',
       description: 'Premium Lifestyle Products',
-      image: 'https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/brand-assets/logo.png', // Replace with your actual logo URL
+      image: '/logo.png', 
       order_id: res.rzpOrderId,
       handler: async function (response) {
         setIsLoading(true);
@@ -134,7 +146,6 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGr
       });
 
       rzp.open();
-      setIsLoading(false);
     } catch (err) {
       console.error('Razorpay init error:', err);
       setError('Could not open payment window. Please try again.');
@@ -296,16 +307,23 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGr
                 <Loader2 className="w-4 h-4 animate-spin" /> Loading Payment Gateway...
               </span>
             ) : (
-              `Pay ₹${finalGrandTotal.toFixed(2)} Securely`
+              `Confirm & Proceed`
             )}
           </button>
           <div className="flex justify-center mt-4 opacity-70">
-            <p className="text-xs flex items-center gap-2">
-              🔒 100% Secure Payments powered by Razorpay
+            <p className="text-xs flex items-center gap-2 text-center">
+              🔒 100% Secure Checkout
             </p>
           </div>
         </div>
       </form>
+
+      <PaymentSelectionModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConfirm={onConfirmPayment}
+        amount={finalGrandTotal}
+      />
     </>
   );
 }

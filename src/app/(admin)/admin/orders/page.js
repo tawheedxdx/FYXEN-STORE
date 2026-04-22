@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import OrderStatusDropdown from '@/components/admin/OrderStatusDropdown';
+import PaymentStatusDropdown from '@/components/admin/PaymentStatusDropdown';
 
 export const metadata = { title: 'Orders | Admin' };
 
@@ -71,13 +72,7 @@ export default async function AdminOrdersPage() {
                   </td>
                   <td className="p-4 font-semibold">₹{order.grand_total}</td>
                   <td className="p-4">
-                    <span className={`inline-block px-2 py-1 rounded text-xs font-bold uppercase ${
-                      order.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 
-                      order.payment_status === 'failed' ? 'bg-red-100 text-red-800' : 
-                      'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {order.payment_status}
-                    </span>
+                    <PaymentStatusDropdown orderId={order.id} currentStatus={order.payment_status} />
                   </td>
                   <td className="p-4">
                     <OrderStatusDropdown orderId={order.id} currentStatus={order.order_status} />
