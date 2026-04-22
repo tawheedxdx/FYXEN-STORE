@@ -87,4 +87,20 @@
   .input-field {
     @apply w-full px-4 py-3 rounded-md border border-gray-300 bg-white text-[16px] focus:outline-none focus:ring-2 focus:ring-primary-900 focus:border-transparent transition-all dark:bg-primary-900 dark:border-primary-700 dark:focus:ring-white;
   }
+
+  .prose {
+    @apply leading-relaxed;
+  }
+  .prose h1 { @apply text-4xl font-bold mb-6 mt-8; }
+  .prose h2 { @apply text-3xl font-bold mb-4 mt-8; }
+  .prose h3 { @apply text-2xl font-bold mb-4 mt-6; }
+  .prose p { @apply mb-4; }
+  .prose ul { @apply list-disc list-inside mb-4 space-y-2; }
+  .prose ol { @apply list-decimal list-inside mb-4 space-y-2; }
+  .prose a { @apply text-accent hover:underline; }
+  .prose blockquote { @apply border-l-4 border-primary-200 pl-4 italic my-4; }
+  .prose img { @apply rounded-xl my-6 max-w-full h-auto; }
+  .prose video { @apply rounded-xl my-6 w-full; }
+  .prose code { @apply bg-primary-50 px-1.5 py-0.5 rounded text-sm font-mono; }
+  .prose pre { @apply bg-primary-900 text-white p-4 rounded-xl overflow-x-auto my-4; }
 }
