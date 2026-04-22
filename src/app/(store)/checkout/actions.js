@@ -337,6 +337,23 @@ export async function retryPayment(orderId) {
   }
 }
 
+export async function deleteOrder(orderId) {
+  const supabaseAdmin = createAdminClient();
+  
+  // 1. Delete order items first (foreign key)
+  await supabaseAdmin.from('order_items').delete().eq('order_id', orderId);
+  
+  // 2. Delete the order
+  const { error } = await supabaseAdmin.from('orders').delete().eq('id', orderId);
+  
+  if (error) {
+    console.error('Delete Order Error:', error);
+    return { error: 'Failed to cleanup order' };
+  }
+  
+  return { success: true };
+}
+
 function generateOrderNumber() {
   const timestamp = Date.now().toString().slice(-6);
   const random = Math.floor(1000 + Math.random() * 9000);

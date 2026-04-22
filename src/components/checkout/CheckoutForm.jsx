@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { createCheckoutSession, verifyPayment, validateCoupon } from '@/app/(store)/checkout/actions';
+import { createCheckoutSession, verifyPayment, validateCoupon, deleteOrder } from '@/app/(store)/checkout/actions';
 import Script from 'next/script';
 import { Loader2, Ticket, CheckCircle2, X } from 'lucide-react';
 import PaymentSelectionModal from './PaymentSelectionModal';
@@ -14,6 +14,7 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGr
   const [rzpReady, setRzpReady] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formDataObj, setFormDataObj] = useState(null);
+  const paymentStatusRef = useRef('none'); // 'none', 'success', 'failed'
 
   // Coupon State
   const [couponCode, setCouponCode] = useState('');
@@ -69,6 +70,7 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGr
     setIsModalOpen(false);
     setIsLoading(true);
     setError(null);
+    paymentStatusRef.current = 'none';
 
     const formData = formDataObj;
     formData.set('paymentMethod', method);
@@ -78,12 +80,13 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGr
 
     if (res?.error) {
       setError(res.error);
-      setIsLoading(true); // Keep loading state if we want to show error
+      setIsLoading(true); 
       setTimeout(() => setIsLoading(false), 2000);
       return;
     }
 
     if (method === 'COD') {
+      paymentStatusRef.current = 'success';
       router.push(`/order/success?id=${res.orderId}`);
       return;
     }
@@ -105,6 +108,7 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGr
       image: '/logo.png', 
       order_id: res.rzpOrderId,
       handler: async function (response) {
+        paymentStatusRef.current = 'success';
         setIsLoading(true);
         // 3. Verify Payment on Backend
         const verifyRes = await verifyPayment({
@@ -129,8 +133,13 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGr
         color: '#09090b',
       },
       modal: {
-        ondismiss: function () {
+        ondismiss: async function () {
           setIsLoading(false);
+          // If the user exited without success or failure, delete the order
+          if (paymentStatusRef.current === 'none') {
+            console.log('User exited payment. Deleting order:', res.orderId);
+            await deleteOrder(res.orderId);
+          }
         },
       },
     };
@@ -140,7 +149,8 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGr
 
       rzp.on('payment.failed', function (response) {
         console.error('Razorpay payment.failed:', response.error);
-        setError(`Payment failed: ${response.error?.description || 'Unknown error'}. Please try again.`);
+        paymentStatusRef.current = 'failed';
+        setError(`Payment failed: ${response.error?.description || 'Unknown error'}. Order saved as pending.`);
         setIsLoading(false);
         router.push(`/order/failed?id=${res.orderId}`);
       });
