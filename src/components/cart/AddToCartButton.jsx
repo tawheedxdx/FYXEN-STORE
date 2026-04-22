@@ -36,37 +36,35 @@ export default function AddToCartButton({ product }) {
   const isOutOfStock = product.stock_quantity <= 0;
 
   return (
-    <div className="flex flex-col gap-2">
-      {error && <p className="text-red-500 text-sm">{error}</p>}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex items-center border border-primary-200 dark:border-white/20 rounded-md h-12 w-full sm:w-32">
+    <div className="flex flex-col gap-2 flex-[1.2]">
+      {error && <p className="text-red-500 text-[10px] absolute -top-4">{error}</p>}
+      <div className="flex gap-2">
+        <div className="flex items-center border border-primary-200 dark:border-white/20 rounded-lg h-12 w-24 shrink-0 overflow-hidden">
           <button 
             onClick={handleDecrease}
             disabled={isOutOfStock}
-            className="px-4 h-full flex items-center justify-center text-primary-500 hover:text-primary-900 dark:hover:text-white disabled:opacity-50 transition-colors"
+            className="flex-1 h-full flex items-center justify-center text-primary-500 hover:bg-primary-50 transition-colors"
           >
-            <Minus className="w-4 h-4" />
+            <Minus className="w-3.5 h-3.5" />
           </button>
-          <span className="flex-1 text-center font-medium">{quantity}</span>
+          <span className="w-8 text-center font-bold text-sm">{quantity}</span>
           <button 
             onClick={handleIncrease}
             disabled={isOutOfStock || quantity >= product.stock_quantity}
-            className="px-4 h-full flex items-center justify-center text-primary-500 hover:text-primary-900 dark:hover:text-white disabled:opacity-50 transition-colors"
+            className="flex-1 h-full flex items-center justify-center text-primary-500 hover:bg-primary-50 transition-colors"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
           </button>
         </div>
         
         <button 
           onClick={handleAddToCart}
           disabled={isOutOfStock || isAdding}
-          className="btn-primary flex-1 h-12"
+          className="btn-primary flex-1 h-12 px-2 text-xs md:text-sm whitespace-nowrap"
         >
-          {isAdding ? (
-            <span className="flex items-center gap-2">Adding...</span>
-          ) : (
-            <span className="flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5" />
+          {isAdding ? 'Adding...' : (
+            <span className="flex items-center justify-center gap-1.5 font-bold">
+              <ShoppingBag className="w-4 h-4" />
               {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
             </span>
           )}

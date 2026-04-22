@@ -35,10 +35,10 @@ export default function BuyNowButton({ product }) {
     <button 
       onClick={handleBuyNow}
       disabled={isOutOfStock || isProcessing}
-      className="btn-outline flex-1 h-12 border-primary-900 text-primary-900 hover:bg-primary-900 hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-black transition-all"
+      className="btn-outline flex-1 h-12 border-primary-900 text-primary-900 hover:bg-primary-900 hover:text-white dark:border-white dark:text-white dark:hover:bg-white dark:hover:text-black transition-all px-2 text-xs md:text-sm whitespace-nowrap"
     >
-      <span className="flex items-center justify-center gap-2 font-bold">
-        <CreditCard className="w-5 h-5" />
+      <span className="flex items-center justify-center gap-1.5 font-bold">
+        <CreditCard className="w-4 h-4" />
         {isOutOfStock ? 'Out of Stock' : 'Buy Now'}
       </span>
     </button>

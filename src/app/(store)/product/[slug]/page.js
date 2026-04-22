@@ -130,7 +130,7 @@ export default async function ProductPage({ params }) {
                 </div>
               )}
 
-              <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <AddToCartButton product={product} />
                 <BuyNowButton product={product} />
               </div>
