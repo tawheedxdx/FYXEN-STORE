@@ -15,7 +15,7 @@ export default async function CheckoutPage() {
     redirect('/login?redirect=/checkout');
   }
 
-  const { items, subtotal, totalShipping } = await getCart();
+  const { items, subtotal, totalShipping, totalTax } = await getCart();
 
   if (items.length === 0) {
     redirect('/cart');
@@ -29,7 +29,8 @@ export default async function CheckoutPage() {
     .single();
 
   const shipping = totalShipping;
-  const grandTotal = subtotal + shipping;
+  const tax = totalTax;
+  const grandTotal = subtotal + shipping + tax;
 
   return (
     <div className="bg-primary-50 dark:bg-primary-900/10 min-h-screen py-8 md:py-12 pb-safe">
@@ -42,6 +43,7 @@ export default async function CheckoutPage() {
             <CheckoutForm 
               subtotal={subtotal} 
               shipping={shipping} 
+              tax={tax}
               grandTotal={grandTotal} 
               profile={profile}
               user={user}
@@ -62,7 +64,7 @@ export default async function CheckoutPage() {
                     <div className="flex-1 text-sm">
                       <p className="font-medium line-clamp-2">{item.title}</p>
                       <p className="text-primary-500">Qty: {item.quantity}</p>
-                      <p className="font-semibold mt-1">₹{item.price}</p>
+                      <p className="font-semibold mt-1">₹{item.price} {item.taxRate > 0 && <span className="text-[10px] text-primary-400 font-normal">+ GST</span>}</p>
                     </div>
                   </div>
                 ))}
@@ -73,6 +75,12 @@ export default async function CheckoutPage() {
                   <span className="text-primary-600 dark:text-primary-400">Subtotal</span>
                   <span className="font-medium">₹{subtotal.toFixed(2)}</span>
                 </div>
+                {tax > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-primary-600 dark:text-primary-400">Tax / GST</span>
+                    <span className="font-medium">₹{tax.toFixed(2)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-primary-600 dark:text-primary-400">Shipping</span>
                   <span className="font-medium">{shipping === 0 ? 'Free' : `₹${shipping.toFixed(2)}`}</span>

@@ -7,7 +7,7 @@ import Script from 'next/script';
 import { Loader2, Ticket, CheckCircle2, X } from 'lucide-react';
 import PaymentSelectionModal from './PaymentSelectionModal';
 
-export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGrandTotal, profile, user }) {
+export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: initialGrandTotal, profile, user }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -26,8 +26,8 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGr
   const [finalGrandTotal, setFinalGrandTotal] = useState(initialGrandTotal);
 
   useEffect(() => {
-    setFinalGrandTotal(Math.max(0, subtotal - currentDiscount + shipping));
-  }, [subtotal, currentDiscount, shipping]);
+    setFinalGrandTotal(Math.max(0, subtotal - currentDiscount + shipping + tax));
+  }, [subtotal, currentDiscount, shipping, tax]);
 
   async function handleApplyCoupon() {
     if (!couponCode) return;
@@ -291,6 +291,12 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGr
               <div className="flex justify-between text-sm text-green-600 font-medium">
                 <span>Discount</span>
                 <span>-₹{currentDiscount.toFixed(2)}</span>
+              </div>
+            )}
+            {tax > 0 && (
+              <div className="flex justify-between text-sm text-primary-500">
+                <span>Tax / GST</span>
+                <span>₹{tax.toFixed(2)}</span>
               </div>
             )}
             <div className="flex justify-between text-sm text-primary-500">

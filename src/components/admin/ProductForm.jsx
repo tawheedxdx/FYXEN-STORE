@@ -243,6 +243,11 @@ export default function ProductForm({ categories, product }) {
               <input name="shippingPrice" type="number" step="0.01" min="0" className="input-field" placeholder="0.00" defaultValue={product?.shipping_price ?? 0} />
               <p className="text-[10px] text-primary-400 mt-1">Enter 0 for "Zero Shipping Charges".</p>
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Tax / GST (%)</label>
+              <input name="taxRate" type="number" step="0.01" min="0" className="input-field" placeholder="0" defaultValue={product?.tax_rate ?? 0} />
+              <p className="text-[10px] text-primary-400 mt-1">Percentage of tax to apply (e.g. 18 for 18% GST).</p>
+            </div>
           </div>
 
           {/* Inventory */}

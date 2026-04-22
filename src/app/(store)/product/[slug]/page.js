@@ -87,7 +87,12 @@ export default async function ProductPage({ params }) {
                 {product.compare_at_price > product.price && (
                   <span className="text-xl md:text-2xl text-primary-400 line-through">₹{product.compare_at_price}</span>
                 )}
-                <span className="text-3xl md:text-4xl font-black text-primary-900 dark:text-white">₹{product.price}</span>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl md:text-4xl font-black text-primary-900 dark:text-white">₹{product.price}</span>
+                  {product.tax_rate > 0 && (
+                    <span className="text-sm md:text-base text-primary-400 font-medium">+ GST</span>
+                  )}
+                </div>
               </div>
 
               <div className="mb-6">

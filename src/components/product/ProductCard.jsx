@@ -45,8 +45,11 @@ export default function ProductCard({ product }) {
         <span className="text-xs text-primary-500 mb-1">{product.brand || 'Fyxen'}</span>
         <h3 className="font-semibold text-primary-900 dark:text-white truncate group-hover:text-accent transition-colors">{product.title}</h3>
         
-        <div className="flex items-center gap-2 mt-1">
+        <div className="flex items-baseline gap-2 mt-1">
           <span className="font-bold text-primary-900 dark:text-white">₹{product.price}</span>
+          {product.tax_rate > 0 && (
+            <span className="text-[10px] text-primary-400 font-medium">+ GST</span>
+          )}
           {product.compare_at_price > product.price && (
             <span className="text-sm text-primary-400 line-through">₹{product.compare_at_price}</span>
           )}
