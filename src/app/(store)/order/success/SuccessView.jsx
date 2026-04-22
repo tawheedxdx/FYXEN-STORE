@@ -3,12 +3,22 @@
 import { motion } from 'framer-motion';
 import { CheckCircle, ArrowRight, Package } from 'lucide-react';
 import Link from 'next/link';
+import Script from 'next/script';
 
 export default function SuccessView({ orderId, paymentStatus }) {
   const isCod = paymentStatus === 'cod';
 
   return (
     <div className="container-custom py-24 min-h-[70vh] flex flex-col items-center justify-center text-center">
+      <Script id="google-conversion-event" strategy="afterInteractive">
+        {`
+          gtag('event', 'conversion', {
+              'send_to': 'AW-18110601963/0zAaCMOEpqEcEOu157tD',
+              'value': 1.0,
+              'currency': 'INR'
+          });
+        `}
+      </Script>
       <motion.div
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
