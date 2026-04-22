@@ -40,7 +40,7 @@ export default function Navbar() {
         className="sticky z-50 w-full glass-panel transition-all duration-300"
         style={{ top: 'var(--banner-height, 0px)' }}
       >
-        <div className="container-custom h-16 flex items-center justify-between">
+        <div className="container-custom h-20 md:h-24 flex items-center justify-between">
           {/* Mobile Menu Toggle */}
           <div className="md:hidden flex items-center">
             <button
@@ -65,7 +65,7 @@ export default function Navbar() {
           {/* Logo */}
           <div className="flex-1 md:flex-none flex justify-center md:justify-start">
             <Link href="/" className="flex items-center">
-              <img src="/logo.png" alt="Fyxen Logo" className="h-12 md:h-16 w-auto object-contain" />
+              <img src="/logo.png" alt="Fyxen Logo" className="h-14 md:h-18 w-auto object-contain" />
             </Link>
           </div>
 
