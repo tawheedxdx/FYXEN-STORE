@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import { ExternalLink } from 'lucide-react';
 import OrderStatusDropdown from '@/components/admin/OrderStatusDropdown';
 import PaymentStatusDropdown from '@/components/admin/PaymentStatusDropdown';
 
@@ -56,11 +58,16 @@ export default async function AdminOrdersPage() {
               {orders.map(order => (
                 <tr key={order.id} className="hover:bg-primary-50/50 transition-colors">
                   <td className="p-4">
-                    <p className="font-semibold">{order.order_number}</p>
+                    <Link href={`/admin/orders/${order.id}`} className="group flex items-center gap-2">
+                      <span className="font-bold text-primary-900 group-hover:text-accent transition-colors">{order.order_number}</span>
+                      <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-all text-accent" />
+                    </Link>
                   </td>
                   <td className="p-4">
-                    <p className="font-medium">{order.profiles?.full_name || order.shipping_full_name}</p>
-                    <p className="text-primary-400 text-xs">{order.profiles?.email || '—'}</p>
+                    <Link href={`/admin/orders/${order.id}`} className="block group">
+                      <p className="font-medium text-primary-900 group-hover:text-accent transition-colors">{order.profiles?.full_name || order.shipping_full_name}</p>
+                      <p className="text-primary-400 text-xs">{order.profiles?.email || '—'}</p>
+                    </Link>
                   </td>
                   <td className="p-4 text-primary-600">
                     <div className="flex items-center gap-2">

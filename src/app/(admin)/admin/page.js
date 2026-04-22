@@ -26,7 +26,7 @@ export default async function AdminDashboardPage() {
     supabase.from('orders').select('*', { count: 'exact', head: true }),
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
     supabase.from('orders').select('grand_total').eq('payment_status', 'paid'),
-    supabase.from('orders').select('order_number, grand_total, payment_status, created_at, profiles(full_name)').order('created_at', { ascending: false }).limit(5),
+    supabase.from('orders').select('id, order_number, grand_total, payment_status, created_at, profiles(full_name)').order('created_at', { ascending: false }).limit(5),
     supabase.from('products').select('id, title, stock_quantity').lt('stock_quantity', 10).order('stock_quantity').limit(5),
   ]);
 
@@ -86,9 +86,13 @@ export default async function AdminDashboardPage() {
           ) : (
             <div className="divide-y divide-primary-100">
               {recentOrders.map(order => (
-                <div key={order.order_number} className="px-6 py-4 flex items-center justify-between">
+                <Link 
+                  key={order.order_number} 
+                  href={`/admin/orders/${order.id}`}
+                  className="px-6 py-4 flex items-center justify-between hover:bg-primary-50 transition-colors group"
+                >
                   <div>
-                    <p className="font-medium text-sm">{order.order_number}</p>
+                    <p className="font-medium text-sm text-primary-900 group-hover:text-accent transition-colors">{order.order_number}</p>
                     <p className="text-primary-400 text-xs">{order.profiles?.full_name || 'Guest'} · {new Date(order.created_at).toLocaleDateString()}</p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -97,7 +101,7 @@ export default async function AdminDashboardPage() {
                     </span>
                     <span className="font-semibold text-sm">₹{order.grand_total}</span>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           )}
