@@ -4,7 +4,9 @@ import { motion } from 'framer-motion';
 import { CheckCircle, ArrowRight, Package } from 'lucide-react';
 import Link from 'next/link';
 
-export default function SuccessView({ orderId }) {
+export default function SuccessView({ orderId, paymentStatus }) {
+  const isCod = paymentStatus === 'cod';
+
   return (
     <div className="container-custom py-24 min-h-[70vh] flex flex-col items-center justify-center text-center">
       <motion.div
@@ -18,8 +20,12 @@ export default function SuccessView({ orderId }) {
         }}
         className="relative"
       >
-        <div className="absolute inset-0 bg-green-500/20 blur-3xl rounded-full" />
-        <CheckCircle className="w-28 h-28 text-green-500 relative z-10" strokeWidth={1.5} />
+        <div className={`absolute inset-0 ${isCod ? 'bg-blue-500/20' : 'bg-green-500/20'} blur-3xl rounded-full`} />
+        {isCod ? (
+          <Package className="w-28 h-28 text-blue-500 relative z-10" strokeWidth={1.5} />
+        ) : (
+          <CheckCircle className="w-28 h-28 text-green-500 relative z-10" strokeWidth={1.5} />
+        )}
       </motion.div>
 
       <motion.div
@@ -28,11 +34,13 @@ export default function SuccessView({ orderId }) {
         transition={{ delay: 0.3, duration: 0.5 }}
         className="mt-8 space-y-4"
       >
-        <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-emerald-400">
-          Payment Verified!
+        <h1 className={`text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${isCod ? 'from-blue-500 to-indigo-400' : 'from-green-500 to-emerald-400'}`}>
+          {isCod ? 'Order Placed!' : 'Payment Verified!'}
         </h1>
         <p className="text-xl text-primary-600 dark:text-primary-300 max-w-lg mx-auto">
-          Your premium order has been successfully placed and is now being processed.
+          {isCod 
+            ? 'Your order has been received and will be delivered shortly. Please keep the cash ready!'
+            : 'Your premium order has been successfully placed and is now being processed.'}
         </p>
       </motion.div>
 
