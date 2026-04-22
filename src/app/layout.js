@@ -92,6 +92,10 @@ export default function RootLayout({ children }) {
         `}
       </Script>
 
+      {/* Botpress Support Bot */}
+      <Script src="https://cdn.botpress.cloud/webchat/v3.6/inject.js" strategy="lazyOnload" />
+      <Script src="https://files.bpcontent.cloud/2026/04/23/11/20260423114123-C28218MU.js" strategy="lazyOnload" />
+
       <body className="min-h-full flex flex-col font-sans bg-background text-foreground">
         {children}
         <CookieConsent />
