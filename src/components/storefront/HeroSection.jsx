@@ -19,12 +19,12 @@ export default function HeroSection() {
         <div className="absolute inset-0 bg-gradient-to-b from-primary-900/50 via-primary-900/80 to-primary-900"></div>
       </div>
       
-      <div className="relative z-10 container-custom text-center text-white px-4">
+      <div className="relative z-10 container-custom text-center text-white px-6">
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1 }}
-          className="inline-block px-4 py-1.5 bg-accent/20 border border-accent/30 rounded-full text-accent text-sm font-bold uppercase tracking-[0.2em] mb-8"
+          className="inline-block px-3 py-1 bg-accent/20 border border-accent/30 rounded-full text-accent text-[10px] md:text-sm font-bold uppercase tracking-[0.2em] mb-6 md:mb-8"
         >
           Established 2024
         </motion.div>
@@ -33,7 +33,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="text-6xl md:text-9xl font-black tracking-tighter mb-8 leading-[0.85]"
+          className="text-5xl md:text-9xl font-black tracking-tighter mb-6 md:mb-8 leading-[0.9]"
         >
           FYXEN <br/> <span className="text-accent">CORE.</span>
         </motion.h1>
@@ -42,7 +42,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-          className="text-xl md:text-2xl text-primary-200 max-w-2xl mx-auto mb-12 font-medium leading-relaxed"
+          className="text-lg md:text-2xl text-primary-200 max-w-2xl mx-auto mb-10 md:mb-12 font-medium leading-relaxed"
         >
           Uncompromising quality for the modern pioneer. Discover essentials engineered for excellence.
         </motion.p>

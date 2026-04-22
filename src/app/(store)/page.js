@@ -18,29 +18,30 @@ export default async function HomePage() {
       <HeroSection />
 
       {/* 2. Trust Markers - Elevated Design */}
-      <section className="py-16 bg-white dark:bg-black relative z-20 -mt-10 rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.1)]">
-        <div className="container-custom">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
-            <div className="flex flex-col items-center p-6 group hover:-translate-y-2 transition-transform">
-              <div className="w-16 h-16 bg-primary-50 dark:bg-primary-900/50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-accent transition-colors">
-                <Trophy className="w-8 h-8 text-primary-900 dark:text-accent group-hover:text-primary-900" />
+      <section className="py-12 md:py-16 bg-white dark:bg-black relative z-20 -mt-10 rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.1)]">
+        <div className="container-custom px-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 text-center">
+            <div className="flex flex-col items-center p-4 md:p-6 group hover:-translate-y-2 transition-transform">
+              <div className="w-14 h-14 md:w-16 md:h-16 bg-primary-50 dark:bg-primary-900/50 rounded-2xl flex items-center justify-center mb-4 md:mb-6 group-hover:bg-accent transition-colors">
+                <Trophy className="w-6 h-6 md:w-8 md:h-8 text-primary-900 dark:text-accent group-hover:text-primary-900" />
               </div>
-              <h3 className="font-black text-xl mb-3 uppercase tracking-tight">Premium Quality</h3>
-              <p className="text-primary-500 dark:text-primary-400 text-sm leading-relaxed">Uncompromising materials and craftsmanship in every product we release.</p>
+              <h3 className="font-black text-lg md:text-xl mb-2 md:mb-3 uppercase tracking-tight">Premium Quality</h3>
+              <p className="text-primary-500 dark:text-primary-400 text-xs md:text-sm leading-relaxed">Uncompromising materials and craftsmanship in every release.</p>
             </div>
-            <div className="flex flex-col items-center p-6 group hover:-translate-y-2 transition-transform">
-              <div className="w-16 h-16 bg-primary-50 dark:bg-primary-900/50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-accent transition-colors">
-                <Zap className="w-8 h-8 text-primary-900 dark:text-accent group-hover:text-primary-900" />
+            {/* ... other markers ... */}
+            <div className="flex flex-col items-center p-4 md:p-6 group hover:-translate-y-2 transition-transform">
+              <div className="w-14 h-14 md:w-16 md:h-16 bg-primary-50 dark:bg-primary-900/50 rounded-2xl flex items-center justify-center mb-4 md:mb-6 group-hover:bg-accent transition-colors">
+                <Zap className="w-6 h-6 md:w-8 md:h-8 text-primary-900 dark:text-accent group-hover:text-primary-900" />
               </div>
-              <h3 className="font-black text-xl mb-3 uppercase tracking-tight">Express Shipping</h3>
-              <p className="text-primary-500 dark:text-primary-400 text-sm leading-relaxed">Fast, reliable delivery nationwide by our premium logistics partners.</p>
+              <h3 className="font-black text-lg md:text-xl mb-2 md:mb-3 uppercase tracking-tight">Express Delivery</h3>
+              <p className="text-primary-500 dark:text-primary-400 text-xs md:text-sm leading-relaxed">Fast, reliable delivery nationwide by our premium partners.</p>
             </div>
-            <div className="flex flex-col items-center p-6 group hover:-translate-y-2 transition-transform">
-              <div className="w-16 h-16 bg-primary-50 dark:bg-primary-900/50 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-accent transition-colors">
-                <Star className="w-8 h-8 text-primary-900 dark:text-accent group-hover:text-primary-900" />
+            <div className="flex flex-col items-center p-4 md:p-6 group hover:-translate-y-2 transition-transform">
+              <div className="w-14 h-14 md:w-16 md:h-16 bg-primary-50 dark:bg-primary-900/50 rounded-2xl flex items-center justify-center mb-4 md:mb-6 group-hover:bg-accent transition-colors">
+                <Star className="w-6 h-6 md:w-8 md:h-8 text-primary-900 dark:text-accent group-hover:text-primary-900" />
               </div>
-              <h3 className="font-black text-xl mb-3 uppercase tracking-tight">VIP Support</h3>
-              <p className="text-primary-500 dark:text-primary-400 text-sm leading-relaxed">Dedicated concierge service for a seamless premium shopping experience.</p>
+              <h3 className="font-black text-lg md:text-xl mb-2 md:mb-3 uppercase tracking-tight">VIP Support</h3>
+              <p className="text-primary-500 dark:text-primary-400 text-xs md:text-sm leading-relaxed">Dedicated concierge service for a seamless experience.</p>
             </div>
           </div>
         </div>
@@ -50,20 +51,21 @@ export default async function HomePage() {
       <CategoryShowcase categories={categories} />
 
       {/* 4. Featured Products */}
-      <section className="py-32 bg-primary-50 dark:bg-primary-950/40 relative">
-        <div className="container-custom">
-          <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-20 text-center md:text-left gap-6">
+      <section className="py-20 md:py-32 bg-primary-50 dark:bg-primary-950/40 relative">
+        <div className="container-custom px-6">
+          <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-12 md:mb-20 text-center md:text-left gap-6">
             <div>
-              <span className="text-accent font-black tracking-[0.3em] uppercase text-sm mb-4 block">Our Picks</span>
-              <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-4">Featured <span className="text-primary-400">Selection</span></h2>
-              <p className="text-primary-500 dark:text-primary-400 text-lg max-w-xl italic font-light">Curated specifically for those who settle for nothing but the best.</p>
+              <span className="text-accent font-black tracking-[0.2em] md:tracking-[0.3em] uppercase text-xs md:text-sm mb-3 md:mb-4 block">Our Picks</span>
+              <h2 className="text-3xl md:text-6xl font-black tracking-tighter uppercase mb-4">Featured <span className="text-primary-400">Selection</span></h2>
+              <p className="text-primary-500 dark:text-primary-400 text-base md:text-lg max-w-xl italic font-light">Curated for those who settle for nothing but the best.</p>
             </div>
-            <Link href="/shop" className="group flex items-center gap-3 bg-primary-900 text-white dark:bg-white dark:text-primary-900 px-8 py-4 rounded-xl font-bold hover:bg-accent hover:text-primary-900 transition-all">
-              VIEW ALL <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
+            <Link href="/shop" className="group flex items-center gap-3 bg-primary-900 text-white dark:bg-white dark:text-primary-900 px-6 py-3 md:px-8 md:py-4 rounded-xl font-bold hover:bg-accent hover:text-primary-900 transition-all text-sm md:text-base">
+              VIEW ALL <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-2 transition-transform" />
             </Link>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-10">
+            {/* ... products ... */}
             {featuredProducts && featuredProducts.length > 0 ? (
               featuredProducts.slice(0, 4).map((product) => (
                 <div key={product.id} className="w-full">

@@ -13,16 +13,16 @@ export default function CategoryShowcase({ categories }) {
   ];
 
   return (
-    <section className="py-24 bg-white dark:bg-black">
+    <section className="py-16 md:py-24 bg-white dark:bg-black">
       <div className="container-custom">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-5xl font-black text-primary-900 dark:text-white mb-4 uppercase tracking-tighter">
+        <div className="text-center mb-10 md:mb-16 px-4">
+          <h2 className="text-2xl md:text-5xl font-black text-primary-900 dark:text-white mb-4 uppercase tracking-tighter">
             Browse by <span className="text-accent">Category</span>
           </h2>
-          <div className="w-24 h-1 bg-accent mx-auto"></div>
+          <div className="w-16 md:w-24 h-1 bg-accent mx-auto"></div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 px-4">
           {displayCategories.map((category, index) => (
             <motion.div
               key={category.slug}
@@ -30,7 +30,7 @@ export default function CategoryShowcase({ categories }) {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="group relative h-[450px] overflow-hidden rounded-2xl cursor-pointer"
+              className="group relative h-[300px] md:h-[450px] overflow-hidden rounded-2xl cursor-pointer"
             >
               <Link href={`/category/${category.slug}`} className="block w-full h-full">
                 <Image
