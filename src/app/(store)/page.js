@@ -4,6 +4,7 @@ import HeroSection from '@/components/storefront/HeroSection';
 import ProductCard from '@/components/product/ProductCard';
 import CategoryShowcase from '@/components/storefront/CategoryShowcase';
 import PromoBanner from '@/components/storefront/PromoBanner';
+import NewsletterForm from '@/components/storefront/NewsletterForm';
 import { getProducts, getCategories } from '@/services/products';
 
 import { createClient } from '@/lib/supabase/server';
@@ -104,16 +105,8 @@ export default async function HomePage() {
               <h2 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tighter uppercase">Join the <span className="text-accent">Elite.</span></h2>
               <p className="text-primary-200 text-xl mb-12 font-light italic">Subscribe to get exclusive early access to drops and member-only rewards.</p>
               
-              <form className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
-                <input 
-                  type="email" 
-                  placeholder="your@email.com" 
-                  className="flex-1 px-8 py-5 rounded-2xl bg-white/10 border border-white/20 text-white placeholder:text-primary-400 focus:outline-none focus:ring-2 focus:ring-accent transition-all"
-                />
-                <button type="submit" className="bg-accent text-primary-900 px-10 py-5 rounded-2xl font-black uppercase hover:bg-white transition-all shadow-xl">
-                  Join Now
-                </button>
-              </form>
+              <NewsletterForm />
+              
               <p className="mt-8 text-primary-400 text-sm">No spam. Only premium updates. Unsubscribe anytime.</p>
             </div>
           </div>
