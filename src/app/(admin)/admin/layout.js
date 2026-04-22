@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { LayoutDashboard, ShoppingCart, Users, Package, Settings, LogOut, FolderOpen, Tag, MessageSquare, FileText, Megaphone } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Users, Package, Settings, LogOut, FolderOpen, Tag, MessageSquare, FileText, Megaphone, Layout } from 'lucide-react';
 import { logout } from '@/app/(auth)/actions';
 
 export const metadata = {
@@ -27,6 +27,7 @@ export default function AdminLayout({ children }) {
             { href: '/admin/inquiries', icon: MessageSquare, label: 'Inquiries' },
             { href: '/admin/pages', icon: FileText, label: 'Site Pages' },
             { href: '/admin/announcements', icon: Megaphone, label: 'Announcements' },
+            { href: '/admin/promo-banner', icon: Layout, label: 'Promo Banners' },
             { href: '/admin/coupons', icon: Tag, label: 'Coupons' },
             { href: '/admin/users', icon: Users, label: 'Users' },
             { href: '/admin/settings', icon: Settings, label: 'Settings' },

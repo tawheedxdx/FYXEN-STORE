@@ -6,11 +6,17 @@ import CategoryShowcase from '@/components/storefront/CategoryShowcase';
 import PromoBanner from '@/components/storefront/PromoBanner';
 import { getProducts, getCategories } from '@/services/products';
 
+import { createClient } from '@/lib/supabase/server';
+
 export default async function HomePage() {
-  const [featuredProducts, categories] = await Promise.all([
+  const supabase = await createClient();
+  const [featuredProducts, categories, { data: banners }] = await Promise.all([
     getProducts({ featured: true }),
-    getCategories()
+    getCategories(),
+    supabase.from('promo_banners').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(1)
   ]);
+
+  const activeBanner = banners?.[0];
 
   return (
     <div className="flex flex-col w-full bg-white dark:bg-black overflow-hidden">
@@ -82,7 +88,7 @@ export default async function HomePage() {
       </section>
 
       {/* 5. Promo Banner */}
-      <PromoBanner />
+      {activeBanner && <PromoBanner banner={activeBanner} />}
 
       {/* 6. Newsletter / CTA */}
       <section className="py-32 bg-white dark:bg-black">
