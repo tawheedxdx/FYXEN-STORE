@@ -59,6 +59,7 @@ export async function createProduct(formData) {
       seo_title: seoTitle,
       seo_description: seoDescription,
       highlights,
+      promo_tag: formData.get('promoTag') || null,
     })
     .select('id')
     .single();
@@ -127,6 +128,7 @@ export async function updateProduct(productId, formData) {
     seo_title: formData.get('seoTitle') || title,
     seo_description: formData.get('seoDescription'),
     highlights,
+    promo_tag: formData.get('promoTag') || null,
     updated_at: new Date().toISOString(),
   }).eq('id', productId);
 

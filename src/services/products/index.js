@@ -10,6 +10,7 @@ export async function getProducts(options = {}) {
     compare_at_price, 
     featured, 
     brand,
+    promo_tag,
     product_images(image_url, sort_order), 
     categories(name, slug)
   `);

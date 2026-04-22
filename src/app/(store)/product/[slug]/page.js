@@ -67,14 +67,26 @@ export default async function ProductPage({ params }) {
           {/* Right: Product Info */}
           <div className="flex flex-col">
             <div className="mb-6 border-b border-primary-100 dark:border-white/10 pb-6">
+              {product.promo_tag && (
+                <span className="text-[10px] md:text-xs font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded uppercase tracking-wider mb-3 inline-block">
+                  {product.promo_tag}
+                </span>
+              )}
+              
               <span className="text-sm font-semibold text-accent mb-2 block">{product.brand || 'Fyxen'}</span>
               <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-primary-900 dark:text-white">{product.title}</h1>
               
               <div className="flex items-center gap-4 mb-2">
-                <span className="text-2xl font-bold text-primary-900 dark:text-white">₹{product.price}</span>
                 {product.compare_at_price > product.price && (
-                  <span className="text-lg text-primary-400 line-through">₹{product.compare_at_price}</span>
+                  <div className="flex items-center gap-1.5 text-green-600 font-bold text-2xl md:text-3xl">
+                    <span className="text-xl md:text-2xl">↓</span>
+                    {Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100)}%
+                  </div>
                 )}
+                {product.compare_at_price > product.price && (
+                  <span className="text-xl md:text-2xl text-primary-400 line-through">₹{product.compare_at_price}</span>
+                )}
+                <span className="text-3xl md:text-4xl font-black text-primary-900 dark:text-white">₹{product.price}</span>
               </div>
 
               <div className="mb-6">

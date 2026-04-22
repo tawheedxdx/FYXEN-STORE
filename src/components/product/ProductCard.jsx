@@ -25,12 +25,18 @@ export default function ProductCard({ product }) {
         )}
         
         {/* Badges */}
-        <div className="absolute top-2 left-2 flex flex-col gap-2">
+        <div className="absolute top-2 left-2 flex flex-col gap-2 pointer-events-none">
+          {product.promo_tag && (
+            <span className="bg-green-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">{product.promo_tag}</span>
+          )}
           {product.compare_at_price > product.price && (
-            <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">SALE</span>
+            <span className="bg-white text-green-600 text-[10px] font-black px-1.5 py-0.5 rounded shadow-sm flex items-center gap-0.5">
+              <span>↓</span>
+              {Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100)}%
+            </span>
           )}
           {product.featured && (
-            <span className="bg-accent text-white text-xs font-bold px-2 py-1 rounded">FEATURED</span>
+            <span className="bg-accent text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm">FEATURED</span>
           )}
         </div>
       </div>

@@ -224,7 +224,7 @@ export default function ProductForm({ categories, product }) {
 
           {/* Pricing */}
           <div className="bg-white p-6 rounded-xl border border-primary-100 shadow-sm space-y-5">
-            <h2 className="font-bold text-lg border-b border-primary-100 pb-3">Pricing & Shipping</h2>
+            <h2 className="font-bold text-lg border-b border-primary-100 pb-3">Pricing & Promotions</h2>
             <div>
               <label className="block text-sm font-medium mb-2">Price (₹) *</label>
               <input name="price" type="number" step="0.01" required min="0" className="input-field" placeholder="0.00" defaultValue={product?.price || ''} />
@@ -232,6 +232,11 @@ export default function ProductForm({ categories, product }) {
             <div>
               <label className="block text-sm font-medium mb-2">Compare At Price (₹)</label>
               <input name="compareAtPrice" type="number" step="0.01" min="0" className="input-field" placeholder="0.00 (for sale badge)" defaultValue={product?.compare_at_price || ''} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-2">Promo Tag (Deal Badge)</label>
+              <input name="promoTag" className="input-field" placeholder="e.g. SUPER DEALS, LIMITED OFFER" defaultValue={product?.promo_tag || ''} />
+              <p className="text-[10px] text-primary-400 mt-1">Leave empty to hide the badge.</p>
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Shipping Price (₹)</label>
