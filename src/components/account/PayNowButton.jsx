@@ -88,6 +88,10 @@ export default function PayNowButton({ order, className = "" }) {
     return null;
   }
 
+  if (order.order_status === 'cancelled') {
+    return null;
+  }
+
   return (
     <>
       <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
