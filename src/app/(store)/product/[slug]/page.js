@@ -7,6 +7,7 @@ import ProductHighlights from '@/components/product/ProductHighlights';
 import ProductReviews from '@/components/product/ProductReviews';
 import { ShieldCheck, Truck, RotateCcw, CheckCircle2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
+import RazorpayAffordabilityWidget from '@/components/common/RazorpayAffordabilityWidget';
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
@@ -129,6 +130,8 @@ export default async function ProductPage({ params }) {
                   </div>
                 </div>
               )}
+
+              <RazorpayAffordabilityWidget price={product.price} />
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <AddToCartButton product={product} />
