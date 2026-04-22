@@ -53,7 +53,9 @@ export default function RazorpayAffordabilityWidget({ price }) {
           window.dispatchEvent(new Event('razorpay-affordability-loaded'));
         }}
       />
-      <div id="razorpay-affordability-widget" className="my-2"></div>
+      <div className="flex justify-center my-4">
+        <div id="razorpay-affordability-widget" className="w-full"></div>
+      </div>
     </>
   );
 }
