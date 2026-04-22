@@ -30,7 +30,7 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGr
     setIsValidating(true);
     setCouponError(null);
     
-    const res = await validateCoupon(couponCode, subtotal);
+    const res = await validateCoupon(couponCode.toUpperCase(), subtotal);
     if (res.error) {
       setCouponError(res.error);
       setAppliedCoupon(null);
@@ -239,7 +239,7 @@ export default function CheckoutForm({ subtotal, shipping, grandTotal: initialGr
                   <input 
                     type="text" 
                     value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                    onChange={(e) => setCouponCode(e.target.value)}
                     className="input-field pl-10 uppercase" 
                     placeholder="Enter code (e.g. SAVE20)" 
                   />
