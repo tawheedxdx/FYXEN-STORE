@@ -148,15 +148,45 @@ export default function AnnouncementForm({ announcement = null }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-3 py-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-2 border-y border-primary-50">
+          <div className="flex items-center gap-3">
+            <input 
+              type="checkbox" 
+              name="is_sticky" 
+              id="is_sticky"
+              defaultChecked={announcement ? announcement.is_sticky : true}
+              className="w-5 h-5 rounded border-primary-200 text-accent focus:ring-accent"
+            />
+            <div>
+              <label htmlFor="is_sticky" className="text-sm font-bold text-primary-900">Sticky Banner</label>
+              <p className="text-xs text-primary-500">Stays at top while scrolling</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <input 
+              type="checkbox" 
+              name="is_active" 
+              id="is_active"
+              defaultChecked={announcement ? announcement.is_active : true}
+              className="w-5 h-5 rounded border-primary-200 text-accent focus:ring-accent"
+            />
+            <div>
+              <label htmlFor="is_active" className="text-sm font-bold text-primary-900">Active Status</label>
+              <p className="text-xs text-primary-500">Visible to customers</p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-primary-700 mb-1">Display Pages</label>
           <input 
-            type="checkbox" 
-            name="is_active" 
-            id="is_active"
-            defaultChecked={announcement ? announcement.is_active : true}
-            className="w-5 h-5 rounded border-primary-200 text-accent focus:ring-accent"
+            type="text" 
+            name="display_pages" 
+            defaultValue={announcement?.display_pages ? announcement.display_pages.join(', ') : 'all'}
+            className="input-field py-2"
+            placeholder="all, /, /shop, /product/*"
           />
-          <label htmlFor="is_active" className="text-sm font-medium text-primary-900">Active (Visible if within timing)</label>
+          <p className="text-[10px] text-primary-400 mt-1">Use 'all' for every page, or comma-separated paths (e.g. /, /cart)</p>
         </div>
       </div>
 

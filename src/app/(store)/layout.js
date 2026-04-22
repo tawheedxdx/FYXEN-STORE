@@ -1,12 +1,10 @@
-import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
-import AnnouncementBanner from '@/components/layout/AnnouncementBanner';
+import Header from '@/components/layout/Header';
 
 export default function StoreLayout({ children }) {
   return (
     <>
-      <AnnouncementBanner />
-      <Navbar />
+      <Header />
       <main className="flex-1 flex flex-col">{children}</main>
       <Footer />
     </>

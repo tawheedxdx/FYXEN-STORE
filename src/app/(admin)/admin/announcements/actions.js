@@ -14,6 +14,9 @@ export async function upsertAnnouncement(formData) {
   const starts_at = formData.get('starts_at');
   const ends_at = formData.get('ends_at');
   const is_active = formData.get('is_active') === 'on';
+  const is_sticky = formData.get('is_sticky') === 'on';
+  const display_pages_raw = formData.get('display_pages') || 'all';
+  const display_pages = display_pages_raw.split(',').map(p => p.trim()).filter(Boolean);
 
   const announcementData = {
     content,
@@ -23,6 +26,8 @@ export async function upsertAnnouncement(formData) {
     starts_at: starts_at || new Date().toISOString(),
     ends_at: ends_at || null,
     is_active,
+    is_sticky,
+    display_pages,
   };
 
   let error;

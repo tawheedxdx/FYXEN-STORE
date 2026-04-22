@@ -15,7 +15,7 @@ const navLinks = [
   { href: '/category/best-sellers', label: 'Best Sellers' },
 ];
 
-export default function Navbar() {
+export default function Navbar({ isInsideStickyHeader }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
 
@@ -36,7 +36,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full glass-panel">
+      <header className={`${isInsideStickyHeader ? 'w-full' : 'sticky top-0 z-50 w-full'} glass-panel transition-all`}>
         <div className="container-custom h-16 flex items-center justify-between">
           {/* Mobile Menu Toggle */}
           <div className="md:hidden flex items-center">
