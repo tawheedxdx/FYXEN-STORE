@@ -59,8 +59,8 @@ export const metadata = {
     },
   },
   icons: {
-    icon: 'https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/brand-assets/logo.png',
-    apple: 'https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/brand-assets/apple-touch-icon.png',
+    icon: '/logo.png',
+    apple: '/logo.png',
   },
 };
 

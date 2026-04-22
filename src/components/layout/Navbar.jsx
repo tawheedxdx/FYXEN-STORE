@@ -64,8 +64,8 @@ export default function Navbar() {
 
           {/* Logo */}
           <div className="flex-1 md:flex-none flex justify-center md:justify-start">
-            <Link href="/" className="text-2xl font-bold tracking-tighter">
-              Fyxen<span className="text-accent">.</span>
+            <Link href="/" className="flex items-center">
+              <img src="/logo.png" alt="Fyxen Logo" className="h-8 md:h-10 w-auto object-contain" />
             </Link>
           </div>
 
@@ -123,8 +123,8 @@ export default function Navbar() {
             >
               {/* Drawer Header */}
               <div className="h-16 flex items-center justify-between px-5 border-b border-primary-100 dark:border-white/10 shrink-0">
-                <Link href="/" className="text-2xl font-bold tracking-tighter" onClick={() => setMobileMenuOpen(false)}>
-                  Fyxen<span className="text-accent">.</span>
+                <Link href="/" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
+                  <img src="/logo.png" alt="Fyxen Logo" className="h-8 w-auto object-contain" />
                 </Link>
                 <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-primary-500 dark:text-primary-400" aria-label="Close menu">
                   <X className="w-5 h-5" />

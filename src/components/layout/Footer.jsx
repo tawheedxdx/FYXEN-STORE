@@ -9,8 +9,8 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           {/* Brand Info */}
           <div className="col-span-1 md:col-span-1">
-            <Link href="/" className="text-2xl font-bold tracking-tighter mb-4 inline-block">
-              Fyxen<span className="text-accent">.</span>
+            <Link href="/" className="mb-4 inline-block">
+              <img src="/logo.png" alt="Fyxen Logo" className="h-8 w-auto object-contain brightness-0 invert" />
             </Link>
             <p className="text-primary-300 text-sm mb-6 leading-relaxed">
               Elevating everyday living with premium essentials. Crafted for those who appreciate the finer details.
