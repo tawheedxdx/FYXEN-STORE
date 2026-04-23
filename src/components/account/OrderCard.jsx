@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import PayNowButton from './PayNowButton';
 import CancelOrderButton from './CancelOrderButton';
 import Script from 'next/script';
-import { ChevronRight, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { ChevronRight, Clock, CheckCircle2, AlertCircle, Star } from 'lucide-react';
 
 export default function OrderCard({ order }) {
   const router = useRouter();
@@ -48,9 +48,23 @@ export default function OrderCard({ order }) {
                   {order.payment_status}
                 </span>
               )}
-              <span className="text-xs text-primary-400 font-medium">
-                {new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
               </span>
+              {(order.loyalty_points_earned > 0 || order.loyalty_points_redeemed > 0) && (
+                <div className="flex gap-2">
+                  {order.loyalty_points_earned > 0 && (
+                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent/10 text-accent text-[9px] font-black uppercase">
+                      <Star className="w-2.5 h-2.5 fill-current" />
+                      +{order.loyalty_points_earned} Earned
+                    </span>
+                  )}
+                  {order.loyalty_points_redeemed > 0 && (
+                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-red-100 text-red-600 dark:bg-red-500/10 dark:text-red-400 text-[9px] font-black uppercase">
+                      <Star className="w-2.5 h-2.5" />
+                      -{order.loyalty_points_redeemed} Used
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
             <div>

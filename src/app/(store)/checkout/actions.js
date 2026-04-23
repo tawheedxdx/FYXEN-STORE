@@ -97,9 +97,28 @@ export async function createCheckoutSession(formData) {
     }
   }
 
+  // Loyalty Points logic
+  const pointsToRedeem = parseInt(formData.get('pointsToRedeem')) || 0;
+  let loyaltyDiscount = 0;
+
+  if (pointsToRedeem > 0) {
+    // Verify user has enough points
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('loyalty_points')
+      .eq('id', user.id)
+      .single();
+
+    if (profile && profile.loyalty_points >= pointsToRedeem) {
+      loyaltyDiscount = pointsToRedeem * 0.5;
+    } else {
+      return { error: 'Insufficient loyalty points' };
+    }
+  }
+
   // Calculate totals
   const shipping = totalShipping;
-  const grandTotal = Math.max(0, subtotal - discount + shipping);
+  const grandTotal = Math.max(0, subtotal - discount - loyaltyDiscount + shipping);
 
   // Extract address info
   const shippingInfo = {
@@ -122,6 +141,8 @@ export async function createCheckoutSession(formData) {
       user_id: user.id,
       subtotal,
       discount_amount: discount,
+      loyalty_discount: loyaltyDiscount,
+      loyalty_points_redeemed: pointsToRedeem,
       shipping_amount: shipping,
       grand_total: grandTotal,
       payment_status: paymentMethod === 'COD' ? 'cod' : 'pending',
@@ -166,6 +187,14 @@ export async function createCheckoutSession(formData) {
     // Increment coupon usage if any
     if (couponId) {
       await supabaseAdmin.rpc('increment_coupon_usage', { coupon_uuid: couponId });
+    }
+
+    // If loyalty points were used, deduct them now for COD
+    if (pointsToRedeem > 0) {
+      await supabaseAdmin.rpc('increment_loyalty_points', { 
+        user_uuid: user.id, 
+        points_to_add: -pointsToRedeem 
+      });
     }
 
     revalidatePath('/cart');
@@ -242,6 +271,32 @@ export async function verifyPayment(paymentData) {
       .eq('id', orderId)
       .select('coupon_id')
       .single();
+
+    // 1. Fetch order details for points logic
+    const { data: order } = await supabaseAdmin
+      .from('orders')
+      .select('grand_total, user_id, loyalty_points_redeemed')
+      .eq('id', orderId)
+      .single();
+
+    if (order) {
+      // 2. Award points for online payment: 10 points per ₹100
+      const pointsToEarn = Math.floor(order.grand_total / 100) * 10;
+      
+      // 3. Deduct redeemed points AND add earned points in one go
+      const netPointsChange = pointsToEarn - (order.loyalty_points_redeemed || 0);
+      
+      await supabaseAdmin.rpc('increment_loyalty_points', { 
+        user_uuid: order.user_id, 
+        points_to_add: netPointsChange 
+      });
+
+      // Update order with earned points info
+      await supabaseAdmin
+        .from('orders')
+        .update({ loyalty_points_earned: pointsToEarn })
+        .eq('id', orderId);
+    }
 
     // If a coupon was used, increment its count
     if (updatedOrder?.coupon_id) {

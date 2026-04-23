@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CreditCard, Truck, ArrowRight, Check, X } from 'lucide-react';
+import { CreditCard, Truck, ArrowRight, Check, X, Star, Gift } from 'lucide-react';
 
 export default function PaymentSelectionModal({ isOpen, onClose, onConfirm, amount }) {
   const [step, setStep] = useState('choice'); // 'choice' or 'confirm'
@@ -91,8 +91,11 @@ export default function PaymentSelectionModal({ isOpen, onClose, onConfirm, amou
                       <Truck className="w-6 h-6" />
                     </div>
                     <div>
-                      <p className="font-bold">CoD (Cash on Delivery)</p>
+                      <p className="font-bold text-primary-900 dark:text-white">CoD (Cash on Delivery)</p>
                       <p className="text-sm text-primary-500">Pay when you receive the order</p>
+                      <p className="text-[10px] text-primary-400 mt-2 flex items-center gap-1 font-bold italic">
+                        No points earned on CoD
+                      </p>
                     </div>
                   </button>
 
@@ -103,9 +106,23 @@ export default function PaymentSelectionModal({ isOpen, onClose, onConfirm, amou
                     <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-500/20 flex items-center justify-center text-green-600 group-hover:scale-110 transition-transform">
                       <CreditCard className="w-6 h-6" />
                     </div>
-                    <div>
-                      <p className="font-bold">Online Payment</p>
-                      <p className="text-sm text-primary-500">Fast & Secure via Razorpay</p>
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-bold text-primary-900 dark:text-white">Online Payment</p>
+                          <p className="text-sm text-primary-500">Fast & Secure via Razorpay</p>
+                        </div>
+                        <div className="bg-accent/10 text-accent px-2 py-1 rounded-md flex items-center gap-1">
+                          <Star className="w-3 h-3 fill-current" />
+                          <span className="text-[10px] font-black">{Math.floor(amount / 100) * 10}</span>
+                        </div>
+                      </div>
+                      <div className="mt-3 p-2 bg-green-500/10 border border-green-500/20 rounded-lg">
+                        <p className="text-[10px] font-bold text-green-600 dark:text-green-400 flex items-center gap-1.5 uppercase tracking-tight">
+                          <Gift className="w-3 h-3" />
+                          Earn extra benefits!
+                        </p>
+                      </div>
                     </div>
                   </button>
                 </div>

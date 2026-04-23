@@ -4,8 +4,9 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createCheckoutSession, verifyPayment, validateCoupon, deleteOrder } from '@/app/(store)/checkout/actions';
 import Script from 'next/script';
-import { Loader2, Ticket, CheckCircle2, X } from 'lucide-react';
+import { Loader2, Ticket, CheckCircle2, X, Star, CreditCard } from 'lucide-react';
 import PaymentSelectionModal from './PaymentSelectionModal';
+import LoyaltyPointsRedemption from './LoyaltyPointsRedemption';
 
 export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: initialGrandTotal, profile, user }) {
   const router = useRouter();
@@ -23,11 +24,16 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
   const [couponError, setCouponError] = useState(null);
 
   const [currentDiscount, setCurrentDiscount] = useState(0);
+  
+  // Loyalty Points State
+  const [pointsToRedeem, setPointsToRedeem] = useState(0);
+  const [loyaltyDiscount, setLoyaltyDiscount] = useState(0);
+
   const [finalGrandTotal, setFinalGrandTotal] = useState(initialGrandTotal);
 
   useEffect(() => {
-    setFinalGrandTotal(Math.max(0, subtotal - currentDiscount + shipping + tax));
-  }, [subtotal, currentDiscount, shipping, tax]);
+    setFinalGrandTotal(Math.max(0, subtotal - currentDiscount - loyaltyDiscount + shipping + tax));
+  }, [subtotal, currentDiscount, loyaltyDiscount, shipping, tax]);
 
   async function handleApplyCoupon() {
     if (!couponCode) return;
@@ -60,6 +66,11 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
     // Add applied coupon code if any
     if (appliedCoupon) {
       formData.append('couponCode', appliedCoupon.code);
+    }
+
+    // Add loyalty points to redeem
+    if (pointsToRedeem > 0) {
+      formData.append('pointsToRedeem', pointsToRedeem);
     }
 
     setFormDataObj(formData);
@@ -281,6 +292,19 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
           )}
         </div>
 
+        {/* Loyalty Points Redemption Section */}
+        <LoyaltyPointsRedemption 
+          profile={profile}
+          subtotal={subtotal}
+          shipping={shipping}
+          tax={tax}
+          currentDiscount={currentDiscount}
+          onRedeem={(pts) => {
+            setPointsToRedeem(pts);
+            setLoyaltyDiscount(pts * 0.5);
+          }}
+        />
+
         <div className="mt-10 pt-6 border-t border-primary-100 dark:border-white/10">
           <div className="space-y-2 mb-6">
             <div className="flex justify-between text-sm text-primary-500">
@@ -289,8 +313,14 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
             </div>
             {currentDiscount > 0 && (
               <div className="flex justify-between text-sm text-green-600 font-medium">
-                <span>Discount</span>
+                <span>Coupon Discount</span>
                 <span>-₹{currentDiscount.toFixed(2)}</span>
+              </div>
+            )}
+            {loyaltyDiscount > 0 && (
+              <div className="flex justify-between text-sm text-green-600 font-medium">
+                <span>Loyalty Discount</span>
+                <span>-₹{loyaltyDiscount.toFixed(2)}</span>
               </div>
             )}
             {tax > 0 && (
@@ -304,8 +334,18 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
               <span>{shipping === 0 ? 'FREE' : `₹${shipping.toFixed(2)}`}</span>
             </div>
             <div className="flex justify-between text-xl font-bold text-primary-900 dark:text-white pt-2 border-t border-primary-50 dark:border-white/5">
-              <span>Total</span>
+              <span>Total Payable</span>
               <span>₹{finalGrandTotal.toFixed(2)}</span>
+            </div>
+            
+            {/* Earnings Info */}
+            <div className="p-3 bg-accent/5 rounded-xl border border-accent/10 mt-4 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                <Star className="w-4 h-4 fill-current" />
+              </div>
+              <p className="text-[10px] md:text-xs font-bold uppercase tracking-tight text-primary-600 dark:text-primary-300">
+                Choose <span className="text-accent underline decoration-2 underline-offset-4">Online Payment</span> on next step to earn <span className="text-accent">~{Math.floor(finalGrandTotal / 100) * 10} Points</span>
+              </p>
             </div>
           </div>
 

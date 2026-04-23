@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, Package, MapPin, CreditCard, Calendar, Truck, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { ChevronLeft, Package, MapPin, CreditCard, Calendar, Truck, CheckCircle2, Clock, AlertCircle, Star } from 'lucide-react';
 import PayNowButton from '@/components/account/PayNowButton';
 import CancelOrderButton from '@/components/account/CancelOrderButton';
 
@@ -170,10 +170,15 @@ export default async function OrderDetailsPage({ params }) {
                 <span>Subtotal</span>
                 <span>₹{order.subtotal.toLocaleString('en-IN')}</span>
               </div>
-              {order.discount_amount > 0 && (
                 <div className="flex justify-between text-green-400">
-                  <span>Discount</span>
+                  <span>Coupon Discount</span>
                   <span>-₹{order.discount_amount.toLocaleString('en-IN')}</span>
+                </div>
+              )}
+              {order.loyalty_discount > 0 && (
+                <div className="flex justify-between text-green-400">
+                  <span>Loyalty Discount</span>
+                  <span>-₹{order.loyalty_discount.toLocaleString('en-IN')}</span>
                 </div>
               )}
               <div className="flex justify-between text-primary-300">
@@ -184,6 +189,34 @@ export default async function OrderDetailsPage({ params }) {
                 <span className="font-bold text-base">Grand Total</span>
                 <span className="font-bold text-2xl tracking-tight">₹{order.grand_total.toLocaleString('en-IN')}</span>
               </div>
+
+              {/* Loyalty Points Breakdown */}
+              {(order.loyalty_points_earned > 0 || order.loyalty_points_redeemed > 0) && (
+                <div className="mt-6 pt-6 border-t border-white/10 space-y-3">
+                  {order.loyalty_points_earned > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-accent">
+                          <Star className="w-3.5 h-3.5 fill-current" />
+                        </div>
+                        <span className="text-xs font-bold uppercase tracking-tight text-primary-200">Points Earned</span>
+                      </div>
+                      <span className="text-sm font-black text-accent">+{order.loyalty_points_earned}</span>
+                    </div>
+                  )}
+                  {order.loyalty_points_redeemed > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-primary-300">
+                          <Star className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="text-xs font-bold uppercase tracking-tight text-primary-200">Points Used</span>
+                      </div>
+                      <span className="text-sm font-black text-primary-100">-{order.loyalty_points_redeemed}</span>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
