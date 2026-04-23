@@ -50,7 +50,7 @@ export default function OrderCard({ order }) {
               )}
               {(order.loyalty_points_earned > 0 || order.loyalty_points_redeemed > 0) && (
                 <div className="flex gap-2">
-                  {order.loyalty_points_earned > 0 && (
+                  {order.loyalty_points_earned > 0 && order.order_status === 'delivered' && (
                     <span className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-accent/10 text-accent text-[9px] font-black uppercase">
                       <Star className="w-2.5 h-2.5 fill-current" />
                       +{order.loyalty_points_earned} Earned

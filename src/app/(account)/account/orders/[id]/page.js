@@ -194,7 +194,7 @@ export default async function OrderDetailsPage({ params }) {
               {/* Loyalty Points Breakdown */}
               {(order.loyalty_points_earned > 0 || order.loyalty_points_redeemed > 0) && (
                 <div className="mt-6 pt-6 border-t border-white/10 space-y-3">
-                  {order.loyalty_points_earned > 0 && (
+                  {order.loyalty_points_earned > 0 && order.order_status === 'delivered' && (
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-accent">

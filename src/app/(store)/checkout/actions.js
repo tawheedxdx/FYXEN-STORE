@@ -280,18 +280,18 @@ export async function verifyPayment(paymentData) {
       .single();
 
     if (order) {
-      // 2. Award points for online payment: 10 points per ₹100
+      // 2. Calculate potential points to earn (to be awarded on delivery)
       const pointsToEarn = Math.floor(order.grand_total / 100) * 10;
       
-      // 3. Deduct redeemed points AND add earned points in one go
-      const netPointsChange = pointsToEarn - (order.loyalty_points_redeemed || 0);
-      
-      await supabaseAdmin.rpc('increment_loyalty_points', { 
-        user_uuid: order.user_id, 
-        points_to_add: netPointsChange 
-      });
+      // 3. Deduct ONLY redeemed points from user profile
+      if (order.loyalty_points_redeemed > 0) {
+        await supabaseAdmin.rpc('increment_loyalty_points', { 
+          user_uuid: order.user_id, 
+          points_to_add: -order.loyalty_points_redeemed 
+        });
+      }
 
-      // Update order with earned points info
+      // Update order with earned points info (trigger will use this later on delivery)
       await supabaseAdmin
         .from('orders')
         .update({ loyalty_points_earned: pointsToEarn })

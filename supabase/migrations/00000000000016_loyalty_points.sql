@@ -17,3 +17,26 @@ BEGIN
   WHERE id = user_uuid;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Function to award points on delivery
+CREATE OR REPLACE FUNCTION award_points_on_delivery()
+RETURNS trigger AS $$
+BEGIN
+  -- Check if order status changed to 'delivered'
+  IF (NEW.order_status = 'delivered' AND (OLD.order_status IS NULL OR OLD.order_status != 'delivered')) THEN
+    -- Only award if there are points to be earned
+    IF (NEW.loyalty_points_earned > 0) THEN
+      UPDATE profiles
+      SET loyalty_points = COALESCE(loyalty_points, 0) + NEW.loyalty_points_earned
+      WHERE id = NEW.user_id;
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger for awarding points
+CREATE OR REPLACE TRIGGER on_order_delivered
+  AFTER UPDATE ON orders
+  FOR EACH ROW
+  EXECUTE PROCEDURE award_points_on_delivery();
