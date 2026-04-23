@@ -48,7 +48,6 @@ export default function OrderCard({ order }) {
                   {order.payment_status}
                 </span>
               )}
-              </span>
               {(order.loyalty_points_earned > 0 || order.loyalty_points_redeemed > 0) && (
                 <div className="flex gap-2">
                   {order.loyalty_points_earned > 0 && (

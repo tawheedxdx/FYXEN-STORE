@@ -170,6 +170,7 @@ export default async function OrderDetailsPage({ params }) {
                 <span>Subtotal</span>
                 <span>₹{order.subtotal.toLocaleString('en-IN')}</span>
               </div>
+              {order.discount_amount > 0 && (
                 <div className="flex justify-between text-green-400">
                   <span>Coupon Discount</span>
                   <span>-₹{order.discount_amount.toLocaleString('en-IN')}</span>
