@@ -41,8 +41,8 @@ export default async function AdminOrdersPage() {
           <p className="text-primary-500">No orders yet.</p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-primary-100 overflow-hidden shadow-sm">
-          <table className="w-full text-left border-collapse text-sm">
+        <div className="bg-white rounded-xl border border-primary-100 overflow-x-auto shadow-sm">
+          <table className="w-full text-left border-collapse text-sm min-w-[800px]">
             <thead>
               <tr className="bg-primary-50 text-primary-600">
                 <th className="p-4 font-medium">Order</th>

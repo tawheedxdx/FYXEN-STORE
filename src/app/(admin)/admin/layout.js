@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { LayoutDashboard, ShoppingCart, Users, Package, Settings, LogOut, FolderOpen, Tag, MessageSquare, FileText, Megaphone, Layout } from 'lucide-react';
 import { logout } from '@/app/(auth)/actions';
+import AdminMobileMenu from '@/components/admin/AdminMobileMenu';
 
 export const metadata = {
   title: 'Fyxen Admin Panel',
@@ -58,7 +59,8 @@ export default function AdminLayout({ children }) {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Mobile Header */}
-        <header className="h-14 bg-white border-b border-primary-100 flex items-center justify-between px-4 md:hidden shadow-sm">
+        <header className="h-14 bg-white border-b border-primary-100 flex items-center gap-4 px-4 md:hidden shadow-sm">
+          <AdminMobileMenu />
           <span className="font-bold text-lg">Fyxen<span className="text-accent">.</span> Admin</span>
         </header>
 

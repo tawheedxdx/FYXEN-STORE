@@ -41,8 +41,8 @@ export default async function AdminProductsPage() {
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-primary-100 overflow-hidden shadow-sm">
-          <table className="w-full text-left border-collapse">
+        <div className="bg-white rounded-xl border border-primary-100 overflow-x-auto shadow-sm">
+          <table className="w-full text-left border-collapse min-w-[800px]">
             <thead>
               <tr className="bg-primary-50 text-primary-600 text-sm">
                 <th className="p-4 font-medium">Product</th>
