@@ -5,6 +5,7 @@ import BuyNowButton from '@/components/cart/BuyNowButton';
 import ImageGallery from '@/components/product/ImageGallery';
 import ProductHighlights from '@/components/product/ProductHighlights';
 import ProductReviews from '@/components/product/ProductReviews';
+import ShareButton from '@/components/product/ShareButton';
 import { ShieldCheck, Truck, RotateCcw, CheckCircle2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import RazorpayAffordabilityWidget from '@/components/common/RazorpayAffordabilityWidget';
@@ -77,7 +78,10 @@ export default async function ProductPage({ params }) {
               )}
               
               <span className="text-sm font-semibold text-accent mb-2 block">{product.brand || 'Fyxen'}</span>
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-primary-900 dark:text-white">{product.title}</h1>
+              <div className="flex justify-between items-start gap-4 mb-4">
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-primary-900 dark:text-white">{product.title}</h1>
+                <ShareButton title={product.title} text={product.short_description || product.description?.substring(0, 100)} />
+              </div>
               
               <div className="flex items-center gap-4 mb-2">
                 {product.compare_at_price > product.price && (
