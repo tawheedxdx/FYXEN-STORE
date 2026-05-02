@@ -77,20 +77,28 @@ export default function ProductForm({ categories, product }) {
       formData.set('existingSortMax', String(existingImages.length));
     }
 
-    if (isEditing) {
-      const res = await updateProduct(product.id, formData);
-      if (res?.error) {
-        setError(res.error);
-        setIsLoading(false);
+    try {
+      if (isEditing) {
+        const res = await updateProduct(product.id, formData);
+        if (res?.error) {
+          setError(res.error);
+          setIsLoading(false);
+        } else {
+          setSuccess(true);
+          setImagePreviews([]);
+          setIsLoading(false);
+        }
       } else {
-        setSuccess(true);
-        setImagePreviews([]);
-        setIsLoading(false);
+        const res = await createProduct(formData);
+        if (res?.error) {
+          setError(res.error);
+          setIsLoading(false);
+        }
+        // If successful, createProduct handles the redirect
       }
-    } else {
-      // createProduct redirects on success
-      await createProduct(formData);
-      // If we reach here, it means redirect happened — but handle error
+    } catch (err) {
+      console.error('Error saving product:', err);
+      setError(err.message || 'An unexpected error occurred while saving the product. Please try again.');
       setIsLoading(false);
     }
   };
