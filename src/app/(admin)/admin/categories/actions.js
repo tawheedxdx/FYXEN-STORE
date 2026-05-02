@@ -30,14 +30,17 @@ export async function createCategory(formData) {
     const ext = image.name.split('.').pop();
     const fileName = `${slug}-${Date.now()}.${ext}`;
     
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('category-images')
       .upload(fileName, image, { contentType: image.type, upsert: true });
 
-    if (!uploadError) {
-      const { data: urlData } = supabase.storage.from('category-images').getPublicUrl(fileName);
-      imageUrl = urlData.publicUrl;
+    if (uploadError) {
+      console.error('Category image upload error:', uploadError);
+      return { error: 'Failed to upload image: ' + uploadError.message };
     }
+
+    const { data: urlData } = supabase.storage.from('category-images').getPublicUrl(fileName);
+    imageUrl = urlData.publicUrl;
   }
 
   const { error } = await supabase.from('categories').insert({
@@ -70,14 +73,17 @@ export async function updateCategory(categoryId, formData) {
     const ext = image.name.split('.').pop();
     const fileName = `${slug}-${Date.now()}.${ext}`;
     
-    const { data: uploadData, error: uploadError } = await supabase.storage
+    const { error: uploadError } = await supabase.storage
       .from('category-images')
       .upload(fileName, image, { contentType: image.type, upsert: true });
 
-    if (!uploadError) {
-      const { data: urlData } = supabase.storage.from('category-images').getPublicUrl(fileName);
-      imageUrl = urlData.publicUrl;
+    if (uploadError) {
+      console.error('Category image upload error:', uploadError);
+      return { error: 'Failed to upload image: ' + uploadError.message };
     }
+
+    const { data: urlData } = supabase.storage.from('category-images').getPublicUrl(fileName);
+    imageUrl = urlData.publicUrl;
   }
 
   const { error } = await supabase.from('categories').update({

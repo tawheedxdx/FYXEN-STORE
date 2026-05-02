@@ -36,17 +36,23 @@ export default function CategoryManager({ initialCategories }) {
     formData.set('description', newDescription);
     if (newImage) formData.set('image', newImage);
 
-    const res = await createCategory(formData);
-    if (res?.error) {
-      setError(res.error);
-    } else {
-      setSuccess('Category added successfully!');
-      setNewName('');
-      setNewDescription('');
-      setNewImage(null);
-      setTimeout(() => window.location.reload(), 500);
+    try {
+      const res = await createCategory(formData);
+      if (res?.error) {
+        setError(res.error);
+      } else {
+        setSuccess('Category added successfully!');
+        setNewName('');
+        setNewDescription('');
+        setNewImage(null);
+        setTimeout(() => window.location.reload(), 500);
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'An unexpected error occurred.');
+    } finally {
+      setLoading(null);
     }
-    setLoading(null);
   };
 
   const handleUpdate = async (e) => {
@@ -61,15 +67,21 @@ export default function CategoryManager({ initialCategories }) {
     formData.set('existingImageUrl', editingCategory.image_url);
     if (editImage) formData.set('image', editImage);
 
-    const res = await updateCategory(editingCategory.id, formData);
-    if (res?.error) {
-      setError(res.error);
-    } else {
-      setSuccess('Category updated successfully!');
-      setEditingCategory(null);
-      setTimeout(() => window.location.reload(), 500);
+    try {
+      const res = await updateCategory(editingCategory.id, formData);
+      if (res?.error) {
+        setError(res.error);
+      } else {
+        setSuccess('Category updated successfully!');
+        setEditingCategory(null);
+        setTimeout(() => window.location.reload(), 500);
+      }
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'An unexpected error occurred.');
+    } finally {
+      setLoading(null);
     }
-    setLoading(null);
   };
 
   const startEdit = (cat) => {
