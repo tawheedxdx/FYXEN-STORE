@@ -10,6 +10,8 @@ import { getProducts, getCategories } from '@/services/products';
 
 import { createClient } from '@/lib/supabase/server';
 
+export const revalidate = 60;
+
 export default async function HomePage() {
   const supabase = await createClient();
   const [featuredProducts, categories, { data: banners }] = await Promise.all([

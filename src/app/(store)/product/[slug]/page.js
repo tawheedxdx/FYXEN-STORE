@@ -9,6 +9,8 @@ import { ShieldCheck, Truck, RotateCcw, CheckCircle2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import RazorpayAffordabilityWidget from '@/components/common/RazorpayAffordabilityWidget';
 
+export const revalidate = 60;
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const product = await getProductBySlug(slug);

@@ -3,6 +3,8 @@ import ProductCard from '@/components/product/ProductCard';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
+export const revalidate = 60;
+
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const categories = await getCategories();

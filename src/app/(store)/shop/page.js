@@ -7,6 +7,8 @@ export const metadata = {
   title: 'Shop All Products | Fyxen',
 };
 
+export const revalidate = 60;
+
 export default async function ShopPage({ searchParams }) {
   const params = await searchParams;
   const q          = params?.q          || '';
