@@ -1,10 +1,10 @@
 import { unstable_cache } from 'next/cache';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import AnnouncementBannerClient from './AnnouncementBannerClient';
 
 const getActiveAnnouncement = unstable_cache(
   async () => {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const now = new Date().toISOString();
 
     const { data: announcement } = await supabase
@@ -30,4 +30,3 @@ export default async function AnnouncementBanner() {
 
   return <AnnouncementBannerClient announcement={announcement} />;
 }
-

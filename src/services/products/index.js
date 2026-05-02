@@ -1,11 +1,12 @@
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { unstable_cache } from 'next/cache';
 
 // ─── Cached: getCategories ───────────────────────────────────────────────────
-// Revalidated on demand via the 'categories' tag (e.g. after admin updates).
+// Uses service-role client (no cookies) so it's safe inside unstable_cache.
+// Revalidated every 60s or on demand via the 'categories' cache tag.
 export const getCategories = unstable_cache(
   async () => {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     const { data, error } = await supabase
       .from('categories')
       .select('*')
@@ -29,7 +30,7 @@ export async function getProducts(options = {}) {
 
   const fetcher = unstable_cache(
     async () => {
-      const supabase = await createClient();
+      const supabase = createAdminClient();
 
       let query = supabase.from('products').select(`
         id,
@@ -44,12 +45,9 @@ export async function getProducts(options = {}) {
         categories(name, slug)
       `).eq('is_active', true);
 
-      // FIX: Instead of 2 sequential queries (N+1), use a single query
-      // that filters directly via the foreign key from the slug.
+      // FIX: resolve category slug → id in the same client, no extra createClient call
       if (options.categorySlug) {
-        // We join categories inline to match by slug without a separate round-trip
-        const supabase2 = await createClient();
-        const { data: cat } = await supabase2
+        const { data: cat } = await supabase
           .from('categories')
           .select('id')
           .eq('slug', options.categorySlug)
@@ -58,7 +56,7 @@ export async function getProducts(options = {}) {
         if (cat) {
           query = query.eq('category_id', cat.id);
         } else {
-          // Category doesn't exist — return empty immediately, no further round-trip
+          // Category doesn't exist — return empty without a second round-trip
           return [];
         }
       }
@@ -103,11 +101,11 @@ export async function getProducts(options = {}) {
 }
 
 // ─── Cached: getProductBySlug ─────────────────────────────────────────────────
-// Deduplicates the duplicate calls from generateMetadata + page render.
+// Deduplicates the duplicate DB calls from generateMetadata + page render.
 export async function getProductBySlug(slug) {
   const fetcher = unstable_cache(
     async () => {
-      const supabase = await createClient();
+      const supabase = createAdminClient();
       const { data, error } = await supabase
         .from('products')
         .select('*, product_images(*), product_variants(*), categories(name, slug), reviews(*, profiles(full_name))')
