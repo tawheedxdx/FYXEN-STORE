@@ -2,6 +2,7 @@ import { getCart } from '@/app/(store)/cart/actions';
 import CheckoutForm from '@/components/checkout/CheckoutForm';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import CheckoutItemsManager from '@/components/checkout/CheckoutItemsManager';
 
 export const metadata = {
   title: 'Secure Checkout | Fyxen',
@@ -55,20 +56,7 @@ export default async function CheckoutPage() {
             <div className="bg-white dark:bg-black p-5 md:p-6 rounded-xl border border-primary-200 dark:border-white/10 lg:sticky lg:top-24 shadow-sm">
               <h2 className="text-xl font-bold mb-6">Order Summary</h2>
               
-              <div className="space-y-4 mb-6 max-h-[40vh] overflow-y-auto pr-2">
-                {items.map((item) => (
-                  <div key={item.id} className="flex gap-4">
-                    <div className="w-16 h-20 bg-primary-100 rounded overflow-hidden shrink-0">
-                      {item.image && <img src={item.image} alt={item.title} className="w-full h-full object-cover" />}
-                    </div>
-                    <div className="flex-1 text-sm">
-                      <p className="font-medium line-clamp-2">{item.title}</p>
-                      <p className="text-primary-500">Qty: {item.quantity}</p>
-                      <p className="font-semibold mt-1">₹{item.price} {item.taxRate > 0 && <span className="text-[10px] text-primary-400 font-normal">+ GST</span>}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <CheckoutItemsManager items={items} />
               
               <div className="space-y-3 text-sm mb-6 border-t border-primary-100 dark:border-white/10 pt-6">
                 <div className="flex justify-between">

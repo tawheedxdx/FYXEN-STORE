@@ -107,6 +107,7 @@ export async function addToCart(productId, quantity = 1) {
   }
 
   revalidatePath('/cart');
+  revalidatePath('/checkout');
   return { success: true };
 }
 
@@ -124,6 +125,7 @@ export async function updateCartItemQuantity(cartItemId, quantity) {
     .eq('id', cartItemId);
 
   revalidatePath('/cart');
+  revalidatePath('/checkout');
   return { success: true };
 }
 
@@ -135,5 +137,6 @@ export async function removeCartItem(cartItemId) {
     .eq('id', cartItemId);
 
   revalidatePath('/cart');
+  revalidatePath('/checkout');
   return { success: true };
 }
