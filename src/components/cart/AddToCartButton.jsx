@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { ShoppingBag, Minus, Plus } from 'lucide-react';
 import { addToCart } from '@/app/(store)/cart/actions';
 import { useRouter } from 'next/navigation';
@@ -9,6 +9,7 @@ export default function AddToCartButton({ product }) {
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const [error, setError] = useState(null);
 
   const handleDecrease = () => setQuantity(q => Math.max(1, q - 1));
@@ -26,11 +27,13 @@ export default function AddToCartButton({ product }) {
       } else {
         setError(res.error);
       }
+      setIsAdding(false);
     } else {
-      router.push('/cart');
+      startTransition(() => {
+        router.push('/cart');
+      });
+      setIsAdding(false);
     }
-    
-    setIsAdding(false);
   };
 
   const isOutOfStock = product.stock_quantity <= 0;
@@ -59,10 +62,10 @@ export default function AddToCartButton({ product }) {
         
         <button 
           onClick={handleAddToCart}
-          disabled={isOutOfStock || isAdding}
+          disabled={isOutOfStock || isAdding || isPending}
           className="btn-primary flex-1 h-12 px-2 text-xs md:text-sm whitespace-nowrap"
         >
-          {isAdding ? 'Adding...' : (
+          {isAdding || isPending ? 'Adding...' : (
             <span className="flex items-center justify-center gap-1.5 font-bold">
               <ShoppingBag className="w-4 h-4" />
               {isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
