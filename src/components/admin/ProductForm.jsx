@@ -87,6 +87,7 @@ export default function ProductForm({ categories, product }) {
           setSuccess(true);
           setImagePreviews([]);
           setIsLoading(false);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       } else {
         const res = await createProduct(formData);
@@ -94,9 +95,13 @@ export default function ProductForm({ categories, product }) {
           setError(res.error);
           setIsLoading(false);
         }
-        // If successful, createProduct handles the redirect
+        // If successful, createProduct handles the redirect via NEXT_REDIRECT error
       }
     } catch (err) {
+      // Next.js redirect() throws an error, we must re-throw it so Next.js can handle the redirect
+      if (err.message === 'NEXT_REDIRECT' || err.digest?.includes('NEXT_REDIRECT')) {
+        throw err;
+      }
       console.error('Error saving product:', err);
       setError(err.message || 'An unexpected error occurred while saving the product. Please try again.');
       setIsLoading(false);

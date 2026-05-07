@@ -32,7 +32,7 @@ export async function createProduct(formData) {
   const stockQuantity = parseInt(formData.get('stockQuantity') || '0');
   const categoryId = formData.get('categoryId') || null;
   const featured = formData.get('featured') === 'true';
-  const isActive = formData.get('isActive') !== 'false';
+  const isActive = formData.get('isActive') === 'true';
   const seoTitle = formData.get('seoTitle') || title;
   const seoDescription = formData.get('seoDescription') || shortDescription;
 
@@ -71,32 +71,33 @@ export async function createProduct(formData) {
     return { error: productError.message };
   }
 
-  // Handle image uploads
+  // Handle image uploads (Parallel)
   const images = formData.getAll('images');
   const validImages = images.filter(img => img && img.size > 0);
 
-  for (let i = 0; i < validImages.length; i++) {
-    const img = validImages[i];
-    const ext = img.name.split('.').pop();
-    const fileName = `${product.id}/${Date.now()}-${i}.${ext}`;
+  if (validImages.length > 0) {
+    await Promise.all(validImages.map(async (img, i) => {
+      const ext = img.name.split('.').pop();
+      const fileName = `${product.id}/${Date.now()}-${i}.${ext}`;
 
-    const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('product-images')
-      .upload(fileName, img, { contentType: img.type, upsert: false });
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, img, { contentType: img.type, upsert: false });
 
-    if (uploadError) {
-      console.error('Image upload error:', uploadError);
-      continue;
-    }
+      if (uploadError) {
+        console.error('Image upload error:', uploadError);
+        return;
+      }
 
-    const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
+      const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
 
-    await supabase.from('product_images').insert({
-      product_id: product.id,
-      image_url: urlData.publicUrl,
-      alt_text: title,
-      sort_order: i,
-    });
+      await supabase.from('product_images').insert({
+        product_id: product.id,
+        image_url: urlData.publicUrl,
+        alt_text: title,
+        sort_order: i,
+      });
+    }));
   }
 
   revalidatePath('/admin/products');
@@ -111,6 +112,10 @@ export async function updateProduct(productId, formData) {
 
   const title = formData.get('title');
   const slug = formData.get('slug') || slugify(title);
+  const featured = formData.get('featured') === 'true';
+  const isActive = formData.get('isActive') === 'true';
+  const seoTitle = formData.get('seoTitle') || title;
+  const seoDescription = formData.get('seoDescription') || formData.get('shortDescription');
   const highlights = formData.get('highlights') ? JSON.parse(formData.get('highlights')) : [];
   const shippingPrice = parseFloat(formData.get('shippingPrice') || '0');
   const taxRate = parseFloat(formData.get('taxRate') || '0');
@@ -128,10 +133,10 @@ export async function updateProduct(productId, formData) {
     tax_rate: taxRate,
     stock_quantity: parseInt(formData.get('stockQuantity') || '0'),
     category_id: formData.get('categoryId') || null,
-    featured: formData.get('featured') === 'true',
-    is_active: formData.get('isActive') !== 'false',
-    seo_title: formData.get('seoTitle') || title,
-    seo_description: formData.get('seoDescription'),
+    featured,
+    is_active: isActive,
+    seo_title: seoTitle,
+    seo_description: seoDescription,
     highlights,
     promo_tag: formData.get('promoTag') || null,
     updated_at: new Date().toISOString(),
@@ -139,31 +144,35 @@ export async function updateProduct(productId, formData) {
 
   if (error) return { error: error.message };
 
-  // Handle new image uploads
+  // Handle new image uploads (Parallel)
   const images = formData.getAll('images');
   const validImages = images.filter(img => img && img.size > 0);
   
   const existingSortMax = formData.get('existingSortMax') ? parseInt(formData.get('existingSortMax')) : 0;
 
-  for (let i = 0; i < validImages.length; i++) {
-    const img = validImages[i];
-    const ext = img.name.split('.').pop();
-    const fileName = `${productId}/${Date.now()}-${i}.${ext}`;
+  if (validImages.length > 0) {
+    await Promise.all(validImages.map(async (img, i) => {
+      const ext = img.name.split('.').pop();
+      const fileName = `${productId}/${Date.now()}-${i}.${ext}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('product-images')
-      .upload(fileName, img, { contentType: img.type, upsert: false });
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, img, { contentType: img.type, upsert: false });
 
-    if (uploadError) continue;
+      if (uploadError) {
+        console.error('Update image upload error:', uploadError);
+        return;
+      }
 
-    const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
+      const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
 
-    await supabase.from('product_images').insert({
-      product_id: productId,
-      image_url: urlData.publicUrl,
-      alt_text: title,
-      sort_order: existingSortMax + i + 1,
-    });
+      await supabase.from('product_images').insert({
+        product_id: productId,
+        image_url: urlData.publicUrl,
+        alt_text: title,
+        sort_order: existingSortMax + i + 1,
+      });
+    }));
   }
 
   revalidatePath('/admin/products');
