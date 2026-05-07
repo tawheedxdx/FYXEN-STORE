@@ -48,7 +48,7 @@ export async function createCategory(formData) {
     slug,
     description,
     image_url: imageUrl,
-    is_active: true,
+    is_active: formData.get('isActive') === 'true' || formData.get('isActive') === null,
   });
 
   if (error) return { error: error.message };
@@ -91,7 +91,7 @@ export async function updateCategory(categoryId, formData) {
     slug,
     description: formData.get('description'),
     image_url: imageUrl,
-    is_active: formData.get('isActive') !== 'false',
+    is_active: formData.get('isActive') === 'true',
     updated_at: new Date().toISOString(),
   }).eq('id', categoryId);
 

@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createCategory, updateCategory, deleteCategory } from '@/app/(admin)/admin/categories/actions';
 import { Plus, Trash2, Loader2, FolderOpen, Check, Edit2, X, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 export default function CategoryManager({ initialCategories }) {
+  const router = useRouter();
   const [categories, setCategories] = useState(initialCategories);
   const [editingCategory, setEditingCategory] = useState(null);
   const [loading, setLoading] = useState(null);
@@ -19,11 +21,32 @@ export default function CategoryManager({ initialCategories }) {
   const [newName, setNewName] = useState('');
   const [newDescription, setNewDescription] = useState('');
   const [newImage, setNewImage] = useState(null);
+  const [newIsActive, setNewIsActive] = useState(true);
 
   // Edit Form State
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [editImage, setEditImage] = useState(null);
+  const [editIsActive, setEditIsActive] = useState(true);
+
+  // Preview URLs
+  const [previewUrl, setPreviewUrl] = useState(null);
+
+  useEffect(() => {
+    if (!editingCategory && newImage) {
+      const url = URL.createObjectURL(newImage);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else if (editingCategory && editImage) {
+      const url = URL.createObjectURL(editImage);
+      setPreviewUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else if (editingCategory && !editImage) {
+      setPreviewUrl(editingCategory.image_url);
+    } else {
+      setPreviewUrl(null);
+    }
+  }, [newImage, editImage, editingCategory]);
 
   const handleAdd = async (e) => {
     e.preventDefault();
@@ -34,6 +57,7 @@ export default function CategoryManager({ initialCategories }) {
     formData.set('name', newName);
     formData.set('slug', slugify(newName));
     formData.set('description', newDescription);
+    formData.set('isActive', String(newIsActive));
     if (newImage) formData.set('image', newImage);
 
     try {
@@ -45,7 +69,9 @@ export default function CategoryManager({ initialCategories }) {
         setNewName('');
         setNewDescription('');
         setNewImage(null);
-        setTimeout(() => window.location.reload(), 500);
+        setNewIsActive(true);
+        router.refresh();
+        setTimeout(() => setSuccess(false), 3000);
       }
     } catch (err) {
       console.error(err);
@@ -64,6 +90,7 @@ export default function CategoryManager({ initialCategories }) {
     formData.set('name', editName);
     formData.set('slug', slugify(editName));
     formData.set('description', editDescription);
+    formData.set('isActive', String(editIsActive));
     formData.set('existingImageUrl', editingCategory.image_url);
     if (editImage) formData.set('image', editImage);
 
@@ -74,7 +101,8 @@ export default function CategoryManager({ initialCategories }) {
       } else {
         setSuccess('Category updated successfully!');
         setEditingCategory(null);
-        setTimeout(() => window.location.reload(), 500);
+        router.refresh();
+        setTimeout(() => setSuccess(false), 3000);
       }
     } catch (err) {
       console.error(err);
@@ -89,6 +117,7 @@ export default function CategoryManager({ initialCategories }) {
     setEditName(cat.name);
     setEditDescription(cat.description || '');
     setEditImage(null);
+    setEditIsActive(cat.is_active ?? true);
     setError(null);
     setSuccess(false);
   };
@@ -101,6 +130,7 @@ export default function CategoryManager({ initialCategories }) {
       setError(res.error);
     } else {
       setCategories(prev => prev.filter(c => c.id !== categoryId));
+      router.refresh();
     }
     setLoading(null);
   };
@@ -110,7 +140,7 @@ export default function CategoryManager({ initialCategories }) {
       {/* Form Section */}
       <div className="space-y-6">
         <div className="bg-white p-6 rounded-xl border border-primary-100 shadow-sm">
-          <h2 className="font-bold text-lg mb-6">
+          <h2 className="font-bold text-lg mb-6 text-primary-900">
             {editingCategory ? `Edit: ${editingCategory.name}` : 'Add New Category'}
           </h2>
 
@@ -123,7 +153,7 @@ export default function CategoryManager({ initialCategories }) {
 
           <form onSubmit={editingCategory ? handleUpdate : handleAdd} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium mb-2">Category Name *</label>
+              <label className="block text-sm font-medium mb-2 text-primary-700">Category Name *</label>
               <input
                 type="text"
                 required
@@ -135,7 +165,7 @@ export default function CategoryManager({ initialCategories }) {
             </div>
             
             <div>
-              <label className="block text-sm font-medium mb-2">Description</label>
+              <label className="block text-sm font-medium mb-2 text-primary-700">Description</label>
               <textarea
                 value={editingCategory ? editDescription : newDescription}
                 onChange={e => editingCategory ? setEditDescription(e.target.value) : setNewDescription(e.target.value)}
@@ -146,38 +176,62 @@ export default function CategoryManager({ initialCategories }) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-2">Cover Image</label>
+              <label className="block text-sm font-medium mb-2 text-primary-700">Cover Image</label>
               <div className="flex flex-col gap-4">
-                {(editingCategory?.image_url || (editingCategory ? editImage : newImage)) && (
-                  <div className="relative w-full h-32 bg-primary-50 rounded-lg overflow-hidden border border-primary-100">
+                {previewUrl && (
+                  <div className="relative w-full h-32 bg-primary-50 rounded-lg overflow-hidden border border-primary-100 shadow-inner">
                     <Image
-                      src={editingCategory && !editImage ? editingCategory.image_url : URL.createObjectURL(editingCategory ? editImage : newImage)}
+                      src={previewUrl}
                       alt="Preview"
                       fill
                       className="object-cover"
                     />
                   </div>
                 )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={e => editingCategory ? setEditImage(e.target.files[0]) : setNewImage(e.target.files[0])}
-                  className="block w-full text-sm text-primary-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer"
-                />
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    id="category-image"
+                    onChange={e => editingCategory ? setEditImage(e.target.files[0]) : setNewImage(e.target.files[0])}
+                    className="hidden"
+                  />
+                  <label 
+                    htmlFor="category-image"
+                    className="flex items-center justify-center gap-2 w-full py-3 border-2 border-dashed border-primary-200 rounded-lg text-primary-500 hover:border-primary-400 hover:bg-primary-50 transition-all cursor-pointer text-sm font-medium"
+                  >
+                    <ImageIcon className="w-4 h-4" />
+                    {(editingCategory ? editImage : newImage) ? 'Change Image' : 'Select Category Image'}
+                  </label>
+                </div>
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex items-center gap-2 py-2">
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer"
+                  checked={editingCategory ? editIsActive : newIsActive}
+                  onChange={e => editingCategory ? setEditIsActive(e.target.checked) : setNewIsActive(e.target.checked)}
+                />
+                <div className="w-10 h-5 bg-primary-200 rounded-full peer peer-checked:bg-green-500 transition-colors"></div>
+                <span className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform"></span>
+              </label>
+              <span className="text-sm font-medium text-primary-700">Active (visible in store)</span>
+            </div>
+
+            <div className="flex gap-3 pt-2">
               <button 
                 type="submit" 
                 disabled={loading} 
-                className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl font-bold transition-all shadow-sm ${
                   editingCategory 
-                    ? 'bg-primary-900 text-white hover:bg-black' 
-                    : 'bg-accent text-primary-900 hover:bg-primary-900 hover:text-white'
-                }`}
+                    ? 'bg-primary-900 text-white hover:bg-black shadow-primary-200' 
+                    : 'bg-accent text-primary-900 hover:bg-primary-900 hover:text-white shadow-accent/20'
+                } disabled:opacity-50`}
               >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : editingCategory ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : editingCategory ? <Check className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
                 {editingCategory ? 'Update Category' : 'Add Category'}
               </button>
               
@@ -185,7 +239,7 @@ export default function CategoryManager({ initialCategories }) {
                 <button 
                   type="button" 
                   onClick={() => setEditingCategory(null)}
-                  className="p-2.5 bg-primary-50 text-primary-900 rounded-lg hover:bg-primary-100 transition-all"
+                  className="p-3 bg-primary-50 text-primary-900 rounded-xl hover:bg-primary-100 transition-all border border-primary-100"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -197,43 +251,51 @@ export default function CategoryManager({ initialCategories }) {
 
       {/* Existing Categories */}
       <div className="bg-white p-6 rounded-xl border border-primary-100 shadow-sm">
-        <h2 className="font-bold text-lg mb-6">Existing Categories ({categories.length})</h2>
+        <h2 className="font-bold text-lg mb-6 text-primary-900 flex items-center gap-2">
+          <FolderOpen className="w-5 h-5 text-accent" />
+          Existing Categories ({categories.length})
+        </h2>
 
         {categories.length === 0 ? (
-          <div className="text-center py-12">
+          <div className="text-center py-12 bg-primary-50/50 rounded-xl border border-dashed border-primary-100">
             <FolderOpen className="w-12 h-12 text-primary-200 mx-auto mb-3" />
-            <p className="text-primary-500">No categories yet.</p>
+            <p className="text-primary-500 font-medium">No categories yet.</p>
           </div>
         ) : (
-          <div className="divide-y divide-primary-100">
+          <div className="space-y-3">
             {categories.map(cat => (
-              <div key={cat.id} className={`py-4 flex items-center justify-between gap-4 transition-all ${editingCategory?.id === cat.id ? 'bg-primary-50 -mx-6 px-6' : ''}`}>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-primary-100 rounded-lg overflow-hidden relative flex-shrink-0">
+              <div key={cat.id} className={`p-4 rounded-xl border transition-all flex items-center justify-between gap-4 ${editingCategory?.id === cat.id ? 'border-accent bg-accent/5 ring-1 ring-accent' : 'border-primary-100 hover:border-primary-200 hover:bg-primary-50/50'}`}>
+                <div className="flex items-center gap-4 overflow-hidden">
+                  <div className="w-14 h-14 bg-primary-100 rounded-lg overflow-hidden relative flex-shrink-0 shadow-sm border border-primary-200">
                     {cat.image_url ? (
                       <Image src={cat.image_url} alt={cat.name} fill className="object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-primary-300">
-                        <ImageIcon className="w-5 h-5" />
+                        <ImageIcon className="w-6 h-6" />
                       </div>
                     )}
                   </div>
-                  <div>
-                    <p className="font-bold text-primary-900">{cat.name}</p>
-                    <p className="text-xs text-primary-400">/category/{cat.slug}</p>
+                  <div className="overflow-hidden">
+                    <div className="flex items-center gap-2">
+                      <p className="font-bold text-primary-900 truncate">{cat.name}</p>
+                      {!cat.is_active && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded uppercase font-bold">Hidden</span>}
+                    </div>
+                    <p className="text-xs text-primary-400 truncate">/category/{cat.slug}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
                   <button
                     onClick={() => startEdit(cat)}
-                    className="p-2 text-primary-400 hover:text-primary-900 hover:bg-white rounded-md transition-colors"
+                    className="p-2 text-primary-400 hover:text-primary-900 hover:bg-white rounded-lg transition-all"
+                    title="Edit"
                   >
                     <Edit2 className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(cat.id, cat.name)}
                     disabled={loading === cat.id}
-                    className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors"
+                    className="p-2 text-primary-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                    title="Delete"
                   >
                     {loading === cat.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                   </button>
