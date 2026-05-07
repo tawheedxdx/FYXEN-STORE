@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 
 async function checkAdmin(supabase) {
@@ -17,6 +18,8 @@ function slugify(text) {
 
 export async function createCategory(formData) {
   const supabase = await createClient();
+  const adminSupabase = createAdminClient();
+  
   const user = await checkAdmin(supabase);
   if (!user) return { error: 'Unauthorized' };
 
@@ -30,7 +33,7 @@ export async function createCategory(formData) {
     const ext = image.name.split('.').pop();
     const fileName = `${slug}-${Date.now()}.${ext}`;
     
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await adminSupabase.storage
       .from('category-images')
       .upload(fileName, image, { contentType: image.type, upsert: true });
 
@@ -39,11 +42,11 @@ export async function createCategory(formData) {
       return { error: 'Failed to upload image: ' + uploadError.message };
     }
 
-    const { data: urlData } = supabase.storage.from('category-images').getPublicUrl(fileName);
+    const { data: urlData } = adminSupabase.storage.from('category-images').getPublicUrl(fileName);
     imageUrl = urlData.publicUrl;
   }
 
-  const { error } = await supabase.from('categories').insert({
+  const { error } = await adminSupabase.from('categories').insert({
     name,
     slug,
     description,
@@ -60,6 +63,8 @@ export async function createCategory(formData) {
 
 export async function updateCategory(categoryId, formData) {
   const supabase = await createClient();
+  const adminSupabase = createAdminClient();
+
   const user = await checkAdmin(supabase);
   if (!user) return { error: 'Unauthorized' };
 
@@ -73,7 +78,7 @@ export async function updateCategory(categoryId, formData) {
     const ext = image.name.split('.').pop();
     const fileName = `${slug}-${Date.now()}.${ext}`;
     
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await adminSupabase.storage
       .from('category-images')
       .upload(fileName, image, { contentType: image.type, upsert: true });
 
@@ -82,11 +87,11 @@ export async function updateCategory(categoryId, formData) {
       return { error: 'Failed to upload image: ' + uploadError.message };
     }
 
-    const { data: urlData } = supabase.storage.from('category-images').getPublicUrl(fileName);
+    const { data: urlData } = adminSupabase.storage.from('category-images').getPublicUrl(fileName);
     imageUrl = urlData.publicUrl;
   }
 
-  const { error } = await supabase.from('categories').update({
+  const { error } = await adminSupabase.from('categories').update({
     name,
     slug,
     description: formData.get('description'),

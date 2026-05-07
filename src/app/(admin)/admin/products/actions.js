@@ -1,6 +1,7 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
@@ -18,6 +19,8 @@ function slugify(text) {
 
 export async function createProduct(formData) {
   const supabase = await createClient();
+  const adminSupabase = createAdminClient();
+  
   const user = await checkAdmin(supabase);
   if (!user) return { error: 'Unauthorized' };
 
@@ -41,7 +44,7 @@ export async function createProduct(formData) {
   const taxRate = parseFloat(formData.get('taxRate') || '0');
   
   // Insert product
-  const { data: product, error: productError } = await supabase
+  const { data: product, error: productError } = await adminSupabase
     .from('products')
     .insert({
       title,
@@ -80,7 +83,7 @@ export async function createProduct(formData) {
       const ext = img.name.split('.').pop();
       const fileName = `${product.id}/${Date.now()}-${i}.${ext}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await adminSupabase.storage
         .from('product-images')
         .upload(fileName, img, { contentType: img.type, upsert: false });
 
@@ -89,9 +92,9 @@ export async function createProduct(formData) {
         return;
       }
 
-      const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
+      const { data: urlData } = adminSupabase.storage.from('product-images').getPublicUrl(fileName);
 
-      await supabase.from('product_images').insert({
+      await adminSupabase.from('product_images').insert({
         product_id: product.id,
         image_url: urlData.publicUrl,
         alt_text: title,
@@ -107,6 +110,8 @@ export async function createProduct(formData) {
 
 export async function updateProduct(productId, formData) {
   const supabase = await createClient();
+  const adminSupabase = createAdminClient();
+  
   const user = await checkAdmin(supabase);
   if (!user) return { error: 'Unauthorized' };
 
@@ -120,7 +125,7 @@ export async function updateProduct(productId, formData) {
   const shippingPrice = parseFloat(formData.get('shippingPrice') || '0');
   const taxRate = parseFloat(formData.get('taxRate') || '0');
 
-  const { error } = await supabase.from('products').update({
+  const { error } = await adminSupabase.from('products').update({
     title,
     slug,
     short_description: formData.get('shortDescription'),
@@ -155,7 +160,7 @@ export async function updateProduct(productId, formData) {
       const ext = img.name.split('.').pop();
       const fileName = `${productId}/${Date.now()}-${i}.${ext}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError } = await adminSupabase.storage
         .from('product-images')
         .upload(fileName, img, { contentType: img.type, upsert: false });
 
@@ -164,9 +169,9 @@ export async function updateProduct(productId, formData) {
         return;
       }
 
-      const { data: urlData } = supabase.storage.from('product-images').getPublicUrl(fileName);
+      const { data: urlData } = adminSupabase.storage.from('product-images').getPublicUrl(fileName);
 
-      await supabase.from('product_images').insert({
+      await adminSupabase.from('product_images').insert({
         product_id: productId,
         image_url: urlData.publicUrl,
         alt_text: title,
@@ -182,10 +187,12 @@ export async function updateProduct(productId, formData) {
 
 export async function deleteProduct(productId) {
   const supabase = await createClient();
+  const adminSupabase = createAdminClient();
+  
   const user = await checkAdmin(supabase);
   if (!user) return { error: 'Unauthorized' };
 
-  const { error } = await supabase.from('products').delete().eq('id', productId);
+  const { error } = await adminSupabase.from('products').delete().eq('id', productId);
   if (error) return { error: error.message };
 
   revalidatePath('/admin/products');
@@ -195,17 +202,19 @@ export async function deleteProduct(productId) {
 
 export async function deleteProductImage(imageId, imageUrl) {
   const supabase = await createClient();
+  const adminSupabase = createAdminClient();
+  
   const user = await checkAdmin(supabase);
   if (!user) return { error: 'Unauthorized' };
 
   // Delete from storage
   const urlParts = imageUrl.split('/product-images/');
   if (urlParts[1]) {
-    await supabase.storage.from('product-images').remove([decodeURIComponent(urlParts[1])]);
+    await adminSupabase.storage.from('product-images').remove([decodeURIComponent(urlParts[1])]);
   }
 
   // Delete from DB
-  const { error } = await supabase.from('product_images').delete().eq('id', imageId);
+  const { error } = await adminSupabase.from('product_images').delete().eq('id', imageId);
   if (error) return { error: error.message };
 
   revalidatePath('/admin/products');
@@ -214,10 +223,12 @@ export async function deleteProductImage(imageId, imageUrl) {
 
 export async function toggleProductStatus(productId, isActive) {
   const supabase = await createClient();
+  const adminSupabase = createAdminClient();
+  
   const user = await checkAdmin(supabase);
   if (!user) return { error: 'Unauthorized' };
 
-  const { error } = await supabase.from('products').update({ is_active: isActive, updated_at: new Date().toISOString() }).eq('id', productId);
+  const { error } = await adminSupabase.from('products').update({ is_active: isActive, updated_at: new Date().toISOString() }).eq('id', productId);
   if (error) return { error: error.message };
 
   revalidatePath('/admin/products');
