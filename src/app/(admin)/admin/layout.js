@@ -1,5 +1,5 @@
-import Link from 'next/link';
-import { LayoutDashboard, ShoppingCart, Users, Package, Settings, LogOut, FolderOpen, Tag, MessageSquare, FileText, Megaphone, Layout } from 'lucide-react';
+import { createClient } from '@/lib/supabase/server';
+import { LayoutDashboard, ShoppingCart, Users, Package, Settings, LogOut, FolderOpen, Tag, MessageSquare, FileText, Megaphone, Layout, AlertTriangle } from 'lucide-react';
 import { logout } from '@/app/(auth)/actions';
 import AdminMobileMenu from '@/components/admin/AdminMobileMenu';
 
@@ -7,7 +7,12 @@ export const metadata = {
   title: 'Fyxen Admin Panel',
 };
 
-export default function AdminLayout({ children }) {
+export default async function AdminLayout({ children }) {
+  const supabase = await createClient();
+  const { data: settings } = await supabase.from('settings').select('site_mode').single();
+  const isMaintenance = settings?.site_mode === 'maintenance';
+  const isOffline = settings?.site_mode === 'offline';
+
   return (
     <div className="flex h-screen bg-primary-50">
       {/* Sidebar */}
@@ -63,6 +68,20 @@ export default function AdminLayout({ children }) {
           <AdminMobileMenu />
           <span className="font-bold text-lg">Fyxen<span className="text-accent">.</span> Admin</span>
         </header>
+
+        {/* Status Banners */}
+        {isMaintenance && (
+          <div className="bg-amber-500 text-white py-2 px-4 text-center text-xs font-bold flex items-center justify-center gap-2">
+            <AlertTriangle className="w-3 h-3" />
+            MAINTENANCE MODE ACTIVE - Customers see a maintenance notice.
+          </div>
+        )}
+        {isOffline && (
+          <div className="bg-red-600 text-white py-2 px-4 text-center text-xs font-bold flex items-center justify-center gap-2">
+            <AlertTriangle className="w-3 h-3" />
+            STORE IS OFFLINE - No one can access the storefront.
+          </div>
+        )}
 
         {/* Page Content */}
         <div className="flex-1 overflow-y-auto p-6 md:p-8 lg:p-10">

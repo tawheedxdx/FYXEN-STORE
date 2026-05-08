@@ -45,6 +45,28 @@ export default function AdminSettingsForm({ settings }) {
         </div>
       </div>
 
+      {/* Website Status */}
+      <div className="bg-white p-6 rounded-xl border border-primary-100 shadow-sm space-y-5">
+        <h2 className="font-bold text-lg border-b border-primary-100 pb-3 flex items-center gap-2">
+          Website Status
+        </h2>
+        <div>
+          <label className="block text-sm font-medium mb-2">Store Mode</label>
+          <select 
+            name="siteMode" 
+            className="input-field" 
+            defaultValue={settings?.site_mode || 'online'}
+          >
+            <option value="online">Online (Default - Publicly accessible)</option>
+            <option value="maintenance">Maintenance Mode (Accessible to Admins only)</option>
+            <option value="offline">Offline (Not accessible to anyone)</option>
+          </select>
+          <p className="text-xs text-primary-400 mt-2">
+            * Maintenance mode allows you to work on the store while showing a notice to customers.
+          </p>
+        </div>
+      </div>
+
       {/* Contact Info */}
       <div className="bg-white p-6 rounded-xl border border-primary-100 shadow-sm space-y-5">
         <h2 className="font-bold text-lg border-b border-primary-100 pb-3">Contact & Support</h2>

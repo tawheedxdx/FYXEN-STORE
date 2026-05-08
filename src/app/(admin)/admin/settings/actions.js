@@ -20,6 +20,7 @@ export async function upsertSettings(formData) {
     support_phone: formData.get('supportPhone'),
     address: formData.get('address'),
     gst_number: formData.get('gstNumber'),
+    site_mode: formData.get('siteMode') || 'online',
     updated_at: new Date().toISOString(),
   };
 
