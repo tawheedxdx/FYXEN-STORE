@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createCheckoutSession, verifyPayment, validateCoupon, deleteOrder } from '@/app/(store)/checkout/actions';
 import Script from 'next/script';
-import { Loader2, Ticket, CheckCircle2, X, Star, CreditCard } from 'lucide-react';
+import { Loader2, Ticket, CheckCircle2, X, Star, CreditCard, Wallet } from 'lucide-react';
 import PaymentSelectionModal from './PaymentSelectionModal';
 import WalletRedemption from './WalletRedemption';
 

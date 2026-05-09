@@ -52,7 +52,7 @@ export async function createWalletRechargeOrder(amount) {
     };
   } catch (error) {
     console.error('Wallet Recharge Error:', error);
-    return { error: 'Failed to initialize recharge payment.' };
+    return { error: `Failed to initialize recharge payment: ${error.message || 'Unknown error'}` };
   }
 }
 
