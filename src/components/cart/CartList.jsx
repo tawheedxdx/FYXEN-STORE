@@ -8,15 +8,19 @@ import { updateCartItemQuantity, removeCartItem } from '@/app/(store)/cart/actio
 export default function CartList({ initialItems }) {
   const [items, setItems] = useState(initialItems);
   const [updating, setUpdating] = useState(null);
+  const [error, setError] = useState(null);
 
   const handleUpdate = async (id, currentQty, change) => {
+    setError(null);
     const newQty = currentQty + change;
     if (newQty < 1) return;
     
     setUpdating(id);
     const res = await updateCartItemQuantity(id, newQty);
     if (res?.success) {
-      setItems(items.map(item => item.id === id ? { ...item, quantity: newQty } : item));
+      setItems(items.map(item => item.id === id ? { ...item, quantity: newQty, isStockError: false } : item));
+    } else if (res?.error) {
+      setError(res.error);
     }
     setUpdating(null);
   };
@@ -32,6 +36,11 @@ export default function CartList({ initialItems }) {
 
   return (
     <div className="space-y-6">
+      {error && (
+        <div className="bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400 p-4 rounded-lg text-sm font-medium border border-red-100 dark:border-red-900/50">
+          {error}
+        </div>
+      )}
       {items.map(item => (
         <div key={item.id} className="flex gap-6 py-6 border-b border-primary-100 dark:border-white/10 relative">
           {updating === item.id && (
@@ -56,6 +65,12 @@ export default function CartList({ initialItems }) {
                 {item.title}
               </Link>
               <div className="font-medium text-primary-900 dark:text-white mt-1">₹{item.price}</div>
+              {item.isStockError && (
+                <div className="text-red-600 text-xs font-bold mt-2 flex items-center gap-1 uppercase tracking-wide">
+                  <span className="w-1.5 h-1.5 rounded-full bg-red-600"></span>
+                  Only {item.stockQuantity} available in stock
+                </div>
+              )}
             </div>
             
             <div className="flex items-center justify-between mt-4">

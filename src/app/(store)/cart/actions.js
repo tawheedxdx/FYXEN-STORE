@@ -41,7 +41,7 @@ export async function getCart() {
       quantity,
       unit_price,
       products (
-        id, title, slug, price, shipping_price, tax_rate, product_images(image_url)
+        id, title, slug, price, shipping_price, tax_rate, stock_quantity, product_images(image_url)
       )
     `)
     .eq('cart_id', cart.id);
@@ -56,6 +56,8 @@ export async function getCart() {
     taxRate: item.products.tax_rate || 0,
     quantity: item.quantity,
     image: item.products.product_images?.[0]?.image_url,
+    stockQuantity: item.products.stock_quantity || 0,
+    isStockError: item.quantity > (item.products.stock_quantity || 0),
   })) || [];
 
   const subtotal = formattedItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
@@ -73,14 +75,17 @@ export async function addToCart(productId, quantity = 1) {
     return { error: 'Please sign in to add items to your cart.' };
   }
 
-  // Parallelize: get cart + product price at the same time
+  // Parallelize: get cart + product price/stock at the same time
   const [cart, { data: product }] = await Promise.all([
     getOrCreateCart(supabase, user.id),
-    supabase.from('products').select('price').eq('id', productId).single(),
+    supabase.from('products').select('price, stock_quantity').eq('id', productId).single(),
   ]);
 
   if (!product) return { error: 'Product not found' };
   if (!cart) return { error: 'Could not create cart' };
+
+  const currentStock = product.stock_quantity || 0;
+  if (currentStock <= 0) return { error: 'This product is currently out of stock.' };
 
   // Must be sequential — depends on cart.id
   const { data: existingItem } = await supabase
@@ -91,11 +96,18 @@ export async function addToCart(productId, quantity = 1) {
     .maybeSingle();
 
   if (existingItem) {
+    const newQuantity = existingItem.quantity + quantity;
+    if (newQuantity > currentStock) {
+      return { error: `Cannot add more. Only ${currentStock} items in stock.` };
+    }
     await supabase
       .from('cart_items')
-      .update({ quantity: existingItem.quantity + quantity })
+      .update({ quantity: newQuantity })
       .eq('id', existingItem.id);
   } else {
+    if (quantity > currentStock) {
+      return { error: `Only ${currentStock} items in stock.` };
+    }
     await supabase
       .from('cart_items')
       .insert({
@@ -117,6 +129,17 @@ export async function updateCartItemQuantity(cartItemId, quantity) {
   
   if (quantity <= 0) {
     return removeCartItem(cartItemId);
+  }
+
+  const { data: item } = await supabase
+    .from('cart_items')
+    .select('products(stock_quantity)')
+    .eq('id', cartItemId)
+    .single();
+
+  const stock = item?.products?.stock_quantity || 0;
+  if (quantity > stock) {
+    return { error: `Only ${stock} items available in stock.` };
   }
 
   await supabase

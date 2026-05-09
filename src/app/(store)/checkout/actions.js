@@ -82,6 +82,13 @@ export async function createCheckoutSession(formData) {
     return { error: 'Cart is empty' };
   }
 
+  // 1. Final Stock Check before order creation
+  for (const item of items) {
+    if (item.quantity > item.stockQuantity) {
+      return { error: `Insufficient stock for ${item.title}. Only ${item.stockQuantity} available.` };
+    }
+  }
+
   const paymentMethod = formData.get('paymentMethod') || 'ONLINE';
 
   // Check for coupon in formData
@@ -181,6 +188,19 @@ export async function createCheckoutSession(formData) {
 
   // If COD, we are done
   if (paymentMethod === 'COD') {
+    // 2. Decrement Stock for COD
+    for (const item of items) {
+      const { data: success } = await supabaseAdmin.rpc('decrement_stock', {
+        p_product_id: item.productId,
+        p_quantity: item.quantity
+      });
+      if (!success) {
+        // This shouldn't happen often due to check above, but for safety:
+        await deleteOrder(order.id);
+        return { error: `Stock for ${item.title} ran out just now. Please update your cart.` };
+      }
+    }
+
     // Clear Cart
     await supabase.from('carts').delete().eq('user_id', user.id);
     
@@ -269,8 +289,29 @@ export async function verifyPayment(paymentData) {
         placed_at: new Date().toISOString()
       })
       .eq('id', orderId)
-      .select('coupon_id')
+      .select('coupon_id, id')
       .single();
+
+    // 1. Fetch order items for stock decrement
+    const { data: orderItems } = await supabaseAdmin
+      .from('order_items')
+      .select('product_id, quantity, product_title_snapshot')
+      .eq('order_id', orderId);
+
+    // 2. Decrement Stock
+    if (orderItems) {
+      for (const item of orderItems) {
+        const { data: success } = await supabaseAdmin.rpc('decrement_stock', {
+          p_product_id: item.product_id,
+          p_quantity: item.quantity
+        });
+        if (!success) {
+          console.error(`STOCK EXHAUSTED for ${item.product_title_snapshot} during payment verify!`);
+          // Note: Payment is already captured. Admin must handle this if it happens.
+          // In a perfect world, we'd reserve stock at order creation and release if expired.
+        }
+      }
+    }
 
     // 1. Fetch order details for points logic
     const { data: order } = await supabaseAdmin

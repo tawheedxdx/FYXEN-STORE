@@ -52,9 +52,20 @@ export default async function CartPage() {
                 <span className="font-bold text-xl">₹{subtotal.toFixed(2)}</span>
               </div>
               
-              <Link href="/checkout" className="btn-primary w-full text-center">
-                Proceed to Checkout
-              </Link>
+              {items.some(i => i.isStockError) ? (
+                <div className="space-y-4">
+                  <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 text-xs font-medium">
+                    Some items in your cart exceed available stock. Please reduce quantities to proceed.
+                  </div>
+                  <button disabled className="btn-primary w-full opacity-50 cursor-not-allowed">
+                    Proceed to Checkout
+                  </button>
+                </div>
+              ) : (
+                <Link href="/checkout" className="btn-primary w-full text-center">
+                  Proceed to Checkout
+                </Link>
+              )}
             </div>
           </div>
         </div>
