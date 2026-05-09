@@ -39,7 +39,7 @@ export default async function StoreLayout({ children }) {
       )}
       <AnnouncementBanner />
       <Navbar />
-      <main className="flex-1 flex flex-col">{children}</main>
+      <main>{children}</main>
       <Footer settings={settings} />
     </>
   );

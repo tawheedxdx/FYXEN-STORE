@@ -1,14 +1,8 @@
-import { Outfit } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import CookieConsent from "@/components/common/CookieConsent";
 import Script from "next/script";
-
-const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
-});
 
 export const metadata = {
   metadataBase: new URL('https://www.fyxen.in'),
@@ -77,7 +71,11 @@ export const viewport = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={`${outfit.variable} h-full antialiased`}>
+    <html lang="en" className="h-full antialiased">
+      {/* Google Fonts — Outfit */}
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
       {/* Google Tag (gtag.js) */}
       <Script
         src="https://www.googletagmanager.com/gtag/js?id=AW-18110601963"
