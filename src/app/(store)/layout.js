@@ -15,7 +15,7 @@ export default async function StoreLayout({ children }) {
     role = profile?.role || 'customer';
   }
 
-  const { data: settings } = await supabase.from('settings').select('site_mode').single();
+  const { data: settings } = await supabase.from('settings').select('*').single();
   const mode = settings?.site_mode || 'online';
   const isAdmin = role === 'admin';
 
@@ -40,7 +40,7 @@ export default async function StoreLayout({ children }) {
       <AnnouncementBanner />
       <Navbar />
       <main className="flex-1 flex flex-col">{children}</main>
-      <Footer />
+      <Footer settings={settings} />
     </>
   );
 }

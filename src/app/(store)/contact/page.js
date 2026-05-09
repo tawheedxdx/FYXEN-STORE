@@ -1,11 +1,20 @@
 import ContactForm from './ContactForm';
+import { createClient } from '@/lib/supabase/server';
 
 export const metadata = {
   title: 'Contact Us | Fyxen',
   description: 'Get in touch with Fyxen for any inquiries or support.',
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const supabase = await createClient();
+  const { data: settings } = await supabase.from('settings').select('*').single();
+
+  const parentCompany = settings?.parent_company_name || 'Bytread International Private Limited';
+  const address = settings?.address || '123 Premium Tower, Business Park\nMumbai, Maharashtra 400001\nIndia';
+  const supportEmail = settings?.support_email || 'support@fyxen.com';
+  const supportPhone = settings?.support_phone || '+91 98765 43210';
+
   return (
     <div className="container-custom py-16 max-w-4xl">
       <div className="text-center mb-12">
@@ -25,11 +34,9 @@ export default function ContactPage() {
             <h3 className="text-xl font-semibold mb-3 flex items-center gap-2">
               Corporate Headquarters
             </h3>
-            <p className="text-primary-600 dark:text-primary-300 leading-relaxed">
-              Bytread International Private Limited<br />
-              123 Premium Tower, Business Park<br />
-              Mumbai, Maharashtra 400001<br />
-              India
+            <p className="text-primary-600 dark:text-primary-300 leading-relaxed whitespace-pre-wrap">
+              <span className="font-medium text-primary-900 dark:text-white">{parentCompany}</span><br />
+              {address}
             </p>
           </div>
           
@@ -39,10 +46,10 @@ export default function ContactPage() {
             </h3>
             <div className="space-y-2 text-primary-600 dark:text-primary-300">
               <p className="flex items-center gap-2">
-                <span className="font-medium text-primary-900 dark:text-white">Email:</span> support@fyxen.com
+                <span className="font-medium text-primary-900 dark:text-white">Email:</span> {supportEmail}
               </p>
               <p className="flex items-center gap-2">
-                <span className="font-medium text-primary-900 dark:text-white">Phone:</span> +91 98765 43210
+                <span className="font-medium text-primary-900 dark:text-white">Phone:</span> {supportPhone}
               </p>
             </div>
           </div>

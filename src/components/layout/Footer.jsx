@@ -1,7 +1,9 @@
 import Link from 'next/link';
 
-export default function Footer() {
+export default function Footer({ settings }) {
   const currentYear = new Date().getFullYear();
+  const parentCompany = settings?.parent_company_name || 'Bytread International Private Limited';
+  const gstNumber = settings?.gst_number;
   
   return (
     <footer className="bg-primary-900 text-white dark:bg-black border-t border-primary-800 dark:border-white/10 mt-auto pt-16 pb-8">
@@ -50,8 +52,11 @@ export default function Footer() {
         </div>
         
         <div className="pt-8 border-t border-primary-800 dark:border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-primary-400">
-          <p>&copy; {currentYear} Fyxen. All rights reserved.</p>
-          <p>Operated by <span className="font-medium text-primary-300">Bytread International Private Limited</span></p>
+          <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4">
+            <p>&copy; {currentYear} Fyxen. All rights reserved.</p>
+            {gstNumber && <p className="md:border-l md:border-primary-800 md:pl-4">GST: {gstNumber}</p>}
+          </div>
+          <p>Operated by <span className="font-medium text-primary-300">{parentCompany}</span></p>
         </div>
       </div>
     </footer>
