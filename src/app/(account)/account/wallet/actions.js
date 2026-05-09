@@ -27,7 +27,7 @@ export async function createWalletRechargeOrder(amount) {
     const rzpOrder = await razorpay.orders.create({
       amount: Math.round(amount * 100), // in paise
       currency: 'INR',
-      receipt: `wallet_${user.id}_${Date.now()}`,
+      receipt: `wlt_${user.id.slice(0, 8)}_${Date.now()}`,
       notes: { userId: user.id, type: 'wallet_recharge' }
     });
 
