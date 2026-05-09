@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createProduct, updateProduct, deleteProductImage } from '@/app/(admin)/admin/products/actions';
 import { Upload, X, Loader2, ImagePlus, ArrowLeft, Check } from 'lucide-react';
 import Link from 'next/link';
+import IconPicker from './IconPicker';
 
 export default function ProductForm({ categories, product }) {
   const router = useRouter();
@@ -182,12 +183,10 @@ export default function ProductForm({ categories, product }) {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
                       <div>
-                        <label className="block text-[10px] uppercase font-bold text-primary-400 mb-1">Icon Name (Lucide)</label>
-                        <input 
-                          className="input-field py-1.5 text-sm" 
-                          placeholder="e.g. Battery, Zap, Bluetooth" 
+                        <label className="block text-[10px] uppercase font-bold text-primary-400 mb-1">Select Icon</label>
+                        <IconPicker 
                           value={h.icon}
-                          onChange={(e) => updateHighlight(i, 'icon', e.target.value)}
+                          onChange={(newIcon) => updateHighlight(i, 'icon', newIcon)}
                         />
                       </div>
                       <div>
@@ -213,9 +212,6 @@ export default function ProductForm({ categories, product }) {
             )}
             
             <input type="hidden" name="highlights" value={JSON.stringify(highlights)} />
-            <p className="text-xs text-primary-400">
-              Icons use Lucide React names. Common ones: <strong>Battery, Zap, Speaker, Bluetooth, Music, Shield, Truck</strong>.
-            </p>
           </div>
 
           {/* SEO */}
