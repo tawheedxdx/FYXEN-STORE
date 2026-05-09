@@ -58,6 +58,10 @@ export default function Footer({ settings }) {
           </div>
           <p>Operated by <span className="font-medium text-primary-300">{parentCompany}</span></p>
         </div>
+        
+        <div className="text-center text-[10px] text-primary-500/60 mt-6">
+          *Subject to Jangipur jurisdiction only.
+        </div>
       </div>
     </footer>
   );
