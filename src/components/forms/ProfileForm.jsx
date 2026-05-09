@@ -28,28 +28,28 @@ export default function ProfileForm({ profile, user }) {
 
   return (
     <div className="space-y-8">
-      {/* Loyalty Points Card */}
-      <div className="bg-gradient-to-br from-primary-900 to-primary-800 text-white rounded-3xl p-6 shadow-xl shadow-primary-900/20 max-w-xl">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-accent">
-              <Star className="w-8 h-8 fill-current" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-primary-200 uppercase tracking-widest">Available Points</p>
-              <h2 className="text-4xl font-black">{profile?.loyalty_points || 0}</h2>
+      {/* Wallet Balance Card */}
+      <div className="bg-gradient-to-br from-primary-900 to-primary-800 text-white rounded-3xl p-6 shadow-xl shadow-primary-900/20 max-w-xl relative overflow-hidden">
+        <div className="relative z-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-accent">
+                <Star className="w-8 h-8 fill-current" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-primary-200 uppercase tracking-widest">Wallet Balance</p>
+                <h2 className="text-4xl font-black">₹{profile?.wallet_balance?.toFixed(2) || '0.00'}</h2>
+              </div>
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-[10px] font-bold text-primary-300 uppercase tracking-widest mb-1">Estimated Value</p>
-            <p className="text-xl font-bold text-accent">₹{(profile?.loyalty_points * 0.5 || 0).toFixed(1)}</p>
+          <div className="mt-6 pt-6 border-t border-white/10">
+            <p className="text-xs text-primary-200 leading-relaxed italic">
+              "Earn ₹2 cashback for every ₹100 spent on all orders! Cashback is credited automatically upon delivery."
+            </p>
           </div>
         </div>
-        <div className="mt-6 pt-6 border-t border-white/10">
-          <p className="text-xs text-primary-200 leading-relaxed italic">
-            "Shop online to earn 10 points for every ₹100 spent. Redeem them at checkout for instant discounts!"
-          </p>
-        </div>
+        {/* Subtle background decoration */}
+        <div className="absolute right-[-20px] bottom-[-20px] w-32 h-32 bg-white/5 rounded-full blur-2xl" />
       </div>
 
       <form action={handleSubmit} className="space-y-6 max-w-xl">

@@ -31,26 +31,10 @@ export async function POST(req) {
           placed_at: new Date().toISOString()
         })
         .eq('id', orderId)
-        .select('coupon_id, user_id, grand_total, loyalty_points_redeemed')
+        .select('coupon_id, user_id, grand_total')
         .single();
 
       if (updatedOrder) {
-        // Calculate points to earn
-        const pointsToEarn = Math.floor(updatedOrder.grand_total / 100) * 10;
-        
-        // Deduct redeemed points
-        if (updatedOrder.loyalty_points_redeemed > 0) {
-          await supabaseAdmin.rpc('increment_loyalty_points', { 
-            user_uuid: updatedOrder.user_id, 
-            points_to_add: -updatedOrder.loyalty_points_redeemed 
-          });
-        }
-
-        await supabaseAdmin
-          .from('orders')
-          .update({ loyalty_points_earned: pointsToEarn })
-          .eq('id', orderId);
-
         // Increment coupon usage
         if (updatedOrder.coupon_id) {
           await supabaseAdmin.rpc('increment_coupon_usage', { coupon_uuid: updatedOrder.coupon_id });

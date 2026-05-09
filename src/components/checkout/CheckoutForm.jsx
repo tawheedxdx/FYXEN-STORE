@@ -6,7 +6,6 @@ import { createCheckoutSession, verifyPayment, validateCoupon, deleteOrder } fro
 import Script from 'next/script';
 import { Loader2, Ticket, CheckCircle2, X, Star, CreditCard } from 'lucide-react';
 import PaymentSelectionModal from './PaymentSelectionModal';
-import LoyaltyPointsRedemption from './LoyaltyPointsRedemption';
 import WalletRedemption from './WalletRedemption';
 
 export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: initialGrandTotal, profile, user }) {
@@ -26,18 +25,14 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
 
   const [currentDiscount, setCurrentDiscount] = useState(0);
   
-  // Loyalty Points State
-  const [pointsToRedeem, setPointsToRedeem] = useState(0);
-  const [loyaltyDiscount, setLoyaltyDiscount] = useState(0);
-
   // Wallet State
   const [walletDiscount, setWalletDiscount] = useState(0);
 
   const [finalGrandTotal, setFinalGrandTotal] = useState(initialGrandTotal);
 
   useEffect(() => {
-    setFinalGrandTotal(Math.max(0, subtotal - currentDiscount - loyaltyDiscount - walletDiscount + shipping + tax));
-  }, [subtotal, currentDiscount, loyaltyDiscount, walletDiscount, shipping, tax]);
+    setFinalGrandTotal(Math.max(0, subtotal - currentDiscount - walletDiscount + shipping + tax));
+  }, [subtotal, currentDiscount, walletDiscount, shipping, tax]);
 
   async function handleApplyCoupon() {
     if (!couponCode) return;
@@ -70,11 +65,6 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
     // Add applied coupon code if any
     if (appliedCoupon) {
       formData.append('couponCode', appliedCoupon.code);
-    }
-
-    // Add loyalty points to redeem
-    if (pointsToRedeem > 0) {
-      formData.append('pointsToRedeem', pointsToRedeem);
     }
 
     setFormDataObj(formData);
@@ -296,26 +286,13 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
           )}
         </div>
 
-        {/* Loyalty Points Redemption Section */}
-        <LoyaltyPointsRedemption 
-          profile={profile}
-          subtotal={subtotal}
-          shipping={shipping}
-          tax={tax}
-          currentDiscount={currentDiscount}
-          onRedeem={(pts) => {
-            setPointsToRedeem(pts);
-            setLoyaltyDiscount(pts * 0.5);
-          }}
-        />
-
         <WalletRedemption 
           profile={profile}
           subtotal={subtotal}
           shipping={shipping}
           tax={tax}
           currentDiscount={currentDiscount}
-          loyaltyDiscount={loyaltyDiscount}
+          loyaltyDiscount={0}
           onRedeem={(amt) => setWalletDiscount(amt)}
         />
 
@@ -329,12 +306,6 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
               <div className="flex justify-between text-sm text-green-600 font-medium">
                 <span>Coupon Discount</span>
                 <span>-₹{currentDiscount.toFixed(2)}</span>
-              </div>
-            )}
-            {loyaltyDiscount > 0 && (
-              <div className="flex justify-between text-sm text-green-600 font-medium">
-                <span>Loyalty Discount</span>
-                <span>-₹{loyaltyDiscount.toFixed(2)}</span>
               </div>
             )}
             {walletDiscount > 0 && (
@@ -359,13 +330,18 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
             </div>
             
             {/* Earnings Info */}
-            <div className="p-3 bg-accent/5 rounded-xl border border-accent/10 mt-4 flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent shrink-0">
-                <Star className="w-4 h-4 fill-current" />
+            <div className="p-4 bg-accent/5 rounded-2xl border border-accent/10 mt-6 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-accent/10 flex items-center justify-center text-accent shrink-0">
+                <Wallet className="w-6 h-6" />
               </div>
-              <p className="text-[10px] md:text-xs font-bold uppercase tracking-tight text-primary-600 dark:text-primary-300">
-                Choose <span className="text-accent underline decoration-2 underline-offset-4">Online Payment</span> on next step to earn <span className="text-accent">~{Math.floor(finalGrandTotal / 100) * 10} Points</span>
-              </p>
+              <div>
+                <p className="text-sm font-bold text-primary-900 dark:text-white mb-0.5">
+                  Earn ₹{Math.floor(finalGrandTotal / 100) * 2} Wallet Cashback
+                </p>
+                <p className="text-xs text-primary-500 font-medium leading-relaxed">
+                  Get 2% back on this order! Cashback is credited directly to your wallet upon successful delivery.
+                </p>
+              </div>
             </div>
           </div>
 

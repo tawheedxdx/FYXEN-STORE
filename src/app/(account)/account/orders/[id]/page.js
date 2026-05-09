@@ -176,10 +176,10 @@ export default async function OrderDetailsPage({ params }) {
                   <span>-₹{order.discount_amount.toLocaleString('en-IN')}</span>
                 </div>
               )}
-              {order.loyalty_discount > 0 && (
+              {order.wallet_amount_used > 0 && (
                 <div className="flex justify-between text-green-400">
-                  <span>Loyalty Discount</span>
-                  <span>-₹{order.loyalty_discount.toLocaleString('en-IN')}</span>
+                  <span>Wallet Payment</span>
+                  <span>-₹{order.wallet_amount_used.toLocaleString('en-IN')}</span>
                 </div>
               )}
               <div className="flex justify-between text-primary-300">
@@ -191,31 +191,27 @@ export default async function OrderDetailsPage({ params }) {
                 <span className="font-bold text-2xl tracking-tight">₹{order.grand_total.toLocaleString('en-IN')}</span>
               </div>
 
-              {/* Loyalty Points Breakdown */}
-              {(order.loyalty_points_earned > 0 || order.loyalty_points_redeemed > 0) && (
-                <div className="mt-6 pt-6 border-t border-white/10 space-y-3">
-                  {order.loyalty_points_earned > 0 && order.order_status === 'delivered' && (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-accent/20 flex items-center justify-center text-accent">
-                          <Star className="w-3.5 h-3.5 fill-current" />
-                        </div>
-                        <span className="text-xs font-bold uppercase tracking-tight text-primary-200">Points Earned</span>
+              {/* Wallet Cashback Info */}
+              {order.wallet_cashback_amount > 0 && (
+                <div className="mt-6 pt-6 border-t border-white/10">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center ${
+                        order.order_status === 'delivered' ? 'bg-accent/20 text-accent' : 'bg-white/10 text-primary-400'
+                      }`}>
+                        <Star className={`w-4 h-4 ${order.order_status === 'delivered' ? 'fill-current' : ''}`} />
                       </div>
-                      <span className="text-sm font-black text-accent">+{order.loyalty_points_earned}</span>
-                    </div>
-                  )}
-                  {order.loyalty_points_redeemed > 0 && (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-primary-300">
-                          <Star className="w-3.5 h-3.5" />
-                        </div>
-                        <span className="text-xs font-bold uppercase tracking-tight text-primary-200">Points Used</span>
+                      <div>
+                        <span className="block text-xs font-bold uppercase tracking-tight text-primary-200">
+                          {order.order_status === 'delivered' ? 'Cashback Earned' : 'Cashback Pending'}
+                        </span>
+                        <span className="text-[10px] text-primary-400">₹2 per ₹100 spend</span>
                       </div>
-                      <span className="text-sm font-black text-primary-100">-{order.loyalty_points_redeemed}</span>
                     </div>
-                  )}
+                    <span className={`text-base font-black ${order.order_status === 'delivered' ? 'text-accent' : 'text-primary-300'}`}>
+                      +₹{order.wallet_cashback_amount.toFixed(2)}
+                    </span>
+                  </div>
                 </div>
               )}
             </div>

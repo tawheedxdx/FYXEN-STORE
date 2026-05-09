@@ -104,25 +104,6 @@ export async function createCheckoutSession(formData) {
     }
   }
 
-  // Loyalty Points logic
-  const pointsToRedeem = parseInt(formData.get('pointsToRedeem')) || 0;
-  let loyaltyDiscount = 0;
-
-  if (pointsToRedeem > 0) {
-    // Verify user has enough points
-    const { data: profile } = await supabaseAdmin
-      .from('profiles')
-      .select('loyalty_points')
-      .eq('id', user.id)
-      .single();
-
-    if (profile && profile.loyalty_points >= pointsToRedeem) {
-      loyaltyDiscount = pointsToRedeem * 0.5;
-    } else {
-      return { error: 'Insufficient loyalty points' };
-    }
-  }
-
   // Wallet Balance Logic
   const useWallet = formData.get('useWallet') === 'true';
   let walletAmountUsed = 0;
@@ -135,14 +116,17 @@ export async function createCheckoutSession(formData) {
       .single();
 
     if (profile && profile.wallet_balance > 0) {
-      const remainingAfterCoupons = Math.max(0, subtotal - discount - loyaltyDiscount + totalShipping);
+      const remainingAfterCoupons = Math.max(0, subtotal - discount + totalShipping);
       walletAmountUsed = Math.min(profile.wallet_balance, remainingAfterCoupons);
     }
   }
 
   // Calculate totals
   const shipping = totalShipping;
-  const grandTotal = Math.max(0, subtotal - discount - loyaltyDiscount - walletAmountUsed + shipping);
+  let grandTotal = Math.max(0, subtotal - discount - walletAmountUsed + shipping);
+
+  // Calculate potential wallet cashback (₹2 per ₹100 spent)
+  const walletCashbackAmount = Math.floor(grandTotal / 100) * 2;
 
   // Extract address info
   const shippingInfo = {
@@ -165,8 +149,6 @@ export async function createCheckoutSession(formData) {
       user_id: user.id,
       subtotal,
       discount_amount: discount,
-      loyalty_discount: loyaltyDiscount,
-      loyalty_points_redeemed: pointsToRedeem,
       shipping_amount: shipping,
       grand_total: grandTotal,
       payment_status: paymentMethod === 'COD' ? 'cod' : 'pending',
@@ -181,7 +163,8 @@ export async function createCheckoutSession(formData) {
       shipping_country: shippingInfo.country,
       placed_at: paymentMethod === 'COD' ? new Date().toISOString() : null,
       coupon_id: couponId,
-      wallet_amount_used: walletAmountUsed
+      wallet_amount_used: walletAmountUsed,
+      wallet_cashback_amount: walletCashbackAmount
     })
     .select('id')
     .single();
@@ -225,14 +208,6 @@ export async function createCheckoutSession(formData) {
     // Increment coupon usage if any
     if (couponId) {
       await supabaseAdmin.rpc('increment_coupon_usage', { coupon_uuid: couponId });
-    }
-
-    // If loyalty points were used, deduct them now for COD
-    if (pointsToRedeem > 0) {
-      await supabaseAdmin.rpc('increment_loyalty_points', { 
-        user_uuid: user.id, 
-        points_to_add: -pointsToRedeem 
-      });
     }
 
     // If wallet was used, deduct it now for COD
@@ -340,55 +315,30 @@ export async function verifyPayment(paymentData) {
         });
         if (!success) {
           console.error(`STOCK EXHAUSTED for ${item.product_title_snapshot} during payment verify!`);
-          // Note: Payment is already captured. Admin must handle this if it happens.
-          // In a perfect world, we'd reserve stock at order creation and release if expired.
         }
       }
     }
 
-    // 1. Fetch order details for points logic
+    // 1. Fetch order details for wallet logic
     const { data: order } = await supabaseAdmin
       .from('orders')
-      .select('grand_total, user_id, loyalty_points_redeemed')
+      .select('grand_total, user_id, wallet_amount_used, order_number')
       .eq('id', orderId)
       .single();
 
     if (order) {
-      // 2. Calculate potential points to earn (to be awarded on delivery)
-      const pointsToEarn = Math.floor(order.grand_total / 100) * 10;
-      
-      // 3. Deduct ONLY redeemed points from user profile
-      if (order.loyalty_points_redeemed > 0) {
-        await supabaseAdmin.rpc('increment_loyalty_points', { 
-          user_uuid: order.user_id, 
-          points_to_add: -order.loyalty_points_redeemed 
-        });
-      }
-
-      // Update order with earned points info (trigger will use this later on delivery)
-      await supabaseAdmin
-        .from('orders')
-        .update({ loyalty_points_earned: pointsToEarn })
-        .eq('id', orderId);
-
       // 4. Deduct Wallet Balance if used
-      const { data: orderWithWallet } = await supabaseAdmin
-        .from('orders')
-        .select('wallet_amount_used, order_number')
-        .eq('id', orderId)
-        .single();
-
-      if (orderWithWallet?.wallet_amount_used > 0) {
+      if (order.wallet_amount_used > 0) {
         await supabaseAdmin.rpc('adjust_wallet_balance', {
           p_user_id: order.user_id,
-          p_amount: -orderWithWallet.wallet_amount_used
+          p_amount: -order.wallet_amount_used
         });
         await supabaseAdmin.from('wallet_transactions').insert({
           user_id: order.user_id,
-          amount: -orderWithWallet.wallet_amount_used,
+          amount: -order.wallet_amount_used,
           type: 'payment',
           status: 'completed',
-          description: `Order Payment (Order: ${orderWithWallet.order_number})`
+          description: `Order Payment (Order: ${order.order_number})`
         });
       }
     }

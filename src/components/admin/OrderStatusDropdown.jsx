@@ -24,13 +24,6 @@ export default function OrderStatusDropdown({ orderId, currentStatus }) {
       .eq('id', orderId);
 
     if (!error) {
-      // Restore stock if cancelled (and wasn't already cancelled)
-      if (newStatus === 'cancelled' && oldStatus !== 'cancelled') {
-        // Any status except 'pending' usually has stock decremented
-        if (oldStatus !== 'pending') {
-          await supabase.rpc('restore_order_stock', { p_order_id: orderId });
-        }
-      }
       setStatus(newStatus);
     } else {
       alert('Failed to update status: ' + error.message);
