@@ -5,6 +5,12 @@ import { createClient } from '@/lib/supabase/server';
 export async function subscribeNewsletter(formData) {
   const supabase = await createClient();
   const email = formData.get('email');
+  
+  // Security check: Check site mode
+  const { data: settings } = await supabase.from('settings').select('site_mode').single();
+  if (settings?.site_mode !== 'online') {
+    return { error: 'Service is currently unavailable due to maintenance.' };
+  }
 
   if (!email) {
     return { error: 'Email is required.' };
