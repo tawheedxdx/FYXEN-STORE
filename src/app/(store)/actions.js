@@ -1,8 +1,12 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function subscribeNewsletter(formData) {
+  const rateLimit = await checkRateLimit('newsletter', 5, 10 * 60 * 1000); // 5 attempts per 10 minutes
+  if (!rateLimit.success) return { error: rateLimit.error };
+
   const supabase = await createClient();
   const email = formData.get('email');
   

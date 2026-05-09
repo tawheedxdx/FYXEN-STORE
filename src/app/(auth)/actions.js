@@ -3,8 +3,12 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { checkRateLimit } from '@/lib/rate-limit';
 
 export async function login(formData) {
+  const rateLimit = await checkRateLimit('login', 5, 5 * 60 * 1000); // 5 attempts per 5 minutes
+  if (!rateLimit.success) return { error: rateLimit.error };
+
   const supabase = await createClient();
   const identifier = formData.get('identifier'); // email or phone
   const password = formData.get('password');
@@ -30,6 +34,9 @@ export async function login(formData) {
 }
 
 export async function signup(formData) {
+  const rateLimit = await checkRateLimit('signup', 3, 10 * 60 * 1000); // 3 attempts per 10 minutes
+  if (!rateLimit.success) return { error: rateLimit.error };
+
   const supabase = await createClient();
   const email = formData.get('email');
   const password = formData.get('password');
@@ -66,6 +73,9 @@ export async function signup(formData) {
 }
 
 export async function continueAsGuest(formData) {
+  const rateLimit = await checkRateLimit('guest', 5, 10 * 60 * 1000); // 5 attempts per 10 minutes
+  if (!rateLimit.success) return { error: rateLimit.error };
+
   const supabase = await createClient();
   const fullName = formData.get('fullName');
   const phone = formData.get('phone');
