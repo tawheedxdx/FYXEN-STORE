@@ -70,6 +70,12 @@ export async function cancelOrder(orderId) {
     return { error: updateError.message };
   }
 
+  // 4. Restore Stock (if it was already decremented)
+  // Stock is decremented for 'confirmed' and 'packed'
+  if (['confirmed', 'packed'].includes(order.order_status)) {
+    await supabase.rpc('restore_order_stock', { p_order_id: orderId });
+  }
+
   revalidatePath('/account/orders');
   revalidatePath(`/account/orders/${orderId}`);
   return { success: true };

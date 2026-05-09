@@ -11,12 +11,31 @@ export default function OrderStatusDropdown({ orderId, currentStatus }) {
 
   const handleChange = async (e) => {
     const newStatus = e.target.value;
+    const oldStatus = status;
     setLoading(true);
 
     const supabase = createClient();
-    await supabase.from('orders').update({ order_status: newStatus }).eq('id', orderId);
+    const { error } = await supabase
+      .from('orders')
+      .update({ 
+        order_status: newStatus,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', orderId);
 
-    setStatus(newStatus);
+    if (!error) {
+      // Restore stock if cancelled (and wasn't already cancelled)
+      if (newStatus === 'cancelled' && oldStatus !== 'cancelled') {
+        // Any status except 'pending' usually has stock decremented
+        if (oldStatus !== 'pending') {
+          await supabase.rpc('restore_order_stock', { p_order_id: orderId });
+        }
+      }
+      setStatus(newStatus);
+    } else {
+      alert('Failed to update status: ' + error.message);
+    }
+    
     setLoading(false);
   };
 
