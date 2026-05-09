@@ -51,8 +51,9 @@ export async function createWalletRechargeOrder(amount) {
       userEmail: user.email,
     };
   } catch (error) {
-    console.error('Wallet Recharge Error:', error);
-    return { error: `Failed to initialize recharge payment: ${error.message || 'Unknown error'}` };
+    console.error('Wallet Recharge Full Error:', error);
+    const errorMessage = error.message || (typeof error === 'object' ? JSON.stringify(error) : String(error));
+    return { error: `Failed to initialize recharge payment: ${errorMessage}` };
   }
 }
 
