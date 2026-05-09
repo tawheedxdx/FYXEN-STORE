@@ -31,44 +31,76 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 80);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    // Set initial state
     setScrolled(window.scrollY > 80);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Centred hero mode: only on homepage when not scrolled
+  // Hero mode = on homepage AND not yet scrolled AND mobile menu is closed
   const heroMode = isHomePage && !scrolled && !mobileMenuOpen;
+  const showLinks = !heroMode;
 
   return (
     <>
+      {/* ── NAVBAR ── */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 ${
+        className={`fixed left-0 right-0 z-50 transition-all duration-500 ${
           heroMode
-            ? 'bg-transparent border-b-transparent'
+            ? 'bg-transparent border-b border-transparent'
             : 'bg-white/90 dark:bg-black/90 backdrop-blur-lg border-b border-black/5 dark:border-white/10 shadow-sm'
         }`}
         style={{ top: 'var(--banner-height, 0px)' }}
       >
-        <div className="container-custom relative flex items-center justify-between h-16 md:h-20">
+        {/* Height container */}
+        <div className="relative container-custom h-16 md:h-20 flex items-center">
 
-          {/* ── LEFT: Nav Links (hidden in hero mode, slide in on scroll) ── */}
+          {/* ── LOGO (always absolute, animates between center and left) ── */}
+          <motion.div
+            className="absolute top-1/2 -translate-y-1/2 z-10"
+            initial={false}
+            animate={
+              heroMode
+                ? {
+                    left: '50%',
+                    x: '-50%',
+                    scale: 1.5,
+                  }
+                : {
+                    left: '1rem', // left-4
+                    x: '0%',
+                    scale: 1,
+                  }
+            }
+            transition={{ type: 'spring', stiffness: 160, damping: 28 }}
+          >
+            <Link href="/" className="flex items-center">
+              <img
+                src="/logo.png"
+                alt="Fyxen Logo"
+                className={`w-auto object-contain transition-[filter] duration-500 h-11 md:h-14 ${
+                  heroMode ? 'brightness-0 invert' : ''
+                }`}
+              />
+            </Link>
+          </motion.div>
+
+          {/* ── LEFT: Desktop nav links ── */}
           <AnimatePresence>
-            {!heroMode && (
+            {showLinks && (
               <motion.nav
                 key="nav-links"
-                initial={{ opacity: 0, x: -24 }}
+                initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -24 }}
-                transition={{ duration: 0.4, ease: 'easeOut' }}
-                className="hidden md:flex items-center gap-1"
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.35, ease: 'easeOut' }}
+                className="hidden md:flex items-center gap-1 ml-[180px] lg:ml-[200px]"
               >
                 {navLinks.map((link, i) => (
                   <motion.div
                     key={link.href}
-                    initial={{ opacity: 0, y: -8 }}
+                    initial={{ opacity: 0, y: -6 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05, duration: 0.3 }}
+                    transition={{ delay: i * 0.055, duration: 0.25 }}
                   >
                     <Link
                       href={link.href}
@@ -92,11 +124,11 @@ export default function Navbar() {
             )}
           </AnimatePresence>
 
-          {/* Mobile Menu Toggle (always left on mobile) */}
+          {/* ── Mobile hamburger (left side, always visible on mobile) ── */}
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setMobileMenuOpen(prev => !prev)}
-              className={`p-2 -ml-2 transition-colors ${heroMode ? 'text-white' : 'text-primary-900 dark:text-white'}`}
+              className={`p-2 transition-colors ${heroMode ? 'text-white' : 'text-primary-900 dark:text-white'}`}
               aria-label="Toggle menu"
             >
               <AnimatePresence mode="wait" initial={false}>
@@ -113,33 +145,8 @@ export default function Navbar() {
             </button>
           </div>
 
-          {/* ── LOGO: Centred + large in hero mode, left on scroll ── */}
-          <motion.div
-            layout
-            transition={{ type: 'spring', stiffness: 200, damping: 30 }}
-            className={`${
-              heroMode
-                ? 'absolute left-1/2 -translate-x-1/2'
-                : 'flex-none md:absolute md:left-1/2 md:-translate-x-1/2 flex justify-center'
-            }`}
-          >
-            <Link href="/" className="flex items-center">
-              <motion.img
-                src="/logo.png"
-                alt="Fyxen Logo"
-                layout
-                transition={{ type: 'spring', stiffness: 200, damping: 30 }}
-                className={`w-auto object-contain transition-all duration-500 ${
-                  heroMode
-                    ? 'h-20 md:h-28 brightness-0 invert'
-                    : 'h-11 md:h-14'
-                }`}
-              />
-            </Link>
-          </motion.div>
-
-          {/* ── RIGHT: Icons ── */}
-          <div className="flex items-center gap-0.5 md:gap-1">
+          {/* ── RIGHT: Icon buttons ── */}
+          <div className="ml-auto flex items-center gap-0.5 md:gap-1">
             <div className={heroMode ? '[&_button]:text-white [&_svg]:text-white' : ''}>
               <ThemeToggle />
             </div>
@@ -173,10 +180,13 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* Spacer to push content below fixed navbar (only when NOT in hero mode) */}
-      {!heroMode && <div className="h-16 md:h-20" />}
+      {/* Spacer — only when compact (non-hero) mode so content isn't hidden under navbar */}
+      <div
+        className="transition-all duration-500"
+        style={{ height: heroMode ? '0px' : 'var(--navbar-h, 80px)' }}
+      />
 
-      {/* ── Mobile Drawer ── */}
+      {/* ── MOBILE DRAWER ── */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <>
@@ -195,13 +205,13 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'tween', duration: 0.28, ease: 'easeInOut' }}
-              className="fixed top-0 left-0 z-50 h-full w-[80%] max-w-[320px] bg-white dark:bg-primary-950 shadow-2xl flex flex-col md:hidden"
+              className="fixed top-0 left-0 z-50 h-full w-[80%] max-w-[320px] bg-white dark:bg-primary-950 shadow-2xl flex flex-col"
             >
-              <div className="h-16 flex items-center justify-between px-5 border-b border-primary-100 dark:border-white/10 shrink-0">
+              <div className="h-16 flex items-center justify-between px-5 border-b border-primary-100 dark:border-white/10">
                 <Link href="/" className="flex items-center" onClick={() => setMobileMenuOpen(false)}>
                   <img src="/logo.png" alt="Fyxen Logo" className="h-10 w-auto object-contain" />
                 </Link>
-                <button onClick={() => setMobileMenuOpen(false)} className="p-2 rounded-lg text-primary-500 hover:bg-primary-50 dark:hover:bg-white/5 transition-colors" aria-label="Close menu">
+                <button onClick={() => setMobileMenuOpen(false)} className="p-2 rounded-lg text-primary-500 hover:bg-primary-50 dark:hover:bg-white/5 transition-colors">
                   <X className="w-5 h-5" />
                 </button>
               </div>
