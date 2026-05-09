@@ -21,7 +21,6 @@ export default async function WalletPage() {
       .from('wallet_transactions')
       .select('*')
       .eq('user_id', user.id)
-      .eq('status', 'completed')
       .order('created_at', { ascending: false })
   ]);
 

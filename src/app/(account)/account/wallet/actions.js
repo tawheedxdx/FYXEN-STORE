@@ -32,7 +32,7 @@ export async function createWalletRechargeOrder(amount) {
     });
 
     const supabaseAdmin = createAdminClient();
-    await supabaseAdmin
+    const { error: txError } = await supabaseAdmin
       .from('wallet_transactions')
       .insert({
         user_id: user.id,
@@ -42,6 +42,11 @@ export async function createWalletRechargeOrder(amount) {
         razorpay_order_id: rzpOrder.id,
         description: 'Wallet Recharge'
       });
+
+    if (txError) {
+      console.error('Transaction Create Error:', txError);
+      return { error: `Failed to record transaction: ${txError.message}` };
+    }
 
     return {
       success: true,
