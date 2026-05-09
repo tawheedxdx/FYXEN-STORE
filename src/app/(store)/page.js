@@ -1,13 +1,12 @@
 import Link from 'next/link';
-import { ArrowRight, ShieldCheck, Truck, Clock, Zap, Star, Trophy } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Truck, Clock, Star, RotateCcw } from 'lucide-react';
 import HeroSection from '@/components/storefront/HeroSection';
-import ProductCard from '@/components/product/ProductCard';
 import CategoryShowcase from '@/components/storefront/CategoryShowcase';
 import ProductCarousel from '@/components/storefront/ProductCarousel';
 import PromoBanner from '@/components/storefront/PromoBanner';
 import NewsletterForm from '@/components/storefront/NewsletterForm';
+import ProductCard from '@/components/product/ProductCard';
 import { getProducts, getCategories } from '@/services/products';
-
 import { createClient } from '@/lib/supabase/server';
 
 export const revalidate = 60;
@@ -22,36 +21,34 @@ export default async function HomePage() {
 
   const activeBanner = banners?.[0];
 
+  const trustFeatures = [
+    { icon: ShieldCheck, title: 'Premium Quality', desc: 'Rigorously tested materials in every product.' },
+    { icon: Truck, title: 'Fast Shipping', desc: 'Express nationwide delivery via trusted partners.' },
+    { icon: RotateCcw, title: 'Easy Returns', desc: 'Hassle-free 7-day return policy.' },
+    { icon: Clock, title: '24/7 Support', desc: 'Dedicated team ready to assist you anytime.' },
+  ];
+
   return (
     <div className="flex flex-col w-full bg-white dark:bg-black overflow-hidden">
-      {/* 1. Hero Section */}
+
+      {/* 1. Hero */}
       <HeroSection />
 
-      {/* 2. Trust Markers - Elevated Design */}
-      <section className="py-12 md:py-16 bg-white dark:bg-black relative z-20 -mt-10 rounded-t-[2.5rem] md:rounded-t-[3rem] shadow-[0_-20px_50px_rgba(0,0,0,0.1)]">
-        <div className="container-custom px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 text-center">
-            <div className="flex flex-col items-center p-4 md:p-6 group hover:-translate-y-2 transition-transform">
-              <div className="w-14 h-14 md:w-16 md:h-16 bg-primary-50 dark:bg-primary-900/50 rounded-2xl flex items-center justify-center mb-4 md:mb-6 group-hover:bg-accent transition-colors">
-                <Trophy className="w-6 h-6 md:w-8 md:h-8 text-primary-900 dark:text-accent group-hover:text-primary-900" />
+      {/* 2. Trust Bar */}
+      <section className="py-8 md:py-12 bg-white dark:bg-primary-950 border-b border-primary-100 dark:border-white/5">
+        <div className="container-custom">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+            {trustFeatures.map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex items-start md:items-center gap-3 group">
+                <div className="shrink-0 w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                  <Icon className="w-5 h-5 text-accent" />
+                </div>
+                <div>
+                  <p className="font-bold text-sm text-primary-900 dark:text-white">{title}</p>
+                  <p className="text-xs text-primary-500 dark:text-primary-400 mt-0.5 hidden md:block">{desc}</p>
+                </div>
               </div>
-              <h3 className="font-black text-lg md:text-xl mb-2 md:mb-3 uppercase tracking-tight">Premium Quality</h3>
-              <p className="text-primary-500 dark:text-primary-400 text-xs md:text-sm leading-relaxed">Uncompromising materials and craftsmanship in every release.</p>
-            </div>
-            <div className="flex flex-col items-center p-4 md:p-6 group hover:-translate-y-2 transition-transform">
-              <div className="w-14 h-14 md:w-16 md:h-16 bg-primary-50 dark:bg-primary-900/50 rounded-2xl flex items-center justify-center mb-4 md:mb-6 group-hover:bg-accent transition-colors">
-                <Zap className="w-6 h-6 md:w-8 md:h-8 text-primary-900 dark:text-accent group-hover:text-primary-900" />
-              </div>
-              <h3 className="font-black text-lg md:text-xl mb-2 md:mb-3 uppercase tracking-tight">Express Delivery</h3>
-              <p className="text-primary-500 dark:text-primary-400 text-xs md:text-sm leading-relaxed">Fast, reliable delivery nationwide by our premium partners.</p>
-            </div>
-            <div className="flex flex-col items-center p-4 md:p-6 group hover:-translate-y-2 transition-transform">
-              <div className="w-14 h-14 md:w-16 md:h-16 bg-primary-50 dark:bg-primary-900/50 rounded-2xl flex items-center justify-center mb-4 md:mb-6 group-hover:bg-accent transition-colors">
-                <Star className="w-6 h-6 md:w-8 md:h-8 text-primary-900 dark:text-accent group-hover:text-primary-900" />
-              </div>
-              <h3 className="font-black text-lg md:text-xl mb-2 md:mb-3 uppercase tracking-tight">VIP Support</h3>
-              <p className="text-primary-500 dark:text-primary-400 text-xs md:text-sm leading-relaxed">Dedicated concierge service for a seamless experience.</p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -60,43 +57,89 @@ export default async function HomePage() {
       <CategoryShowcase categories={categories} />
 
       {/* 4. Featured Products */}
-      <section className="py-20 md:py-32 bg-primary-50 dark:bg-primary-950/40 relative">
-        <div className="container-custom px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-12 md:mb-20 text-center md:text-left gap-6">
+      <section className="py-20 md:py-28 bg-white dark:bg-black">
+        <div className="container-custom">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-14 gap-4">
             <div>
-              <span className="text-accent font-black tracking-[0.2em] md:tracking-[0.3em] uppercase text-xs md:text-sm mb-3 md:mb-4 block">Our Picks</span>
-              <h2 className="text-3xl md:text-6xl font-black tracking-tighter uppercase mb-4">Featured <span className="text-primary-400">Selection</span></h2>
-              <p className="text-primary-500 dark:text-primary-400 text-base md:text-lg max-w-xl italic font-light">Curated for those who settle for nothing but the best.</p>
+              <span className="section-label">Our Picks</span>
+              <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-primary-900 dark:text-white mt-1">
+                Featured <span className="text-accent">Selection</span>
+              </h2>
+              <p className="text-primary-500 dark:text-primary-400 text-base mt-3 max-w-lg">
+                Curated for those who settle for nothing but the best.
+              </p>
             </div>
-            <Link href="/shop" className="group flex items-center gap-3 bg-primary-900 text-white dark:bg-white dark:text-primary-900 px-6 py-3 md:px-8 md:py-4 rounded-xl font-bold hover:bg-accent hover:text-primary-900 transition-all text-sm md:text-base">
-              VIEW ALL <ArrowRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-2 transition-transform" />
+            <Link href="/shop" className="inline-flex items-center gap-2 btn-outline shrink-0">
+              View All <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
-          
-          <ProductCarousel products={featuredProducts} />
+
+          {featuredProducts.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              {featuredProducts.slice(0, 8).map(product => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          ) : (
+            <ProductCarousel products={[]} />
+          )}
         </div>
       </section>
 
       {/* 5. Promo Banner */}
       {activeBanner && <PromoBanner banner={activeBanner} />}
 
-      {/* 6. Newsletter / CTA */}
-      <section className="py-32 bg-white dark:bg-black">
+      {/* 6. Social Proof Bar */}
+      <section className="py-12 bg-primary-50 dark:bg-primary-950/50 border-y border-primary-100 dark:border-white/5">
         <div className="container-custom">
-          <div className="bg-primary-900 rounded-[3rem] p-12 md:p-24 text-center relative overflow-hidden">
-            {/* Background elements */}
-            <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none">
-              <div className="absolute top-0 left-0 w-64 h-64 border-8 border-accent rounded-full -ml-32 -mt-32"></div>
-              <div className="absolute bottom-0 right-0 w-96 h-96 border-8 border-accent rounded-full -mr-48 -mb-48 opacity-20"></div>
-            </div>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-16 text-center">
+            {[
+              { num: '2,000+', text: 'Orders Shipped' },
+              { num: '500+', text: 'Happy Customers' },
+              { num: '4.9/5', text: 'Customer Rating' },
+              { num: '100%', text: 'Authentic Products' },
+            ].map(({ num, text }) => (
+              <div key={text} className="flex flex-col items-center">
+                <span className="text-3xl md:text-4xl font-black text-primary-900 dark:text-white tracking-tighter">{num}</span>
+                <span className="text-xs text-primary-500 dark:text-primary-400 uppercase tracking-wider font-medium mt-1">{text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            <div className="relative z-10 max-w-3xl mx-auto">
-              <h2 className="text-4xl md:text-6xl font-black text-white mb-8 tracking-tighter uppercase">Join the <span className="text-accent">Elite.</span></h2>
-              <p className="text-primary-200 text-xl mb-12 font-light italic">Subscribe to get exclusive early access to drops and member-only rewards.</p>
-              
-              <NewsletterForm />
-              
-              <p className="mt-8 text-primary-400 text-sm">No spam. Only premium updates. Unsubscribe anytime.</p>
+      {/* 7. Newsletter */}
+      <section className="py-20 md:py-28 bg-white dark:bg-black">
+        <div className="container-custom">
+          <div className="relative bg-primary-900 dark:bg-primary-950 rounded-3xl overflow-hidden">
+            {/* Decorative blobs */}
+            <div className="absolute -top-24 -right-24 w-96 h-96 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
+
+            <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center p-10 md:p-16">
+              {/* Left */}
+              <div>
+                <div className="flex items-center gap-2 mb-6">
+                  <Star className="w-4 h-4 text-accent fill-accent" />
+                  <span className="text-accent text-xs font-bold uppercase tracking-[0.2em]">Exclusive Access</span>
+                </div>
+                <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter mb-4">
+                  Join the<br /><span className="text-accent">Elite.</span>
+                </h2>
+                <p className="text-primary-300 text-base leading-relaxed mb-6">
+                  Get early access to new drops, exclusive member-only discounts, and curated recommendations straight to your inbox.
+                </p>
+                <div className="flex items-center gap-2 text-primary-400 text-sm">
+                  <ShieldCheck className="w-4 h-4 text-primary-500" />
+                  No spam. Unsubscribe anytime.
+                </div>
+              </div>
+
+              {/* Right */}
+              <div className="bg-white/5 rounded-2xl p-6 md:p-8 border border-white/10">
+                <p className="text-white font-semibold mb-4">Join <span className="text-accent">12,000+</span> subscribers today</p>
+                <NewsletterForm />
+              </div>
             </div>
           </div>
         </div>
