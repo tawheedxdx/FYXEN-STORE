@@ -142,16 +142,7 @@ export default function WalletClient({ profile, transactions }) {
                     {tx.amount > 0 ? <ArrowDownLeft className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-bold text-primary-900 dark:text-white">{tx.description}</p>
-                      {tx.status !== 'completed' && (
-                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold uppercase ${
-                          tx.status === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700'
-                        }`}>
-                          {tx.status}
-                        </span>
-                      )}
-                    </div>
+                    <p className="font-bold text-primary-900 dark:text-white">{tx.description}</p>
                     <p className="text-xs text-primary-400">{new Date(tx.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</p>
                   </div>
                 </div>

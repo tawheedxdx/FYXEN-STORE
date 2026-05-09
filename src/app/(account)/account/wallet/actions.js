@@ -31,23 +31,6 @@ export async function createWalletRechargeOrder(amount) {
       notes: { userId: user.id, type: 'wallet_recharge' }
     });
 
-    const supabaseAdmin = createAdminClient();
-    const { error: txError } = await supabaseAdmin
-      .from('wallet_transactions')
-      .insert({
-        user_id: user.id,
-        amount: amount,
-        type: 'recharge',
-        status: 'pending',
-        razorpay_order_id: rzpOrder.id,
-        description: 'Wallet Recharge'
-      });
-
-    if (txError) {
-      console.error('Transaction Create Error:', txError);
-      return { error: `Failed to record transaction: ${txError.message}` };
-    }
-
     return {
       success: true,
       rzpOrderId: rzpOrder.id,
@@ -79,22 +62,43 @@ export async function verifyWalletRecharge(paymentData) {
     .digest('hex');
 
   if (generatedSignature === razorpay_signature) {
-    // 1. Update Transaction Status
+    // 1. Fetch Order Details from Razorpay to get User and Amount
+    let rzpOrder;
+    try {
+      rzpOrder = await razorpay.orders.fetch(razorpay_order_id);
+    } catch (err) {
+      console.error('RZP Fetch Error:', err);
+      return { error: 'Failed to verify payment details with provider.' };
+    }
+
+    const userId = rzpOrder.notes?.userId;
+    const amount = rzpOrder.amount / 100; // convert paise back to rupees
+
+    if (!userId) {
+      return { error: 'Invalid transaction metadata.' };
+    }
+
+    // 2. Create the completed transaction record
     const { data: transaction, error: txError } = await supabaseAdmin
       .from('wallet_transactions')
-      .update({ 
+      .insert({
+        user_id: userId,
+        amount: amount,
+        type: 'recharge',
         status: 'completed',
-        razorpay_payment_id 
+        razorpay_order_id: razorpay_order_id,
+        razorpay_payment_id: razorpay_payment_id,
+        description: 'Wallet Recharge'
       })
-      .eq('razorpay_order_id', razorpay_order_id)
       .select('user_id, amount')
       .single();
 
     if (txError || !transaction) {
-      return { error: 'Transaction record not found.' };
+      console.error('Transaction Record Error:', txError);
+      return { error: 'Failed to record the completed transaction.' };
     }
 
-    // 2. Update User Balance
+    // 3. Update User Balance
     const { data: success } = await supabaseAdmin.rpc('adjust_wallet_balance', {
       p_user_id: transaction.user_id,
       p_amount: transaction.amount
