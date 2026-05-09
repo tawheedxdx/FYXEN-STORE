@@ -54,129 +54,117 @@ export default function Navbar() {
         {/* Height container */}
         <div className="relative container-custom h-16 md:h-20 flex items-center">
 
-          {/* ── LOGO (always absolute, animates between center and left) ── */}
+          {/* ── LOGO (always absolute, animates between center and left/center-small) ── */}
           <motion.div
-            className="absolute top-1/2 -translate-y-1/2 z-10"
+            className="absolute top-1/2 -translate-y-1/2 z-20 pointer-events-none"
             initial={false}
             animate={
               heroMode
                 ? {
                     left: '50%',
                     x: '-50%',
-                    scale: 1.5,
+                    scale: 1.3, // Slightly smaller for mobile safety
                   }
                 : {
-                    left: '1rem', // left-4
-                    x: '0%',
+                    // Responsive position: centered on mobile, left on desktop
+                    left: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : '1rem',
+                    x: typeof window !== 'undefined' && window.innerWidth < 768 ? '-50%' : '0%',
                     scale: 1,
                   }
             }
             transition={{ type: 'spring', stiffness: 160, damping: 28 }}
           >
-            <Link href="/" className="flex items-center">
+            <Link href="/" className="flex items-center pointer-events-auto">
               <img
                 src="/logo.png"
                 alt="Fyxen Logo"
-                className={`w-auto object-contain transition-[filter] duration-500 h-11 md:h-14 ${
+                className={`w-auto object-contain transition-[filter] duration-500 h-10 md:h-14 ${
                   heroMode ? 'brightness-0 invert' : ''
                 }`}
               />
             </Link>
           </motion.div>
 
-          {/* ── LEFT: Desktop nav links ── */}
-          <AnimatePresence>
-            {showLinks && (
-              <motion.nav
-                key="nav-links"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                transition={{ duration: 0.35, ease: 'easeOut' }}
-                className="hidden md:flex items-center gap-1 ml-[180px] lg:ml-[200px]"
-              >
-                {navLinks.map((link, i) => (
-                  <motion.div
-                    key={link.href}
-                    initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.055, duration: 0.25 }}
-                  >
-                    <Link
-                      href={link.href}
-                      className={`relative px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                        pathname === link.href
-                          ? 'text-primary-900 dark:text-white'
-                          : 'text-primary-500 dark:text-primary-400 hover:text-primary-900 dark:hover:text-white hover:bg-primary-50 dark:hover:bg-white/5'
-                      }`}
-                    >
-                      {link.label}
-                      {pathname === link.href && (
-                        <motion.div
-                          layoutId="nav-underline"
-                          className="absolute bottom-1 left-3 right-3 h-0.5 bg-accent rounded-full"
-                        />
-                      )}
-                    </Link>
-                  </motion.div>
-                ))}
-              </motion.nav>
-            )}
-          </AnimatePresence>
-
-          {/* ── Mobile hamburger (left side, always visible on mobile) ── */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setMobileMenuOpen(prev => !prev)}
-              className={`p-2 transition-colors ${heroMode ? 'text-white' : 'text-primary-900 dark:text-white'}`}
-              aria-label="Toggle menu"
+          {/* ── LEFT: Hamburger (Mobile) & Nav Links (Desktop) ── */}
+          <div className="flex items-center">
+            {/* Hamburger */}
+            <motion.div
+              className="md:hidden"
+              animate={{ opacity: heroMode ? 0 : 1, pointerEvents: heroMode ? 'none' : 'auto' }}
             >
-              <AnimatePresence mode="wait" initial={false}>
-                {mobileMenuOpen ? (
-                  <motion.div key="close" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.15 }}>
-                    <X className="w-6 h-6" />
-                  </motion.div>
-                ) : (
-                  <motion.div key="open" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.15 }}>
-                    <Menu className="w-6 h-6" />
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </button>
+              <button
+                onClick={() => setMobileMenuOpen(prev => !prev)}
+                className="p-2 -ml-2 text-primary-900 dark:text-white"
+                aria-label="Toggle menu"
+              >
+                <Menu className="w-6 h-6" />
+              </button>
+            </motion.div>
+
+            {/* Desktop Nav Links */}
+            <AnimatePresence>
+              {showLinks && (
+                <motion.nav
+                  key="nav-links"
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.35, ease: 'easeOut' }}
+                  className="hidden md:flex items-center gap-1 ml-[160px] lg:ml-[180px]"
+                >
+                  {navLinks.map((link, i) => (
+                    <motion.div
+                      key={link.href}
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.055, duration: 0.25 }}
+                    >
+                      <Link
+                        href={link.href}
+                        className={`relative px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                          pathname === link.href
+                            ? 'text-primary-900 dark:text-white'
+                            : 'text-primary-500 dark:text-primary-400 hover:text-primary-900 dark:hover:text-white hover:bg-primary-50 dark:hover:bg-white/5'
+                        }`}
+                      >
+                        {link.label}
+                        {pathname === link.href && (
+                          <motion.div
+                            layoutId="nav-underline"
+                            className="absolute bottom-1 left-3 right-3 h-0.5 bg-accent rounded-full"
+                          />
+                        )}
+                      </Link>
+                    </motion.div>
+                  ))}
+                </motion.nav>
+              )}
+            </AnimatePresence>
           </div>
 
-          {/* ── RIGHT: Icon buttons ── */}
-          <div className="ml-auto flex items-center gap-0.5 md:gap-1">
-            <div className={heroMode ? '[&_button]:text-white [&_svg]:text-white' : ''}>
-              <ThemeToggle />
-            </div>
-            <div className={heroMode ? '[&_button]:text-white' : ''}>
-              <SearchBar />
-            </div>
+          {/* ── RIGHT: Icon buttons (Search, User, Cart) ── */}
+          <motion.div 
+            className="ml-auto flex items-center gap-0.5 md:gap-1"
+            animate={{ opacity: heroMode ? 0 : 1, pointerEvents: heroMode ? 'none' : 'auto' }}
+          >
+            <ThemeToggle />
+            <SearchBar />
             <Link
               href="/account"
-              className={`hidden md:flex p-2 rounded-lg transition-colors ${
-                heroMode
-                  ? 'text-white/80 hover:text-white hover:bg-white/10'
-                  : 'text-primary-700 dark:text-primary-300 hover:text-primary-900 dark:hover:text-white hover:bg-primary-50 dark:hover:bg-white/5'
-              }`}
+              className="hidden md:flex p-2 rounded-lg text-primary-700 dark:text-primary-300 hover:text-primary-900 dark:hover:text-white hover:bg-primary-50 dark:hover:bg-white/5 transition-colors"
               aria-label="Account"
             >
               <User className="w-5 h-5" />
             </Link>
             <Link
               href="/cart"
-              className={`relative p-2 rounded-lg transition-colors ${
-                heroMode
-                  ? 'text-white/80 hover:text-white hover:bg-white/10'
-                  : 'text-primary-700 dark:text-primary-300 hover:text-primary-900 dark:hover:text-white hover:bg-primary-50 dark:hover:bg-white/5'
-              }`}
+              className="relative p-2 rounded-lg text-primary-700 dark:text-primary-300 hover:text-primary-900 dark:hover:text-white hover:bg-primary-50 dark:hover:bg-white/5 transition-colors"
               aria-label="Cart"
             >
               <ShoppingBag className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full border-2 border-white dark:border-black" />
             </Link>
-          </div>
+          </motion.div>
         </div>
       </header>
 
