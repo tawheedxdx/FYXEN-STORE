@@ -4,15 +4,22 @@ import AnnouncementBanner from '@/components/layout/AnnouncementBanner';
 import { createClient } from '@/lib/supabase/server';
 import MaintenancePage from '@/components/common/MaintenancePage';
 import { AlertTriangle } from 'lucide-react';
+import WelcomeModal from '@/components/modals/WelcomeModal';
 
 export default async function StoreLayout({ children }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
   let role = 'customer';
+  let showWelcome = false;
   if (user) {
-    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single();
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, has_seen_welcome')
+      .eq('id', user.id)
+      .single();
     role = profile?.role || 'customer';
+    showWelcome = profile?.has_seen_welcome === false;
   }
 
   const { data: settings } = await supabase.from('settings').select('*').single();
@@ -41,6 +48,7 @@ export default async function StoreLayout({ children }) {
       <Navbar />
       <main>{children}</main>
       <Footer settings={settings} />
+      <WelcomeModal show={showWelcome} />
     </>
   );
 }

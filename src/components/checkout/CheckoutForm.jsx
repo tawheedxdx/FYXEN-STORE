@@ -7,6 +7,7 @@ import Script from 'next/script';
 import { Loader2, Ticket, CheckCircle2, X, Star, CreditCard } from 'lucide-react';
 import PaymentSelectionModal from './PaymentSelectionModal';
 import LoyaltyPointsRedemption from './LoyaltyPointsRedemption';
+import WalletRedemption from './WalletRedemption';
 
 export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: initialGrandTotal, profile, user }) {
   const router = useRouter();
@@ -29,11 +30,14 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
   const [pointsToRedeem, setPointsToRedeem] = useState(0);
   const [loyaltyDiscount, setLoyaltyDiscount] = useState(0);
 
+  // Wallet State
+  const [walletDiscount, setWalletDiscount] = useState(0);
+
   const [finalGrandTotal, setFinalGrandTotal] = useState(initialGrandTotal);
 
   useEffect(() => {
-    setFinalGrandTotal(Math.max(0, subtotal - currentDiscount - loyaltyDiscount + shipping + tax));
-  }, [subtotal, currentDiscount, loyaltyDiscount, shipping, tax]);
+    setFinalGrandTotal(Math.max(0, subtotal - currentDiscount - loyaltyDiscount - walletDiscount + shipping + tax));
+  }, [subtotal, currentDiscount, loyaltyDiscount, walletDiscount, shipping, tax]);
 
   async function handleApplyCoupon() {
     if (!couponCode) return;
@@ -305,6 +309,16 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
           }}
         />
 
+        <WalletRedemption 
+          profile={profile}
+          subtotal={subtotal}
+          shipping={shipping}
+          tax={tax}
+          currentDiscount={currentDiscount}
+          loyaltyDiscount={loyaltyDiscount}
+          onRedeem={(amt) => setWalletDiscount(amt)}
+        />
+
         <div className="mt-10 pt-6 border-t border-primary-100 dark:border-white/10">
           <div className="space-y-2 mb-6">
             <div className="flex justify-between text-sm text-primary-500">
@@ -321,6 +335,12 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
               <div className="flex justify-between text-sm text-green-600 font-medium">
                 <span>Loyalty Discount</span>
                 <span>-₹{loyaltyDiscount.toFixed(2)}</span>
+              </div>
+            )}
+            {walletDiscount > 0 && (
+              <div className="flex justify-between text-sm text-green-600 font-medium">
+                <span>Wallet Payment</span>
+                <span>-₹{walletDiscount.toFixed(2)}</span>
               </div>
             )}
             {tax > 0 && (

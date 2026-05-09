@@ -123,9 +123,26 @@ export async function createCheckoutSession(formData) {
     }
   }
 
+  // Wallet Balance Logic
+  const useWallet = formData.get('useWallet') === 'true';
+  let walletAmountUsed = 0;
+  
+  if (useWallet) {
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('wallet_balance')
+      .eq('id', user.id)
+      .single();
+
+    if (profile && profile.wallet_balance > 0) {
+      const remainingAfterCoupons = Math.max(0, subtotal - discount - loyaltyDiscount + totalShipping);
+      walletAmountUsed = Math.min(profile.wallet_balance, remainingAfterCoupons);
+    }
+  }
+
   // Calculate totals
   const shipping = totalShipping;
-  const grandTotal = Math.max(0, subtotal - discount - loyaltyDiscount + shipping);
+  const grandTotal = Math.max(0, subtotal - discount - loyaltyDiscount - walletAmountUsed + shipping);
 
   // Extract address info
   const shippingInfo = {
@@ -163,7 +180,8 @@ export async function createCheckoutSession(formData) {
       shipping_postal_code: shippingInfo.postal_code,
       shipping_country: shippingInfo.country,
       placed_at: paymentMethod === 'COD' ? new Date().toISOString() : null,
-      coupon_id: couponId
+      coupon_id: couponId,
+      wallet_amount_used: walletAmountUsed
     })
     .select('id')
     .single();
@@ -214,6 +232,21 @@ export async function createCheckoutSession(formData) {
       await supabaseAdmin.rpc('increment_loyalty_points', { 
         user_uuid: user.id, 
         points_to_add: -pointsToRedeem 
+      });
+    }
+
+    // If wallet was used, deduct it now for COD
+    if (walletAmountUsed > 0) {
+      await supabaseAdmin.rpc('adjust_wallet_balance', {
+        p_user_id: user.id,
+        p_amount: -walletAmountUsed
+      });
+      await supabaseAdmin.from('wallet_transactions').insert({
+        user_id: user.id,
+        amount: -walletAmountUsed,
+        type: 'payment',
+        status: 'completed',
+        description: `Order Payment (Order: ${orderNumber})`
       });
     }
 
@@ -337,6 +370,27 @@ export async function verifyPayment(paymentData) {
         .from('orders')
         .update({ loyalty_points_earned: pointsToEarn })
         .eq('id', orderId);
+
+      // 4. Deduct Wallet Balance if used
+      const { data: orderWithWallet } = await supabaseAdmin
+        .from('orders')
+        .select('wallet_amount_used, order_number')
+        .eq('id', orderId)
+        .single();
+
+      if (orderWithWallet?.wallet_amount_used > 0) {
+        await supabaseAdmin.rpc('adjust_wallet_balance', {
+          p_user_id: order.user_id,
+          p_amount: -orderWithWallet.wallet_amount_used
+        });
+        await supabaseAdmin.from('wallet_transactions').insert({
+          user_id: order.user_id,
+          amount: -orderWithWallet.wallet_amount_used,
+          type: 'payment',
+          status: 'completed',
+          description: `Order Payment (Order: ${orderWithWallet.order_number})`
+        });
+      }
     }
 
     // If a coupon was used, increment its count

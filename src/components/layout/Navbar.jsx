@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ShoppingBag, User, Menu, X } from 'lucide-react';
+import { ShoppingBag, User, Menu, X, Wallet } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import SearchBar from '@/components/ui/SearchBar';
@@ -229,6 +229,7 @@ export default function Navbar() {
 
                 {[
                   { href: '/account', icon: User, label: 'My Account' },
+                  { href: '/account/wallet', icon: Wallet, label: 'My Wallet' },
                   { href: '/cart', icon: ShoppingBag, label: 'My Cart' },
                 ].map(({ href, icon: Icon, label }, i) => (
                   <motion.div

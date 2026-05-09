@@ -25,7 +25,7 @@ export default async function CheckoutPage() {
   // Fetch profile for pre-filling
   const { data: profile } = await supabase
     .from('profiles')
-    .select('full_name, phone, email, loyalty_points')
+    .select('full_name, phone, email, loyalty_points, wallet_balance')
     .eq('id', user.id)
     .single();
 

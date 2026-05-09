@@ -1,0 +1,125 @@
+'use server';
+
+import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
+import Razorpay from 'razorpay';
+import crypto from 'crypto';
+import { revalidatePath } from 'next/cache';
+
+const razorpay = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_dummy',
+  key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummy_secret',
+});
+
+export async function createWalletRechargeOrder(amount) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: 'Please sign in to recharge your wallet.' };
+  }
+
+  if (amount < 1) {
+    return { error: 'Minimum recharge amount is ₹1.' };
+  }
+
+  try {
+    const rzpOrder = await razorpay.orders.create({
+      amount: Math.round(amount * 100), // in paise
+      currency: 'INR',
+      receipt: `wallet_${user.id}_${Date.now()}`,
+      notes: { userId: user.id, type: 'wallet_recharge' }
+    });
+
+    const supabaseAdmin = createAdminClient();
+    await supabaseAdmin
+      .from('wallet_transactions')
+      .insert({
+        user_id: user.id,
+        amount: amount,
+        type: 'recharge',
+        status: 'pending',
+        razorpay_order_id: rzpOrder.id,
+        description: 'Wallet Recharge'
+      });
+
+    return {
+      success: true,
+      rzpOrderId: rzpOrder.id,
+      amount: rzpOrder.amount,
+      key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID,
+      userEmail: user.email,
+    };
+  } catch (error) {
+    console.error('Wallet Recharge Error:', error);
+    return { error: 'Failed to initialize recharge payment.' };
+  }
+}
+
+export async function verifyWalletRecharge(paymentData) {
+  const supabase = await createClient();
+  const supabaseAdmin = createAdminClient();
+  const {
+    razorpay_order_id,
+    razorpay_payment_id,
+    razorpay_signature,
+  } = paymentData;
+
+  const secret = process.env.RAZORPAY_KEY_SECRET || 'dummy_secret';
+  
+  const generatedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(razorpay_order_id + '|' + razorpay_payment_id)
+    .digest('hex');
+
+  if (generatedSignature === razorpay_signature) {
+    // 1. Update Transaction Status
+    const { data: transaction, error: txError } = await supabaseAdmin
+      .from('wallet_transactions')
+      .update({ 
+        status: 'completed',
+        razorpay_payment_id 
+      })
+      .eq('razorpay_order_id', razorpay_order_id)
+      .select('user_id, amount')
+      .single();
+
+    if (txError || !transaction) {
+      return { error: 'Transaction record not found.' };
+    }
+
+    // 2. Update User Balance
+    const { data: success } = await supabaseAdmin.rpc('adjust_wallet_balance', {
+      p_user_id: transaction.user_id,
+      p_amount: transaction.amount
+    });
+
+    if (!success) {
+      return { error: 'Failed to update wallet balance. Please contact support.' };
+    }
+
+    revalidatePath('/account/wallet');
+    return { success: true };
+  } else {
+    await supabaseAdmin
+      .from('wallet_transactions')
+      .update({ status: 'failed' })
+      .eq('razorpay_order_id', razorpay_order_id);
+      
+    return { error: 'Payment verification failed.' };
+  }
+}
+
+export async function markWelcomeAsSeen() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: 'Not authenticated' };
+
+  await supabase
+    .from('profiles')
+    .update({ has_seen_welcome: true })
+    .eq('id', user.id);
+
+  revalidatePath('/');
+  return { success: true };
+}

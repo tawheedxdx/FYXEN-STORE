@@ -1,7 +1,7 @@
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import Link from 'next/link';
-import { User, MapPin, Package, LogOut } from 'lucide-react';
+import { User, MapPin, Package, LogOut, Wallet } from 'lucide-react';
 import { logout } from '@/app/(auth)/actions';
 
 export default function AccountLayout({ children }) {
@@ -32,6 +32,11 @@ export default function AccountLayout({ children }) {
                     <li>
                       <Link href="/account/addresses" className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-primary-50 text-primary-700 font-medium transition-colors">
                         <MapPin className="w-5 h-5" /> Addresses
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href="/account/wallet" className="flex items-center gap-3 px-4 py-3 rounded-md hover:bg-primary-50 text-primary-700 font-medium transition-colors">
+                        <Wallet className="w-5 h-5" /> My Wallet
                       </Link>
                     </li>
                   </ul>
