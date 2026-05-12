@@ -300,6 +300,36 @@ export default function ProductForm({ categories, product }) {
             </div>
 
             <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">Best Seller</label>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" name="isBestSeller" value="true" className="sr-only peer"
+                  defaultChecked={product?.is_best_seller || false} />
+                <div className="w-10 h-5 bg-primary-200 rounded-full peer peer-checked:bg-primary-900 transition-colors"></div>
+                <span className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform"></span>
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">New Arrival</label>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" name="isNewArrival" value="true" className="sr-only peer"
+                  defaultChecked={product?.is_new_arrival || false} />
+                <div className="w-10 h-5 bg-primary-200 rounded-full peer peer-checked:bg-primary-900 transition-colors"></div>
+                <span className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform"></span>
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <label className="text-sm font-medium">On Sale</label>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" name="isOnSale" value="true" className="sr-only peer"
+                  defaultChecked={product?.is_on_sale || false} />
+                <div className="w-10 h-5 bg-primary-200 rounded-full peer peer-checked:bg-primary-900 transition-colors"></div>
+                <span className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform"></span>
+              </label>
+            </div>
+
+            <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Active (visible in store)</label>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input type="checkbox" name="isActive" value="true" className="sr-only peer"

@@ -38,6 +38,9 @@ export async function createProduct(formData) {
   const isActive = formData.get('isActive') === 'true';
   const seoTitle = formData.get('seoTitle') || title;
   const seoDescription = formData.get('seoDescription') || shortDescription;
+  const isBestSeller = formData.get('isBestSeller') === 'true';
+  const isNewArrival = formData.get('isNewArrival') === 'true';
+  const isOnSale = formData.get('isOnSale') === 'true';
 
   const highlights = formData.get('highlights') ? JSON.parse(formData.get('highlights')) : [];
   const shippingPrice = parseFloat(formData.get('shippingPrice') || '0');
@@ -65,6 +68,9 @@ export async function createProduct(formData) {
       seo_description: seoDescription,
       highlights,
       promo_tag: formData.get('promoTag') || null,
+      is_best_seller: isBestSeller,
+      is_new_arrival: isNewArrival,
+      is_on_sale: isOnSale,
     })
     .select('id')
     .single();
@@ -105,6 +111,9 @@ export async function createProduct(formData) {
 
   revalidatePath('/admin/products');
   revalidatePath('/shop');
+  revalidatePath('/best-sellers');
+  revalidatePath('/new-arrivals');
+  revalidatePath('/sale');
   redirect('/admin/products');
 }
 
@@ -121,6 +130,9 @@ export async function updateProduct(productId, formData) {
   const isActive = formData.get('isActive') === 'true';
   const seoTitle = formData.get('seoTitle') || title;
   const seoDescription = formData.get('seoDescription') || formData.get('shortDescription');
+  const isBestSeller = formData.get('isBestSeller') === 'true';
+  const isNewArrival = formData.get('isNewArrival') === 'true';
+  const isOnSale = formData.get('isOnSale') === 'true';
   const highlights = formData.get('highlights') ? JSON.parse(formData.get('highlights')) : [];
   const shippingPrice = parseFloat(formData.get('shippingPrice') || '0');
   const taxRate = parseFloat(formData.get('taxRate') || '0');
@@ -144,6 +156,9 @@ export async function updateProduct(productId, formData) {
     seo_description: seoDescription,
     highlights,
     promo_tag: formData.get('promoTag') || null,
+    is_best_seller: isBestSeller,
+    is_new_arrival: isNewArrival,
+    is_on_sale: isOnSale,
     updated_at: new Date().toISOString(),
   }).eq('id', productId);
 
@@ -182,6 +197,9 @@ export async function updateProduct(productId, formData) {
 
   revalidatePath('/admin/products');
   revalidatePath(`/product/${slug}`);
+  revalidatePath('/best-sellers');
+  revalidatePath('/new-arrivals');
+  revalidatePath('/sale');
   return { success: true };
 }
 

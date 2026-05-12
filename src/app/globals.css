@@ -112,6 +112,7 @@ html {
   .badge-sale     { @apply bg-red-500 text-white; }
   .badge-promo    { @apply bg-emerald-500 text-white; }
   .badge-featured { @apply bg-accent text-primary-900; }
+  .badge-best     { @apply bg-yellow-400 text-black; }
   .badge-new      { @apply bg-primary-900 text-white dark:bg-white dark:text-primary-900; }
 
   /* Section label */

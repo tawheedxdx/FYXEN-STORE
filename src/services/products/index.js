@@ -39,6 +39,9 @@ export async function getProducts(options = {}) {
         price,
         compare_at_price,
         featured,
+        is_best_seller,
+        is_new_arrival,
+        is_on_sale,
         brand,
         promo_tag,
         product_images(image_url, sort_order),
@@ -63,6 +66,18 @@ export async function getProducts(options = {}) {
 
       if (options.featured) {
         query = query.eq('featured', true);
+      }
+
+      if (options.bestSeller) {
+        query = query.eq('is_best_seller', true);
+      }
+
+      if (options.newArrival) {
+        query = query.eq('is_new_arrival', true);
+      }
+
+      if (options.onSale) {
+        query = query.eq('is_on_sale', true);
       }
 
       if (options.searchQuery) {
