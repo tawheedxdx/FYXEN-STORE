@@ -50,17 +50,25 @@ export async function getProducts(options = {}) {
 
       // FIX: resolve category slug → id in the same client, no extra createClient call
       if (options.categorySlug) {
-        const { data: cat } = await supabase
-          .from('categories')
-          .select('id')
-          .eq('slug', options.categorySlug)
-          .maybeSingle();
-
-        if (cat) {
-          query = query.eq('category_id', cat.id);
+        if (options.categorySlug === 'best-sellers') {
+          query = query.eq('is_best_seller', true);
+        } else if (options.categorySlug === 'new-arrivals') {
+          query = query.eq('is_new_arrival', true);
+        } else if (options.categorySlug === 'sale') {
+          query = query.eq('is_on_sale', true);
         } else {
-          // Category doesn't exist — return empty without a second round-trip
-          return [];
+          const { data: cat } = await supabase
+            .from('categories')
+            .select('id')
+            .eq('slug', options.categorySlug)
+            .maybeSingle();
+
+          if (cat) {
+            query = query.eq('category_id', cat.id);
+          } else {
+            // Category doesn't exist — return empty without a second round-trip
+            return [];
+          }
         }
       }
 
