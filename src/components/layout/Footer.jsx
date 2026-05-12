@@ -116,7 +116,7 @@ export default function Footer({ settings }) {
             <p>Operated by <span className="text-primary-400 font-medium">{parentCompany}</span></p>
           </div>
         </div>
-        <div className="text-center text-[10px] text-primary-600/60 pb-5">
+        <div className="text-center text-sm text-primary-500 pb-8 font-medium">
           *Subject to Jangipur jurisdiction only.
         </div>
       </div>
