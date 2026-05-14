@@ -2,121 +2,82 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { ArrowRight, ShoppingBag, Star } from 'lucide-react';
-
-const stats = [
-  { value: '2K+', label: 'Orders Delivered' },
-  { value: '500+', label: 'Happy Customers' },
-  { value: '4.9★', label: 'Average Rating' },
-];
+import { ArrowRight, ShoppingBag } from 'lucide-react';
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen w-full bg-primary-950 flex items-center overflow-hidden">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=2400&auto=format&fit=crop"
-          alt="Fyxen Premium Store"
-          fill
-          priority
-          className="object-cover opacity-25"
-        />
-        {/* Gradient overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-primary-950 via-primary-950/80 to-primary-950/30" />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary-950 via-transparent to-transparent" />
-      </div>
+    <section className="relative w-full bg-white dark:bg-black overflow-hidden min-h-[80vh] md:min-h-screen flex items-center">
+      <div className="container-custom w-full py-16 md:py-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center min-h-[80vh] md:min-h-screen">
+          
+          {/* Left: Text Content */}
+          <div className="flex flex-col justify-center py-16 md:py-24 order-2 md:order-1">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary-400 mb-6">
+              New Season — 2025 Collection
+            </p>
+            <h1 className="text-6xl sm:text-7xl md:text-8xl font-black tracking-tighter text-primary-900 dark:text-white leading-[0.9] mb-8">
+              The<br />
+              <span className="italic font-light">Premium</span><br />
+              Standard.
+            </h1>
+            <p className="text-base md:text-lg text-primary-500 dark:text-primary-400 max-w-md mb-10 leading-relaxed">
+              Elevating everyday living with premium essentials — crafted for those who appreciate the finer details.
+            </p>
+            <div className="flex flex-col sm:flex-row items-start gap-4">
+              <Link
+                href="/shop"
+                className="inline-flex items-center gap-2 bg-primary-900 dark:bg-white text-white dark:text-primary-900 px-8 py-4 rounded-full font-bold text-sm hover:bg-primary-700 dark:hover:bg-gray-100 transition-all"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                Discover Now
+              </Link>
+              <Link
+                href="/category/new-arrivals"
+                className="inline-flex items-center gap-2 text-primary-900 dark:text-white font-semibold text-sm px-8 py-4 rounded-full border border-primary-200 dark:border-white/20 hover:bg-primary-50 dark:hover:bg-white/10 transition-all"
+              >
+                New Arrivals <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
 
-      {/* Decorative accent orb */}
-      <div className="absolute top-1/4 right-1/4 w-[600px] h-[600px] rounded-full bg-accent/5 blur-[120px] pointer-events-none" />
+            {/* Stats */}
+            <div className="flex items-center gap-8 mt-12 pt-8 border-t border-primary-100 dark:border-white/10">
+              {[
+                { num: '2K+', label: 'Orders Shipped' },
+                { num: '500+', label: 'Happy Customers' },
+                { num: '4.9★', label: 'Rating' },
+              ].map(s => (
+                <div key={s.label}>
+                  <p className="text-xl font-black text-primary-900 dark:text-white">{s.num}</p>
+                  <p className="text-[11px] text-primary-400 uppercase tracking-wider mt-0.5">{s.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
 
-      {/* Content */}
-      <div className="relative z-10 container-custom w-full py-24 md:py-0">
-        <div className="max-w-3xl">
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 bg-accent/15 border border-accent/30 rounded-full mb-8"
-          >
-            <Star className="w-3.5 h-3.5 text-accent fill-accent" />
-            <span className="text-accent text-xs font-bold uppercase tracking-[0.2em]">Premium Collection 2025</span>
-          </motion.div>
+          {/* Right: Image */}
+          <div className="relative h-[50vw] md:h-screen max-h-screen order-1 md:order-2 overflow-hidden rounded-3xl md:rounded-none md:rounded-bl-[4rem]">
+            <Image
+              src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1200&auto=format&fit=crop"
+              alt="Fyxen Premium Collection"
+              fill
+              priority
+              className="object-cover"
+            />
+            {/* Subtle overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/10" />
 
-          {/* Heading */}
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.1, ease: 'easeOut' }}
-            className="text-6xl sm:text-7xl md:text-8xl xl:text-9xl font-black tracking-tighter text-white leading-[0.88] mb-6"
-          >
-            FYXEN<br />
-            <span className="text-accent">CORE.</span>
-          </motion.h1>
+            {/* Floating badge */}
+            <div className="absolute bottom-8 left-8 bg-white/95 dark:bg-black/90 backdrop-blur-md rounded-2xl px-5 py-4 shadow-xl">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-primary-400 mb-1">Just Landed</p>
+              <p className="text-sm font-black text-primary-900 dark:text-white">New Arrivals 2025</p>
+              <Link href="/category/new-arrivals" className="text-xs text-primary-500 hover:text-primary-900 dark:hover:text-white transition-colors flex items-center gap-1 mt-1">
+                Shop Now <ArrowRight className="w-3 h-3" />
+              </Link>
+            </div>
+          </div>
 
-          {/* Subheading */}
-          <motion.p
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.2, ease: 'easeOut' }}
-            className="text-lg md:text-xl text-primary-300 max-w-xl mb-10 leading-relaxed font-light"
-          >
-            Uncompromising quality for the modern pioneer. Discover essentials engineered for those who refuse to settle.
-          </motion.p>
-
-          {/* CTAs */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.3, ease: 'easeOut' }}
-            className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-16"
-          >
-            <Link
-              href="/shop"
-              className="group inline-flex items-center gap-3 bg-accent text-primary-900 px-8 py-4 rounded-xl font-bold text-base hover:bg-accent-hover transition-all shadow-lg shadow-accent/20 hover:shadow-accent/30 hover:-translate-y-0.5"
-            >
-              <ShoppingBag className="w-5 h-5" />
-              Explore Shop
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link
-              href="/category/new-arrivals"
-              className="inline-flex items-center gap-3 px-8 py-4 border border-white/20 text-white rounded-xl font-semibold text-base hover:bg-white/10 hover:border-white/40 transition-all backdrop-blur-sm"
-            >
-              New Arrivals
-            </Link>
-          </motion.div>
-
-          {/* Stats Row */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.5 }}
-            className="flex items-center gap-8 pt-8 border-t border-white/10"
-          >
-            {stats.map((stat, i) => (
-              <div key={i} className="flex flex-col">
-                <span className="text-2xl md:text-3xl font-black text-white">{stat.value}</span>
-                <span className="text-xs text-primary-400 uppercase tracking-wider mt-0.5">{stat.label}</span>
-              </div>
-            ))}
-          </motion.div>
         </div>
       </div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        animate={{ y: [0, 10, 0] }}
-        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 hidden md:flex flex-col items-center gap-2"
-      >
-        <span className="text-white/30 text-[10px] uppercase tracking-widest">Scroll</span>
-        <div className="w-5 h-8 border border-white/20 rounded-full flex justify-center pt-1.5">
-          <div className="w-1 h-1.5 bg-accent rounded-full" />
-        </div>
-      </motion.div>
     </section>
   );
 }

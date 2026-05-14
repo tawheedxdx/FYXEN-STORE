@@ -1,51 +1,60 @@
 import Link from 'next/link';
-import { ArrowRight, ShieldCheck, Truck, Clock, Star, RotateCcw } from 'lucide-react';
+import { ShieldCheck, Truck, RotateCcw, Clock, ArrowRight } from 'lucide-react';
 import HeroSection from '@/components/storefront/HeroSection';
-import CategoryShowcase from '@/components/storefront/CategoryShowcase';
-import ProductCarousel from '@/components/storefront/ProductCarousel';
+import CategoryNavStrip from '@/components/storefront/CategoryNavStrip';
+import CollectionBanners from '@/components/storefront/CollectionBanners';
 import PromoBanner from '@/components/storefront/PromoBanner';
 import NewsletterForm from '@/components/storefront/NewsletterForm';
 import ProductCard from '@/components/product/ProductCard';
 import { getProducts, getCategories } from '@/services/products';
 import { createClient } from '@/lib/supabase/server';
 
+export const metadata = {
+  title: 'Fyxen — Premium Essentials',
+  description: 'Elevating everyday living with premium essentials crafted for those who appreciate the finer details.',
+};
+
 export const revalidate = 60;
+
+const trustFeatures = [
+  { icon: ShieldCheck, title: 'Authentic Products', desc: 'Every item is 100% genuine and quality-checked.' },
+  { icon: Truck, title: 'Delivered Across India', desc: 'Swift, reliable delivery to your doorstep.' },
+  { icon: RotateCcw, title: 'Easy 7-Day Returns', desc: 'Not happy? Return it, no questions asked.' },
+  { icon: Clock, title: '24/7 Support', desc: 'Our team is always here to help you.' },
+];
 
 export default async function HomePage() {
   const supabase = await createClient();
-  const [featuredProducts, categories, { data: banners }] = await Promise.all([
+  const [featuredProducts, bestSellers, categories, { data: banners }] = await Promise.all([
     getProducts({ featured: true }),
+    getProducts({ bestSeller: true }),
     getCategories(),
-    supabase.from('promo_banners').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(1)
+    supabase.from('promo_banners').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(1),
   ]);
 
   const activeBanner = banners?.[0];
 
-  const trustFeatures = [
-    { icon: ShieldCheck, title: 'Premium Quality', desc: 'Rigorously tested materials in every product.' },
-    { icon: Truck, title: 'Fast Shipping', desc: 'Express nationwide delivery via trusted partners.' },
-    { icon: RotateCcw, title: 'Easy Returns', desc: 'Hassle-free 7-day return policy.' },
-    { icon: Clock, title: '24/7 Support', desc: 'Dedicated team ready to assist you anytime.' },
-  ];
-
   return (
-    <div className="flex flex-col w-full bg-white dark:bg-black overflow-hidden">
+    <div className="flex flex-col w-full bg-white dark:bg-black">
 
       {/* 1. Hero */}
       <HeroSection />
 
-      {/* 2. Trust Bar */}
-      <section className="py-8 md:py-12 bg-white dark:bg-primary-950 border-b border-primary-100 dark:border-white/5">
+      {/* 2. Category Nav Strip */}
+      <CategoryNavStrip categories={categories} />
+
+      {/* 3. Trust Pillars */}
+      <section className="py-14 md:py-20 bg-white dark:bg-black border-b border-primary-100 dark:border-white/5">
         <div className="container-custom">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
             {trustFeatures.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="flex items-start md:items-center gap-3 group">
-                <div className="shrink-0 w-10 h-10 rounded-xl bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                  <Icon className="w-5 h-5 text-accent" />
+              <div key={title} className="flex flex-col items-center md:items-start text-center md:text-left gap-3">
+                <div className="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+                  <Icon className="w-5 h-5 text-primary-700 dark:text-primary-300" />
                 </div>
                 <div>
                   <p className="font-bold text-sm text-primary-900 dark:text-white">{title}</p>
-                  <p className="text-xs text-primary-500 dark:text-primary-400 mt-0.5 hidden md:block">{desc}</p>
+                  <p className="text-xs text-primary-500 dark:text-primary-400 mt-1 leading-relaxed">{desc}</p>
                 </div>
               </div>
             ))}
@@ -53,97 +62,126 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 3. Category Showcase */}
-      <CategoryShowcase categories={categories} />
+      {/* 4. Featured Products — "Fyxen Exclusives" */}
+      {featuredProducts.length > 0 && (
+        <section className="py-16 md:py-24 bg-white dark:bg-black">
+          <div className="container-custom">
+            <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-10 md:gap-16 items-start">
+              {/* Left: Section Header */}
+              <div className="md:sticky md:top-28">
+                <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary-400 mb-4">Handpicked</p>
+                <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-primary-900 dark:text-white leading-[0.95] mb-5">
+                  Fyxen<br /><span className="italic font-light">Exclusives</span>
+                </h2>
+                <p className="text-sm text-primary-500 dark:text-primary-400 leading-relaxed mb-8 max-w-[240px]">
+                  Handpicked exclusively for those who appreciate quality and craftsmanship.
+                </p>
+                <Link
+                  href="/shop"
+                  className="inline-flex items-center gap-2 text-sm font-bold text-primary-900 dark:text-white border-b border-primary-900 dark:border-white pb-0.5 hover:opacity-60 transition-opacity"
+                >
+                  Shop the Collection <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
 
-      {/* 4. Featured Products */}
-      <section className="py-20 md:py-28 bg-white dark:bg-black">
-        <div className="container-custom">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 md:mb-14 gap-4">
-            <div>
-              <span className="section-label">Our Picks</span>
-              <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-primary-900 dark:text-white mt-1">
-                Featured <span className="text-accent">Selection</span>
-              </h2>
-              <p className="text-primary-500 dark:text-primary-400 text-base mt-3 max-w-lg">
-                Curated for those who settle for nothing but the best.
-              </p>
+              {/* Right: Product Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+                {featuredProducts.slice(0, 6).map(product => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
             </div>
-            <Link href="/shop" className="inline-flex items-center gap-2 btn-outline shrink-0">
-              View All <ArrowRight className="w-4 h-4" />
-            </Link>
           </div>
-
-          {featuredProducts.length > 0 ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {featuredProducts.slice(0, 8).map(product => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          ) : (
-            <ProductCarousel products={[]} />
-          )}
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* 5. Promo Banner */}
       {activeBanner && <PromoBanner banner={activeBanner} />}
 
-      {/* 6. Social Proof Bar */}
-      <section className="py-12 bg-primary-50 dark:bg-primary-950/50 border-y border-primary-100 dark:border-white/5">
+      {/* 6. Best Sellers Section */}
+      {bestSellers.length > 0 && (
+        <section className="py-16 md:py-24 bg-primary-50 dark:bg-primary-950/40">
+          <div className="container-custom">
+            <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-10 md:gap-16 items-start">
+              {/* Left: Section Header */}
+              <div className="md:sticky md:top-28">
+                <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary-400 mb-4">Top Picks</p>
+                <h2 className="text-4xl md:text-5xl font-black tracking-tighter text-primary-900 dark:text-white leading-[0.95] mb-5">
+                  Featured<br /><span className="italic font-light">Products</span>
+                </h2>
+                <p className="text-sm text-primary-500 dark:text-primary-400 leading-relaxed mb-8 max-w-[240px]">
+                  The products our customers keep coming back for, time and time again.
+                </p>
+                <Link
+                  href="/category/best-sellers"
+                  className="inline-flex items-center gap-2 text-sm font-bold text-primary-900 dark:text-white border-b border-primary-900 dark:border-white pb-0.5 hover:opacity-60 transition-opacity"
+                >
+                  Shop the Collection <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+
+              {/* Right: Product Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+                {bestSellers.slice(0, 6).map(product => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* 7. Curated Collection Banners */}
+      <CollectionBanners />
+
+      {/* 8. Stats Bar */}
+      <section className="py-14 md:py-20 bg-white dark:bg-black border-y border-primary-100 dark:border-white/5">
         <div className="container-custom">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-16 text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 md:divide-x divide-primary-100 dark:divide-white/10">
             {[
               { num: '2,000+', text: 'Orders Shipped' },
               { num: '500+', text: 'Happy Customers' },
-              { num: '4.9/5', text: 'Customer Rating' },
+              { num: '4.9 / 5', text: 'Customer Rating' },
               { num: '100%', text: 'Authentic Products' },
             ].map(({ num, text }) => (
-              <div key={text} className="flex flex-col items-center">
+              <div key={text} className="flex flex-col items-center text-center md:px-8 py-2">
                 <span className="text-3xl md:text-4xl font-black text-primary-900 dark:text-white tracking-tighter">{num}</span>
-                <span className="text-xs text-primary-500 dark:text-primary-400 uppercase tracking-wider font-medium mt-1">{text}</span>
+                <span className="text-xs text-primary-500 dark:text-primary-400 uppercase tracking-widest font-medium mt-2">{text}</span>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 7. Newsletter */}
-      <section className="py-20 md:py-28 bg-white dark:bg-black">
+      {/* 9. Newsletter */}
+      <section className="py-16 md:py-24 bg-primary-900 dark:bg-primary-950">
         <div className="container-custom">
-          <div className="relative bg-primary-900 dark:bg-primary-950 rounded-3xl overflow-hidden">
-            {/* Decorative blobs */}
-            <div className="absolute -top-24 -right-24 w-96 h-96 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
-
-            <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-center p-10 md:p-16">
-              {/* Left */}
-              <div>
-                <div className="flex items-center gap-2 mb-6">
-                  <Star className="w-4 h-4 text-accent fill-accent" />
-                  <span className="text-accent text-xs font-bold uppercase tracking-[0.2em]">Exclusive Access</span>
-                </div>
-                <h2 className="text-4xl md:text-5xl font-black text-white tracking-tighter mb-4">
-                  Join the<br /><span className="text-accent">Elite.</span>
-                </h2>
-                <p className="text-primary-300 text-base leading-relaxed mb-6">
-                  Get early access to new drops, exclusive member-only discounts, and curated recommendations straight to your inbox.
-                </p>
-                <div className="flex items-center gap-2 text-primary-400 text-sm">
-                  <ShieldCheck className="w-4 h-4 text-primary-500" />
-                  No spam. Unsubscribe anytime.
-                </div>
-              </div>
-
-              {/* Right */}
-              <div className="bg-white/5 rounded-2xl p-6 md:p-8 border border-white/10">
-                <p className="text-white font-semibold mb-4">Join <span className="text-accent">12,000+</span> subscribers today</p>
-                <NewsletterForm />
-              </div>
+          <div className="max-w-2xl mx-auto text-center">
+            <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary-400 mb-4">Exclusive Access</p>
+            <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-white mb-4 leading-[0.9]">
+              Thrive<br /><span className="italic font-light">With Us</span>
+            </h2>
+            <p className="text-primary-400 text-base mb-10 leading-relaxed">
+              Get early access to new drops, exclusive member discounts, and curated picks — straight to your inbox.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+              <input
+                type="email"
+                placeholder="your@email.com"
+                className="flex-1 px-5 py-3.5 rounded-full bg-white/10 border border-white/20 text-white placeholder:text-primary-500 focus:outline-none focus:ring-2 focus:ring-white/30 text-sm"
+              />
+              <Link
+                href="#"
+                className="px-8 py-3.5 bg-white text-primary-900 rounded-full font-bold text-sm hover:bg-gray-100 transition-all whitespace-nowrap"
+              >
+                Subscribe
+              </Link>
             </div>
+            <p className="text-primary-600 text-xs mt-4">No spam. Unsubscribe anytime.</p>
           </div>
         </div>
       </section>
+
     </div>
   );
 }

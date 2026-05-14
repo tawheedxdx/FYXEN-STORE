@@ -42,6 +42,7 @@ export async function getProducts(options = {}) {
         is_best_seller,
         is_new_arrival,
         is_on_sale,
+        stock_quantity,
         brand,
         promo_tag,
         product_images(image_url, sort_order),
