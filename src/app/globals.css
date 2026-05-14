@@ -88,7 +88,7 @@ html {
     @apply bg-primary-900 text-white px-6 py-3 rounded-lg hover:bg-primary-700 active:scale-95 transition-all duration-200 font-semibold text-sm flex items-center justify-center min-h-[44px] gap-2 dark:bg-white dark:text-primary-900 dark:hover:bg-gray-100;
   }
   .btn-accent {
-    @apply bg-accent text-primary-900 px-6 py-3 rounded-lg hover:bg-accent-hover active:scale-95 transition-all duration-200 font-semibold text-sm flex items-center justify-center min-h-[44px] gap-2;
+    @apply bg-primary-900 text-white px-6 py-3 rounded-lg hover:bg-primary-700 active:scale-95 transition-all duration-200 font-bold text-sm flex items-center justify-center min-h-[44px] gap-2 dark:bg-white dark:text-primary-900 dark:hover:bg-gray-200 shadow-lg shadow-primary-900/10;
   }
   .btn-secondary {
     @apply bg-primary-50 text-primary-900 px-6 py-3 rounded-lg hover:bg-primary-100 active:scale-95 transition-all duration-200 font-semibold text-sm flex items-center justify-center min-h-[44px] gap-2 dark:bg-primary-800 dark:text-white dark:hover:bg-primary-700;
@@ -111,13 +111,12 @@ html {
   }
   .badge-sale     { @apply bg-red-500 text-white; }
   .badge-promo    { @apply bg-emerald-500 text-white; }
-  .badge-featured { @apply bg-accent text-primary-900; }
+  .badge-featured { @apply bg-primary-900 text-white dark:bg-white dark:text-primary-900; }
   .badge-best     { @apply bg-yellow-400 text-black; }
   .badge-new      { @apply bg-primary-900 text-white dark:bg-white dark:text-primary-900; }
 
-  /* Section label */
   .section-label {
-    @apply text-accent font-bold tracking-[0.25em] uppercase text-[11px] block;
+    @apply text-primary-400 font-bold tracking-[0.25em] uppercase text-[11px] block;
   }
 
   /* Prose */
@@ -128,7 +127,7 @@ html {
   .prose p { @apply mb-4; }
   .prose ul { @apply list-disc list-inside mb-4 space-y-2; }
   .prose ol { @apply list-decimal list-inside mb-4 space-y-2; }
-  .prose a { @apply text-accent hover:underline; }
+  .prose a { @apply text-primary-900 dark:text-white font-bold hover:underline; }
   .prose blockquote { @apply border-l-4 border-primary-200 pl-4 italic my-4; }
   .prose img { @apply rounded-xl my-6 max-w-full h-auto; }
   .prose video { @apply rounded-xl my-6 w-full; }

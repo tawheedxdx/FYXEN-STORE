@@ -77,7 +77,7 @@ export default async function ProductPage({ params }) {
                 </span>
               )}
               
-              <span className="text-sm font-semibold text-accent mb-2 block">{product.brand || 'Fyxen'}</span>
+              <span className="text-sm font-bold tracking-widest uppercase text-primary-400 mb-2 block">{product.brand || 'Fyxen'}</span>
               <div className="flex justify-between items-start gap-4 mb-4">
                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-primary-900 dark:text-white">{product.title}</h1>
                 <ShareButton title={product.title} text={product.short_description || product.description?.substring(0, 100)} />
@@ -151,18 +151,18 @@ export default async function ProductPage({ params }) {
             </div>
 
             {/* Trust Highlights */}
-            <div className="bg-primary-50 dark:bg-primary-900/20 p-6 rounded-xl border border-primary-100 dark:border-white/10 space-y-4">
-              <div className="flex items-center gap-4 text-primary-700 dark:text-primary-300">
-                <Truck className="w-5 h-5 text-accent" />
-                <span className="text-sm">Fast Shipping across India</span>
+            <div className="bg-primary-50 dark:bg-primary-900/20 p-6 rounded-2xl border border-primary-100 dark:border-white/10 space-y-4 mt-8">
+              <div className="flex items-center gap-4 text-primary-900 dark:text-primary-300">
+                <Truck className="w-5 h-5" />
+                <span className="text-sm font-medium">Fast Shipping across India</span>
               </div>
-              <div className="flex items-center gap-4 text-primary-700 dark:text-primary-300">
-                <ShieldCheck className="w-5 h-5 text-accent" />
-                <span className="text-sm">1 Year Premium Warranty</span>
+              <div className="flex items-center gap-4 text-primary-900 dark:text-primary-300">
+                <ShieldCheck className="w-5 h-5" />
+                <span className="text-sm font-medium">1 Year Premium Warranty</span>
               </div>
-              <div className="flex items-center gap-4 text-primary-700 dark:text-primary-300">
-                <RotateCcw className="w-5 h-5 text-accent" />
-                <span className="text-sm">15-Day Hassle-Free Returns</span>
+              <div className="flex items-center gap-4 text-primary-900 dark:text-primary-300">
+                <RotateCcw className="w-5 h-5" />
+                <span className="text-sm font-medium">15-Day Hassle-Free Returns</span>
               </div>
             </div>
 

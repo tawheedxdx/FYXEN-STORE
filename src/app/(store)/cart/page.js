@@ -39,11 +39,11 @@ export default async function CartPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-primary-600 dark:text-primary-300">Shipping</span>
-                  <span className="text-accent font-medium">Calculated at checkout</span>
+                  <span className="text-primary-900 dark:text-white font-medium">Calculated at checkout</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-primary-600 dark:text-primary-300">Taxes</span>
-                  <span className="text-accent font-medium">Calculated at checkout</span>
+                  <span className="text-primary-900 dark:text-white font-medium">Calculated at checkout</span>
                 </div>
               </div>
               

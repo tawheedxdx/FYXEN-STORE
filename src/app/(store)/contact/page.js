@@ -54,8 +54,8 @@ export default async function ContactPage() {
             </div>
           </div>
 
-          <div className="p-6 bg-accent/5 rounded-2xl border border-accent/10">
-            <h4 className="font-bold text-accent mb-2">Business Hours</h4>
+          <div className="p-6 bg-primary-50 dark:bg-primary-900/20 rounded-2xl border border-primary-100 dark:border-white/10">
+            <h4 className="font-bold text-primary-900 dark:text-white mb-2">Business Hours</h4>
             <p className="text-sm text-primary-600 dark:text-primary-400">
               Monday — Friday: 9:00 AM - 6:00 PM<br />
               Saturday: 10:00 AM - 2:00 PM<br />
