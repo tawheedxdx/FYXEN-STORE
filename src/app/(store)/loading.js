@@ -2,55 +2,64 @@ import Skeleton from '@/components/ui/Skeleton';
 
 export default function StoreLoading() {
   return (
-    <div className="flex flex-col w-full bg-white dark:bg-black overflow-hidden animate-in fade-in duration-500">
-      {/* Hero skeleton */}
-      <div className="relative h-screen w-full bg-primary-900/30 dark:bg-primary-800/20 flex items-center justify-center">
-        <div className="text-center space-y-6 px-6 w-full max-w-4xl mx-auto flex flex-col items-center">
-          <Skeleton className="h-6 w-40 rounded-full bg-white/20 dark:bg-black/20" />
-          <Skeleton className="h-24 md:h-36 w-full md:w-3/4 rounded-2xl bg-white/20 dark:bg-black/20" />
-          <Skeleton className="h-6 w-1/2 rounded-full bg-white/20 dark:bg-black/20" />
-          <div className="flex gap-4 justify-center pt-4">
-            <Skeleton className="h-14 w-40 rounded-2xl bg-white/20 dark:bg-black/20" />
-            <Skeleton className="h-14 w-40 rounded-2xl bg-white/20 dark:bg-black/20" />
+    <div className="flex flex-col w-full bg-white dark:bg-black">
+      {/* 1. Hero Skeleton */}
+      <div className="relative h-[85vh] min-h-[600px] w-full bg-white dark:bg-black flex flex-col md:flex-row">
+        <div className="w-full md:w-1/2 h-[50vh] md:h-full flex flex-col justify-center px-6 md:px-12 lg:px-20 z-10 pt-20">
+          <Skeleton className="h-4 w-32 mb-6" />
+          <Skeleton className="h-16 md:h-24 w-full max-w-md mb-4" />
+          <Skeleton className="h-16 md:h-24 w-3/4 max-w-sm mb-6" />
+          <Skeleton className="h-4 w-full max-w-md mb-2" />
+          <Skeleton className="h-4 w-5/6 max-w-sm mb-10" />
+          <div className="flex gap-4">
+            <Skeleton className="h-12 w-40 rounded-full" />
+            <Skeleton className="h-12 w-40 rounded-full" />
           </div>
+        </div>
+        <div className="w-full md:w-1/2 h-[50vh] md:h-full relative">
+          <Skeleton className="w-full h-full rounded-none" />
         </div>
       </div>
 
-      {/* Trust markers skeleton */}
-      <div className="py-12 md:py-16 bg-white dark:bg-black -mt-10 rounded-t-[2.5rem] relative z-20">
-        <div className="container-custom px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="flex flex-col items-center gap-4">
-                <Skeleton className="w-16 h-16 rounded-2xl" />
-                <Skeleton className="h-5 w-32 rounded-full" />
-                <Skeleton className="h-3 w-48 rounded-full opacity-50" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Category showcase skeleton */}
-      <div className="py-20 container-custom px-6">
-        <Skeleton className="h-8 w-48 rounded-full mb-12 mx-auto" />
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="aspect-[4/5] rounded-[2rem]" />
+      {/* 2. Nav Strip Skeleton */}
+      <div className="border-b border-primary-100 dark:border-white/10 py-4">
+        <div className="container-custom flex gap-4 overflow-hidden">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <Skeleton key={i} className="h-6 w-24 shrink-0" />
           ))}
         </div>
       </div>
 
-      {/* Featured products skeleton */}
-      <div className="py-20 bg-primary-50 dark:bg-primary-950/40">
-        <div className="container-custom px-6">
-          <Skeleton className="h-8 w-64 rounded-full mb-12 mx-auto" />
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {[1, 2, 3, 4].map((i) => (
+      {/* 3. Trust Pillars Skeleton */}
+      <div className="py-14 md:py-20 border-b border-primary-100 dark:border-white/5">
+        <div className="container-custom grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="flex flex-col items-center md:items-start gap-3">
+              <Skeleton className="w-12 h-12 rounded-full" />
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-3 w-32" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* 4. Editorial Section Skeleton */}
+      <div className="py-16 md:py-24">
+        <div className="container-custom grid grid-cols-1 md:grid-cols-[280px_1fr] gap-10 md:gap-16">
+          <div>
+            <Skeleton className="h-3 w-20 mb-4" />
+            <Skeleton className="h-12 w-48 mb-2" />
+            <Skeleton className="h-12 w-40 mb-6" />
+            <Skeleton className="h-3 w-full mb-2" />
+            <Skeleton className="h-3 w-3/4 mb-8" />
+            <Skeleton className="h-4 w-32" />
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
+            {[1, 2, 3, 4, 5, 6].map(i => (
               <div key={i} className="flex flex-col gap-3">
-                <Skeleton className="aspect-[4/5] rounded-xl" />
-                <Skeleton className="h-4 w-3/4 rounded-full" />
-                <Skeleton className="h-4 w-1/2 rounded-full opacity-50" />
+                <Skeleton className="aspect-[4/5] rounded-xl mb-2" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
               </div>
             ))}
           </div>
