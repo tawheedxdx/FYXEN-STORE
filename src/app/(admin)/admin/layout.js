@@ -19,8 +19,8 @@ export default async function AdminLayout({ children }) {
       {/* Sidebar */}
       <aside className="w-64 bg-primary-900 text-white flex-col hidden md:flex shrink-0">
         <div className="p-6 border-b border-primary-800">
-          <Link href="/admin" className="flex items-baseline gap-2 text-2xl font-bold tracking-tighter">
-            Fyxen<span className="text-accent">.</span>
+          <Link href="/admin" className="flex items-baseline gap-2 text-2xl font-black tracking-tighter">
+            Fyxen.
             <span className="text-xs font-normal text-primary-400 ml-1">Admin</span>
           </Link>
         </div>
@@ -44,7 +44,7 @@ export default async function AdminLayout({ children }) {
               href={href}
               className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary-800 transition-colors text-primary-200 hover:text-white group"
             >
-              <Icon className="w-5 h-5 text-primary-400 group-hover:text-accent transition-colors" />
+              <Icon className="w-5 h-5 text-primary-400 group-hover:text-white transition-colors" />
               <span className="text-sm font-medium">{label}</span>
             </Link>
           ))}
@@ -67,7 +67,7 @@ export default async function AdminLayout({ children }) {
         {/* Mobile Header */}
         <header className="h-14 bg-white border-b border-primary-100 flex items-center gap-4 px-4 md:hidden shadow-sm">
           <AdminMobileMenu />
-          <span className="font-bold text-lg">Fyxen<span className="text-accent">.</span> Admin</span>
+          <span className="font-black text-lg">Fyxen. Admin</span>
         </header>
 
         {/* Status Banners */}

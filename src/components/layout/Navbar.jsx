@@ -131,7 +131,7 @@ export default function Navbar() {
                         {pathname === link.href && (
                           <motion.div
                             layoutId="nav-underline"
-                            className="absolute bottom-1 left-3 right-3 h-0.5 bg-accent rounded-full"
+                            className="absolute bottom-1 left-3 right-3 h-0.5 bg-primary-900 dark:bg-white rounded-full"
                           />
                         )}
                       </Link>
@@ -162,7 +162,7 @@ export default function Navbar() {
               aria-label="Cart"
             >
               <ShoppingBag className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full border-2 border-white dark:border-black" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary-900 dark:bg-white rounded-full border-2 border-white dark:border-black" />
             </Link>
           </motion.div>
         </div>
@@ -216,7 +216,7 @@ export default function Navbar() {
                       href={link.href}
                       className={`flex items-center w-full py-3 px-4 rounded-xl text-base font-semibold transition-colors ${
                         pathname === link.href
-                          ? 'text-accent bg-accent/10'
+                          ? 'text-primary-900 dark:text-white bg-primary-100 dark:bg-white/10'
                           : 'text-primary-900 dark:text-white hover:bg-primary-50 dark:hover:bg-white/5'
                       }`}
                     >

@@ -63,7 +63,7 @@ export default function LoginForm() {
           <div>
             <div className="flex items-center justify-between mb-1.5 ml-1">
               <label htmlFor="password" className="block text-sm font-medium text-primary-900">Password</label>
-              <Link href="/forgot-password" size="sm" className="text-xs font-bold text-accent hover:text-accent-hover transition-colors underline underline-offset-2">
+              <Link href="/forgot-password" size="sm" className="text-xs font-bold text-primary-900 dark:text-white hover:underline transition-colors underline-offset-2">
                 Forgot password?
               </Link>
             </div>
@@ -93,7 +93,7 @@ export default function LoginForm() {
               <span className="w-full border-t border-primary-100"></span>
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-4 text-primary-400 font-bold tracking-widest">Or</span>
+              <span className="bg-primary-50 dark:bg-[#151518] px-4 text-primary-400 font-bold tracking-widest">Or</span>
             </div>
           </div>
 
@@ -108,7 +108,7 @@ export default function LoginForm() {
           <div className="text-center mt-8">
             <p className="text-sm text-primary-500">
               New to Fyxen?{' '}
-              <Link href="/signup" className="font-bold text-primary-900 hover:text-accent transition-colors underline underline-offset-4">
+              <Link href="/signup" className="font-bold text-primary-900 dark:text-white hover:underline transition-colors underline-offset-4">
                 Create an account
               </Link>
             </p>

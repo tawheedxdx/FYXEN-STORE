@@ -1,88 +1,121 @@
 import { getProducts, getCategories } from '@/services/products';
 import ProductCard from '@/components/product/ProductCard';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { PackageSearch, ArrowRight } from 'lucide-react';
 
 export const revalidate = 60;
+
+const specialMeta = {
+  'best-sellers': { name: 'Best Sellers', tagline: 'The products our customers love most.' },
+  'new-arrivals': { name: 'New Arrivals', tagline: 'The latest additions to the Fyxen collection.' },
+  'sale': { name: 'On Sale', tagline: 'Premium quality at exclusive, limited-time prices.' },
+};
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const categories = await getCategories();
   const category = categories.find(c => c.slug === slug);
-  
-  const title = category ? `${category.name} | Fyxen` : `${slug.charAt(0).toUpperCase() + slug.slice(1).replace('-', ' ')} | Fyxen`;
-  const description = category?.description || `Explore our exclusive collection of ${slug.replace('-', ' ')} at Fyxen. Quality you can trust.`;
-
+  const special = specialMeta[slug];
+  const name = special?.name || category?.name || slug.replace(/-/g, ' ');
   return {
-    title,
-    description,
-    openGraph: {
-      title,
-      description,
-      type: 'website',
-      url: `/category/${slug}`,
-    },
+    title: `${name} | Fyxen`,
+    description: special?.tagline || category?.description || `Explore our ${name} collection at Fyxen.`,
   };
 }
 
 export default async function CategoryPage({ params }) {
   const { slug } = await params;
-  
-  const products = await getProducts({ categorySlug: slug });
-  const categories = await getCategories();
-  
+  const [products, categories] = await Promise.all([
+    getProducts({ categorySlug: slug }),
+    getCategories(),
+  ]);
+
   const currentCategory = categories.find(c => c.slug === slug);
-  if (!currentCategory && slug !== 'new-arrivals' && slug !== 'best-sellers') {
-    // If it's a dynamic category that doesn't exist, we might want to 404
-    // But for demo purposes or hardcoded special categories, we won't strictly 404 yet.
-  }
+  const special = specialMeta[slug];
+  const displayName = special?.name || currentCategory?.name || slug.replace(/-/g, ' ');
+  const displayDesc = special?.tagline || currentCategory?.description || '';
 
   return (
-    <div className="container-custom py-12">
-      <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold mb-4 capitalize">{currentCategory?.name || slug.replace('-', ' ')}</h1>
-        {currentCategory?.description && (
-          <p className="text-primary-500 max-w-2xl mx-auto">{currentCategory.description}</p>
-        )}
+    <div className="min-h-screen bg-white dark:bg-black">
+      {/* Page Header */}
+      <div className="border-b border-primary-100 dark:border-white/5 py-12 md:py-16">
+        <div className="container-custom">
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary-400 mb-3">Collection</p>
+          <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-primary-900 dark:text-white leading-[0.9] capitalize">
+            {displayName.split(' ').map((word, i) =>
+              i === 1 ? <span key={i}><br /><span className="italic font-light">{word}</span></span> : word + ' '
+            )}
+          </h1>
+          {displayDesc && (
+            <p className="text-primary-500 dark:text-primary-400 mt-4 text-base max-w-lg">{displayDesc}</p>
+          )}
+          <p className="text-sm text-primary-400 mt-2 font-medium">
+            {products.length} product{products.length !== 1 ? 's' : ''}
+          </p>
+        </div>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-8 w-full">
-        {/* Filters Sidebar */}
-        <aside className="w-full md:w-64 shrink-0">
-          <div className="bg-white dark:bg-primary-900/20 p-6 rounded-xl border border-primary-100 dark:border-white/10 sticky top-24 w-full">
-            <h3 className="font-bold text-lg mb-4">Categories</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="/shop" className="text-primary-600 dark:text-primary-300 hover:text-accent transition-colors">All Products</Link>
-              </li>
-              {categories.map(category => (
-                <li key={category.id}>
-                  <Link 
-                    href={`/category/${category.slug}`} 
-                    className={`${slug === category.slug ? 'text-accent font-medium' : 'text-primary-600 dark:text-primary-300 hover:text-accent transition-colors'}`}
-                  >
-                    {category.name}
+      <div className="container-custom py-10 md:py-14">
+        <div className="flex flex-col md:flex-row gap-10 w-full">
+
+          {/* Sidebar */}
+          <aside className="w-full md:w-56 shrink-0">
+            <div className="sticky top-28">
+              <p className="text-xs font-bold uppercase tracking-widest text-primary-400 mb-4">Browse</p>
+              <ul className="space-y-1">
+                <li>
+                  <Link href="/shop" className="block py-2 text-sm text-primary-500 dark:text-primary-400 hover:text-primary-900 dark:hover:text-white transition-colors border-b border-transparent hover:border-primary-200">
+                    All Products
                   </Link>
                 </li>
-              ))}
-            </ul>
-          </div>
-        </aside>
+                <li>
+                  <Link href="/category/best-sellers" className={`block py-2 text-sm transition-colors border-b ${slug === 'best-sellers' ? 'text-primary-900 dark:text-white font-bold border-primary-900 dark:border-white' : 'text-primary-500 dark:text-primary-400 hover:text-primary-900 dark:hover:text-white border-transparent hover:border-primary-200'}`}>
+                    Best Sellers
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/category/new-arrivals" className={`block py-2 text-sm transition-colors border-b ${slug === 'new-arrivals' ? 'text-primary-900 dark:text-white font-bold border-primary-900 dark:border-white' : 'text-primary-500 dark:text-primary-400 hover:text-primary-900 dark:hover:text-white border-transparent hover:border-primary-200'}`}>
+                    New Arrivals
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/category/sale" className={`block py-2 text-sm transition-colors border-b ${slug === 'sale' ? 'text-primary-900 dark:text-white font-bold border-primary-900 dark:border-white' : 'text-primary-500 dark:text-primary-400 hover:text-primary-900 dark:hover:text-white border-transparent hover:border-primary-200'}`}>
+                    Sale
+                  </Link>
+                </li>
+                {categories.length > 0 && <li><div className="my-3 border-t border-primary-100 dark:border-white/10" /></li>}
+                {categories.map(cat => (
+                  <li key={cat.id}>
+                    <Link href={`/category/${cat.slug}`} className={`block py-2 text-sm transition-colors border-b ${slug === cat.slug ? 'text-primary-900 dark:text-white font-bold border-primary-900 dark:border-white' : 'text-primary-500 dark:text-primary-400 hover:text-primary-900 dark:hover:text-white border-transparent hover:border-primary-200'}`}>
+                      {cat.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </aside>
 
-        {/* Product Grid */}
-        <div className="flex-1 w-full">
-          {products.length === 0 ? (
-            <div className="text-center py-24 bg-primary-50 dark:bg-primary-900/20 rounded-xl border border-primary-100 dark:border-white/10">
-              <h2 className="text-2xl font-bold mb-2">No products found</h2>
-              <p className="text-primary-500">Check back later for new items in this category.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {products.map(product => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          )}
+          {/* Product Grid */}
+          <div className="flex-1 w-full">
+            {products.length === 0 ? (
+              <div className="flex flex-col items-center justify-center text-center py-28 border border-dashed border-primary-200 dark:border-white/10 rounded-3xl">
+                <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center mb-5">
+                  <PackageSearch className="w-7 h-7 text-primary-400" />
+                </div>
+                <h2 className="text-2xl font-bold mb-2">Nothing here yet</h2>
+                <p className="text-primary-500 text-sm mb-6 max-w-xs">Check back soon — we're always adding new products.</p>
+                <Link href="/shop" className="inline-flex items-center gap-2 font-bold text-sm border-b border-primary-900 dark:border-white pb-0.5 hover:opacity-60 transition-opacity">
+                  Browse All <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7">
+                {products.map(product => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
