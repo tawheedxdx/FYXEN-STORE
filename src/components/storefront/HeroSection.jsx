@@ -57,7 +57,7 @@ export default function HeroSection() {
           {/* Right: Image */}
           <div className="relative h-[50vw] md:h-screen max-h-screen order-1 md:order-2 overflow-hidden rounded-3xl md:rounded-none md:rounded-bl-[4rem]">
             <Image
-              src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?q=80&w=1200&auto=format&fit=crop"
+              src="https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/category-images/smart-lifestyle-1778601006873.png"
               alt="Fyxen Premium Collection"
               fill
               priority
