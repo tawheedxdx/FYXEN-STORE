@@ -37,32 +37,10 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col w-full bg-white dark:bg-black">
 
-      {/* 1. Hero */}
-      <HeroSection />
-
-      {/* 2. Category Nav Strip */}
+      {/* 1. Category Nav Strip */}
       <CategoryNavStrip categories={categories} />
 
-      {/* 3. Trust Pillars */}
-      <section className="py-14 md:py-20 bg-white dark:bg-black border-b border-primary-100 dark:border-white/5">
-        <div className="container-custom">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
-            {trustFeatures.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="flex flex-col items-center md:items-start text-center md:text-left gap-3">
-                <div className="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
-                  <Icon className="w-5 h-5 text-primary-700 dark:text-primary-300" />
-                </div>
-                <div>
-                  <p className="font-bold text-sm text-primary-900 dark:text-white">{title}</p>
-                  <p className="text-xs text-primary-500 dark:text-primary-400 mt-1 leading-relaxed">{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 4. Featured Products — "Fyxen Exclusives" */}
+      {/* 2. Featured Products — "Fyxen Exclusives" */}
       {featuredProducts.length > 0 && (
         <section className="py-16 md:py-24 bg-white dark:bg-black">
           <div className="container-custom">
@@ -95,10 +73,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* 5. Promo Banner */}
-      {activeBanner && <PromoBanner banner={activeBanner} />}
-
-      {/* 6. Best Sellers Section */}
+      {/* 3. Best Sellers Section */}
       {bestSellers.length > 0 && (
         <section className="py-16 md:py-24 bg-primary-50 dark:bg-primary-950/40">
           <div className="container-custom">
@@ -130,6 +105,31 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* 4. Hero */}
+      <HeroSection />
+
+      {/* 5. Trust Pillars */}
+      <section className="py-14 md:py-20 bg-white dark:bg-black border-b border-primary-100 dark:border-white/5">
+        <div className="container-custom">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+            {trustFeatures.map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex flex-col items-center md:items-start text-center md:text-left gap-3">
+                <div className="w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
+                  <Icon className="w-5 h-5 text-primary-700 dark:text-primary-300" />
+                </div>
+                <div>
+                  <p className="font-bold text-sm text-primary-900 dark:text-white">{title}</p>
+                  <p className="text-xs text-primary-500 dark:text-primary-400 mt-1 leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Promo Banner */}
+      {activeBanner && <PromoBanner banner={activeBanner} />}
 
       {/* 7. Curated Collection Banners */}
       <CollectionBanners />
