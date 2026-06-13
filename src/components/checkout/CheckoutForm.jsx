@@ -77,6 +77,12 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
     setError(null);
     paymentStatusRef.current = 'none';
 
+    if (method === 'ONLINE' && !window.Razorpay) {
+      setError('Payment gateway is still loading. Please wait a moment and try again.');
+      setIsLoading(false);
+      return;
+    }
+
     const formData = formDataObj;
     formData.set('paymentMethod', method);
 
@@ -85,8 +91,7 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
 
     if (res?.error) {
       setError(res.error);
-      setIsLoading(true); 
-      setTimeout(() => setIsLoading(false), 2000);
+      setIsLoading(false);
       return;
     }
 
@@ -347,16 +352,12 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
 
           <button
             type="submit"
-            disabled={isLoading || !rzpReady}
+            disabled={isLoading}
             className="btn-primary w-full text-lg py-4 shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {isLoading ? (
               <span className="flex items-center justify-center gap-2">
                 <Loader2 className="w-5 h-5 animate-spin" /> Processing...
-              </span>
-            ) : !rzpReady ? (
-              <span className="flex items-center justify-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin" /> Loading Payment Gateway...
               </span>
             ) : (
               `Confirm & Proceed`

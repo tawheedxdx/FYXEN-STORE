@@ -7,46 +7,36 @@ import { CreditCard, Truck, ArrowRight, Check, X, Star, Gift } from 'lucide-reac
 export default function PaymentSelectionModal({ isOpen, onClose, onConfirm, amount }) {
   const [step, setStep] = useState('choice'); // 'choice' or 'confirm'
   const [selectedMethod, setSelectedMethod] = useState(null); // 'COD' or 'ONLINE'
-  const [isSliding, setIsSliding] = useState(false);
-  const [sliderPosition, setSliderPosition] = useState(0);
-  const sliderRef = useRef(null);
+  const [maxDrag, setMaxDrag] = useState(0);
   const trackRef = useRef(null);
 
   useEffect(() => {
     if (!isOpen) {
       setStep('choice');
       setSelectedMethod(null);
-      setSliderPosition(0);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (step === 'confirm' && trackRef.current) {
+      const timer = setTimeout(() => {
+        if (trackRef.current) {
+          const trackWidth = trackRef.current.offsetWidth;
+          setMaxDrag(trackWidth - 56 - 8); // button width is 56, padding is 4px on each side (total 8px)
+        }
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [step]);
 
   const handleMethodSelect = (method) => {
     setSelectedMethod(method);
     setStep('confirm');
   };
 
-  const handleSliderMove = (e) => {
-    if (!isSliding || !trackRef.current) return;
-    
-    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-    const trackRect = trackRef.current.getBoundingClientRect();
-    const newPos = Math.max(0, Math.min(clientX - trackRect.left - 24, trackRect.width - 48 - 4));
-    
-    setSliderPosition(newPos);
-
-    // If reached end
-    if (newPos >= trackRect.width - 48 - 10) {
-      setIsSliding(false);
-      setSliderPosition(trackRect.width - 48 - 4);
+  const handleDragEnd = (event, info) => {
+    if (info.offset.x >= maxDrag * 0.9) {
       onConfirm(selectedMethod);
-    }
-  };
-
-  const handleSliderEnd = () => {
-    if (!isSliding) return;
-    setIsSliding(false);
-    if (sliderPosition < (trackRef.current?.offsetWidth - 60)) {
-      setSliderPosition(0);
     }
   };
 
@@ -151,11 +141,6 @@ export default function PaymentSelectionModal({ isOpen, onClose, onConfirm, amou
                   <div 
                     ref={trackRef}
                     className="h-16 bg-primary-100 dark:bg-white/5 rounded-full relative p-1 overflow-hidden"
-                    onMouseMove={handleSliderMove}
-                    onMouseUp={handleSliderEnd}
-                    onMouseLeave={handleSliderEnd}
-                    onTouchMove={handleSliderMove}
-                    onTouchEnd={handleSliderEnd}
                   >
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <p className="text-sm font-bold text-primary-400 flex items-center gap-2">
@@ -170,16 +155,16 @@ export default function PaymentSelectionModal({ isOpen, onClose, onConfirm, amou
                     </div>
 
                     <motion.div
+                      drag="x"
+                      dragConstraints={{ left: 0, right: maxDrag }}
+                      dragElastic={{ left: 0, right: 0.1 }}
+                      dragSnapToOrigin={true}
+                      onDragEnd={handleDragEnd}
                       className="absolute top-1 bottom-1 bg-accent rounded-full flex items-center justify-center text-white cursor-grab active:cursor-grabbing shadow-lg"
                       style={{ 
-                        left: sliderPosition + 4,
                         width: 56,
                         height: 56
                       }}
-                      onMouseDown={() => setIsSliding(true)}
-                      onTouchStart={() => setIsSliding(true)}
-                      drag="x"
-                      dragConstraints={{ left: 0, right: 0 }} // We handle logic manually for cleaner feel
                     >
                       <ArrowRight className="w-6 h-6" />
                     </motion.div>

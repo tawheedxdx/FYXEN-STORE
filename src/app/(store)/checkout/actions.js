@@ -77,7 +77,7 @@ export async function createCheckoutSession(formData) {
     return { error: 'Not authenticated' };
   }
 
-  const { items, subtotal, totalShipping } = await getCart();
+  const { items, subtotal, totalShipping, totalTax } = await getCart();
   if (items.length === 0) {
     return { error: 'Cart is empty' };
   }
@@ -116,14 +116,15 @@ export async function createCheckoutSession(formData) {
       .single();
 
     if (profile && profile.wallet_balance > 0) {
-      const remainingAfterCoupons = Math.max(0, subtotal - discount + totalShipping);
+      const remainingAfterCoupons = Math.max(0, subtotal - discount + totalShipping + totalTax);
       walletAmountUsed = Math.min(profile.wallet_balance, remainingAfterCoupons);
     }
   }
 
   // Calculate totals
   const shipping = totalShipping;
-  let grandTotal = Math.max(0, subtotal - discount - walletAmountUsed + shipping);
+  const tax = totalTax;
+  let grandTotal = Math.max(0, subtotal - discount - walletAmountUsed + shipping + tax);
 
   // Calculate potential wallet cashback (₹2 per ₹100 spent)
   const walletCashbackAmount = Math.floor(grandTotal / 100) * 2;
@@ -150,6 +151,7 @@ export async function createCheckoutSession(formData) {
       subtotal,
       discount_amount: discount,
       shipping_amount: shipping,
+      tax_amount: tax,
       grand_total: grandTotal,
       payment_status: paymentMethod === 'COD' ? 'cod' : 'pending',
       order_status: paymentMethod === 'COD' ? 'confirmed' : 'pending',
@@ -286,8 +288,8 @@ export async function verifyPayment(paymentData) {
   if (generatedSignature === razorpay_signature) {
     // Payment verified
     
-    // Update Order Status
-    const { data: updatedOrder } = await supabaseAdmin
+    // Update Order Status and fetch details in one step
+    const { data: order, error: orderUpdateError } = await supabaseAdmin
       .from('orders')
       .update({ 
         payment_status: 'paid', 
@@ -297,8 +299,13 @@ export async function verifyPayment(paymentData) {
         placed_at: new Date().toISOString()
       })
       .eq('id', orderId)
-      .select('coupon_id, id')
+      .select('id, user_id, grand_total, wallet_amount_used, order_number, coupon_id')
       .single();
+
+    if (orderUpdateError || !order) {
+      console.error('Order Update Error:', orderUpdateError);
+      return { error: 'Failed to update order status' };
+    }
 
     // 1. Fetch order items for stock decrement
     const { data: orderItems } = await supabaseAdmin
@@ -319,33 +326,24 @@ export async function verifyPayment(paymentData) {
       }
     }
 
-    // 1. Fetch order details for wallet logic
-    const { data: order } = await supabaseAdmin
-      .from('orders')
-      .select('grand_total, user_id, wallet_amount_used, order_number')
-      .eq('id', orderId)
-      .single();
-
-    if (order) {
-      // 4. Deduct Wallet Balance if used
-      if (order.wallet_amount_used > 0) {
-        await supabaseAdmin.rpc('adjust_wallet_balance', {
-          p_user_id: order.user_id,
-          p_amount: -order.wallet_amount_used
-        });
-        await supabaseAdmin.from('wallet_transactions').insert({
-          user_id: order.user_id,
-          amount: -order.wallet_amount_used,
-          type: 'payment',
-          status: 'completed',
-          description: `Order Payment (Order: ${order.order_number})`
-        });
-      }
+    // 3. Deduct Wallet Balance if used
+    if (order.wallet_amount_used > 0) {
+      await supabaseAdmin.rpc('adjust_wallet_balance', {
+        p_user_id: order.user_id,
+        p_amount: -order.wallet_amount_used
+      });
+      await supabaseAdmin.from('wallet_transactions').insert({
+        user_id: order.user_id,
+        amount: -order.wallet_amount_used,
+        type: 'payment',
+        status: 'completed',
+        description: `Order Payment (Order: ${order.order_number})`
+      });
     }
 
     // If a coupon was used, increment its count
-    if (updatedOrder?.coupon_id) {
-      await supabaseAdmin.rpc('increment_coupon_usage', { coupon_uuid: updatedOrder.coupon_id });
+    if (order.coupon_id) {
+      await supabaseAdmin.rpc('increment_coupon_usage', { coupon_uuid: order.coupon_id });
     }
 
     // Save Payment Record
@@ -356,7 +354,7 @@ export async function verifyPayment(paymentData) {
         provider_order_id: razorpay_order_id,
         provider_payment_id: razorpay_payment_id,
         status: 'captured',
-        amount: 0, // Should be fetched from RZP strictly
+        amount: order.grand_total,
       });
 
     // Clear Cart
@@ -438,8 +436,34 @@ export async function retryPayment(orderId) {
 }
 
 export async function deleteOrder(orderId) {
+  const supabase = await createClient();
   const supabaseAdmin = createAdminClient();
+  const { data: { user } } = await supabase.auth.getUser();
   
+  if (!user) {
+    return { error: 'Not authenticated' };
+  }
+
+  // Verify order exists, belongs to the user, and payment_status is 'pending' / 'unpaid'
+  const { data: order, error: orderFetchError } = await supabaseAdmin
+    .from('orders')
+    .select('user_id, payment_status')
+    .eq('id', orderId)
+    .single();
+
+  if (orderFetchError || !order) {
+    return { error: 'Order not found' };
+  }
+
+  // Security check: Only allow deleting pending orders belonging to the user
+  if (order.user_id !== user.id) {
+    return { error: 'Unauthorized' };
+  }
+
+  if (order.payment_status === 'paid') {
+    return { error: 'Cannot delete a paid order' };
+  }
+
   // 1. Delete order items first (foreign key)
   await supabaseAdmin.from('order_items').delete().eq('order_id', orderId);
   

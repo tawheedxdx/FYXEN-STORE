@@ -15,9 +15,10 @@ const navLinks = [
   { href: '/category/best-sellers', label: 'Best Sellers' },
 ];
 
-export default function Navbar() {
+export default function Navbar({ cartCount = 0 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
   const isHomePage = pathname === '/';
 
@@ -30,10 +31,18 @@ export default function Navbar() {
   }, [mobileMenuOpen]);
 
   useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener('resize', handleResize, { passive: true });
+    
     const handleScroll = () => setScrolled(window.scrollY > 80);
     setScrolled(window.scrollY > 80);
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, []);
 
   // Hero mode = on homepage AND not yet scrolled AND mobile menu is closed
@@ -67,8 +76,8 @@ export default function Navbar() {
                   }
                 : {
                     // Responsive position: centered on mobile, left on desktop
-                    left: typeof window !== 'undefined' && window.innerWidth < 768 ? '50%' : '1rem',
-                    x: typeof window !== 'undefined' && window.innerWidth < 768 ? '-50%' : '0%',
+                    left: isMobile ? '50%' : '1rem',
+                    x: isMobile ? '-50%' : '0%',
                     scale: 1,
                   }
             }
@@ -162,7 +171,11 @@ export default function Navbar() {
               aria-label="Cart"
             >
               <ShoppingBag className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary-900 dark:bg-white rounded-full border-2 border-white dark:border-black" />
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-primary-900 dark:bg-white text-white dark:text-black text-[10px] font-black flex items-center justify-center rounded-full border border-white dark:border-black px-1 shadow-sm">
+                  {cartCount}
+                </span>
+              )}
             </Link>
           </motion.div>
         </div>
@@ -244,6 +257,11 @@ export default function Navbar() {
                     >
                       <Icon className="w-5 h-5" />
                       {label}
+                      {label === 'My Cart' && cartCount > 0 && (
+                        <span className="ml-auto bg-primary-900 dark:bg-white text-white dark:text-black text-[10px] font-black flex items-center justify-center rounded-full px-2 py-0.5 min-w-[20px]">
+                          {cartCount}
+                        </span>
+                      )}
                     </Link>
                   </motion.div>
                 ))}

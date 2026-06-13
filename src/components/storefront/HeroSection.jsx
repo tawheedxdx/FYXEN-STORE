@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { ArrowRight, ShoppingBag } from 'lucide-react';
 
 export default function HeroSection() {
+  const currentYear = new Date().getFullYear();
   return (
     <section className="relative w-full bg-white dark:bg-black overflow-hidden min-h-[80vh] md:min-h-screen flex items-center">
       <div className="container-custom w-full py-16 md:py-0">
@@ -13,7 +14,7 @@ export default function HeroSection() {
           {/* Left: Text Content */}
           <div className="flex flex-col justify-center py-16 md:py-24 order-2 md:order-1">
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary-400 mb-6">
-              New Season — 2025 Collection
+              New Season — {currentYear} Collection
             </p>
             <h1 className="text-6xl sm:text-7xl md:text-8xl font-black tracking-tighter text-primary-900 dark:text-white leading-[0.9] mb-8">
               The<br />
@@ -69,7 +70,7 @@ export default function HeroSection() {
             {/* Floating badge */}
             <div className="absolute bottom-8 left-8 bg-white/95 dark:bg-black/90 backdrop-blur-md rounded-2xl px-5 py-4 shadow-xl">
               <p className="text-[10px] font-bold uppercase tracking-widest text-primary-400 mb-1">Just Landed</p>
-              <p className="text-sm font-black text-primary-900 dark:text-white">New Arrivals 2025</p>
+              <p className="text-sm font-black text-primary-900 dark:text-white">New Arrivals {currentYear}</p>
               <Link href="/category/new-arrivals" className="text-xs text-primary-500 hover:text-primary-900 dark:hover:text-white transition-colors flex items-center gap-1 mt-1">
                 Shop Now <ArrowRight className="w-3 h-3" />
               </Link>

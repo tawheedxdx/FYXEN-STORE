@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import MaintenancePage from '@/components/common/MaintenancePage';
 import { AlertTriangle } from 'lucide-react';
 import WelcomeModal from '@/components/modals/WelcomeModal';
+import { getCart } from '@/app/(store)/cart/actions';
 
 export default async function StoreLayout({ children }) {
   const supabase = await createClient();
@@ -26,6 +27,10 @@ export default async function StoreLayout({ children }) {
   const mode = settings?.site_mode || 'online';
   const isAdmin = role === 'admin';
 
+  // Fetch cart to count items
+  const { items } = await getCart();
+  const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
+
   // Handling Offline Mode (No one can see)
   if (mode === 'offline' && !isAdmin) {
     return <MaintenancePage mode="offline" />;
@@ -45,7 +50,7 @@ export default async function StoreLayout({ children }) {
         </div>
       )}
       <AnnouncementBanner />
-      <Navbar />
+      <Navbar cartCount={cartCount} />
       <main>{children}</main>
       <Footer settings={settings} />
       <WelcomeModal show={showWelcome} />
