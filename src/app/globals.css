@@ -134,3 +134,17 @@ html {
   .prose code { @apply bg-primary-50 px-1.5 py-0.5 rounded text-sm font-mono; }
   .prose pre { @apply bg-primary-900 text-white p-4 rounded-xl overflow-x-auto my-4; }
 }
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+}
+
