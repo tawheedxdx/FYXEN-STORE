@@ -6,6 +6,10 @@ import ImageGallery from '@/components/product/ImageGallery';
 import ProductHighlights from '@/components/product/ProductHighlights';
 import ProductReviews from '@/components/product/ProductReviews';
 import ShareButton from '@/components/product/ShareButton';
+import FrequentlyBoughtTogether from '@/components/product/FrequentlyBoughtTogether';
+import RecommendationCarousel from '@/components/product/RecommendationCarousel';
+import RecentlyViewedTracker from '@/components/product/RecentlyViewedTracker';
+import { getFrequentlyBoughtTogether, getContentBasedRecommendations } from '@/services/products/recommendations';
 import { ShieldCheck, Truck, RotateCcw, CheckCircle2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import RazorpayAffordabilityWidget from '@/components/common/RazorpayAffordabilityWidget';
@@ -60,6 +64,11 @@ export default async function ProductPage({ params }) {
   if (!product) {
     notFound();
   }
+
+  const [fbt, related] = await Promise.all([
+    getFrequentlyBoughtTogether(product.id, 1),
+    getContentBasedRecommendations(product.id, 6)
+  ]);
 
   return (
     <div className="bg-white dark:bg-black min-h-screen">
@@ -178,6 +187,15 @@ export default async function ProductPage({ params }) {
             </div>
           </div>
         </div>
+
+        {/* Track recently viewed products */}
+        <RecentlyViewedTracker slug={product.slug} />
+
+        {/* Frequently Bought Together Section */}
+        <FrequentlyBoughtTogether product={product} recommendations={fbt} />
+
+        {/* Related Products Section */}
+        <RecommendationCarousel products={related} title="You May Also Like" />
 
         {/* Reviews System */}
         <ProductReviews productId={product.id} reviews={product.reviews || []} user={user} />

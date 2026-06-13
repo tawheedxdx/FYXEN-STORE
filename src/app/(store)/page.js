@@ -6,6 +6,7 @@ import CollectionBanners from '@/components/storefront/CollectionBanners';
 import PromoBanner from '@/components/storefront/PromoBanner';
 import NewsletterForm from '@/components/storefront/NewsletterForm';
 import ProductCard from '@/components/product/ProductCard';
+import HomeRecommendations from '@/components/storefront/HomeRecommendations';
 import { getProducts, getCategories } from '@/services/products';
 import { createClient } from '@/lib/supabase/server';
 
@@ -105,6 +106,9 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      {/* Recommended for you Section */}
+      <HomeRecommendations />
 
       {/* 4. Hero */}
       <HeroSection />
