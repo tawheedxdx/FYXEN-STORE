@@ -70,7 +70,7 @@ export default function TrackOrderClient() {
       <div className="text-center mb-10">
         <h1 className="text-4xl font-bold mb-3">Track Your Order</h1>
         <p className="text-primary-500 dark:text-primary-400">
-          Enter your Order ID (e.g. <span className="font-mono">FYX-123456-789</span>) and the email used at checkout.
+          Enter your Order Number (e.g. <span className="font-mono">#FYX-925663-1079</span>) and the email used at checkout.
         </p>
       </div>
 
@@ -81,13 +81,13 @@ export default function TrackOrderClient() {
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Order ID</label>
+            <label className="block text-sm font-medium mb-2">Order Number</label>
             <input
               name="orderNumber"
               type="text"
               required
               className="input-field font-mono text-[16px]"
-              placeholder="FYX-1234567890-123"
+              placeholder="#FYX-925663-1079"
             />
           </div>
           <div>

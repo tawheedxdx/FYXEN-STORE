@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { XCircle, RefreshCcw, Headset } from 'lucide-react';
 import Link from 'next/link';
 
-export default function FailedView({ orderId }) {
+export default function FailedView({ orderId, orderNumber }) {
   return (
     <div className="container-custom py-24 min-h-[70vh] flex flex-col items-center justify-center text-center">
       <motion.div
@@ -36,15 +36,17 @@ export default function FailedView({ orderId }) {
         </p>
       </motion.div>
 
-      {orderId && (
+      {(orderNumber || orderId) && (
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.5 }}
           className="mt-8 p-6 bg-red-50 dark:bg-red-500/5 border border-red-200 dark:border-red-500/20 rounded-2xl backdrop-blur-md"
         >
-          <p className="text-sm text-red-500 uppercase tracking-widest mb-1">Failed Order ID</p>
-          <p className="text-xl font-mono font-semibold text-red-700 dark:text-red-400 tracking-wider">{orderId}</p>
+          <p className="text-sm text-red-500 uppercase tracking-widest mb-1">Order Number</p>
+          <p className="text-xl font-mono font-semibold text-red-700 dark:text-red-400 tracking-wider">
+            {orderNumber ? `#${orderNumber}` : orderId}
+          </p>
         </motion.div>
       )}
 

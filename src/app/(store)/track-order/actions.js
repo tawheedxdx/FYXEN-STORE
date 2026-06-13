@@ -3,11 +3,16 @@
 import { createClient } from '@/lib/supabase/server';
 
 export async function trackOrder(formData) {
-  const orderNumber = formData.get('orderNumber')?.toString().trim().toUpperCase();
+  let orderNumber = formData.get('orderNumber')?.toString().trim().toUpperCase();
   const email = formData.get('email')?.toString().trim().toLowerCase();
 
   if (!orderNumber || !email) {
     return { error: 'Please fill in both fields.' };
+  }
+
+  // Strip leading '#' if present
+  if (orderNumber.startsWith('#')) {
+    orderNumber = orderNumber.substring(1);
   }
 
   const supabase = await createClient();
@@ -45,7 +50,7 @@ export async function trackOrder(formData) {
     .single();
 
   if (error || !order) {
-    return { error: 'Order not found. Please check your Order ID and try again.' };
+    return { error: 'Order not found. Please check your Order Number and try again.' };
   }
 
   // Verify email matches

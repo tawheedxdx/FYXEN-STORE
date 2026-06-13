@@ -5,7 +5,7 @@ import { CheckCircle, ArrowRight, Package } from 'lucide-react';
 import Link from 'next/link';
 import Script from 'next/script';
 
-export default function SuccessView({ orderId, paymentStatus }) {
+export default function SuccessView({ orderId, orderNumber, paymentStatus }) {
   const isCod = paymentStatus === 'cod';
 
   return (
@@ -54,15 +54,17 @@ export default function SuccessView({ orderId, paymentStatus }) {
         </p>
       </motion.div>
 
-      {orderId && (
+      {(orderNumber || orderId) && (
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5, duration: 0.5 }}
           className="mt-8 p-6 bg-primary-50 dark:bg-white/5 border border-primary-200 dark:border-white/10 rounded-2xl backdrop-blur-md"
         >
-          <p className="text-sm text-primary-500 uppercase tracking-widest mb-1">Order ID</p>
-          <p className="text-xl font-mono font-semibold text-primary-900 dark:text-white tracking-wider">{orderId}</p>
+          <p className="text-sm text-primary-500 uppercase tracking-widest mb-1">Order Number</p>
+          <p className="text-xl font-mono font-semibold text-primary-900 dark:text-white tracking-wider">
+            {orderNumber ? `#${orderNumber}` : orderId}
+          </p>
         </motion.div>
       )}
 
