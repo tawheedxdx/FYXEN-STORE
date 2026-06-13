@@ -45,8 +45,8 @@ export default function Navbar({ cartCount = 0 }) {
     };
   }, []);
 
-  // Hero mode = on homepage AND not yet scrolled AND mobile menu is closed
-  const heroMode = isHomePage && !scrolled && !mobileMenuOpen;
+  // Since HeroSection is no longer at the top of the homepage, disable heroMode so navbar is always visible and compact.
+  const heroMode = false;
   const showLinks = !heroMode;
 
   return (

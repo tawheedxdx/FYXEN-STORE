@@ -19,7 +19,7 @@ export default function CategoryNavStrip({ categories = [] }) {
   ];
 
   return (
-    <nav className="bg-white dark:bg-black border-b border-primary-100 dark:border-white/10">
+    <nav className="sticky top-16 md:top-20 z-40 bg-white/90 dark:bg-black/90 backdrop-blur-md border-b border-primary-100 dark:border-white/10">
       <div className="container-custom">
         <div
           ref={scrollRef}
