@@ -43,7 +43,7 @@ export default function HomeRecommendations() {
   if (loading || products.length === 0) return null;
 
   return (
-    <section className="py-16 md:py-2 bg-white dark:bg-black border-t border-primary-100 dark:border-white/5">
+    <section className="py-16 md:py-24 bg-white dark:bg-black border-t border-primary-100 dark:border-white/5">
       <div className="container-custom">
         <RecommendationCarousel products={products} title="Recommended For You" />
       </div>
