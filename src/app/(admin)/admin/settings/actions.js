@@ -21,6 +21,7 @@ export async function upsertSettings(formData) {
     address: formData.get('address'),
     gst_number: formData.get('gstNumber'),
     site_mode: formData.get('siteMode') || 'online',
+    return_validity_days: parseInt(formData.get('returnValidityDays')) || 7,
     updated_at: new Date().toISOString(),
   };
 

@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, Package, MapPin, CreditCard, Calendar, Truck, CheckCircle2, Clock, AlertCircle, Star } from 'lucide-react';
+import { ChevronLeft, Package, MapPin, CreditCard, Calendar, Truck, CheckCircle2, Clock, AlertCircle, Star, RotateCcw } from 'lucide-react';
 import PayNowButton from '@/components/account/PayNowButton';
 import CancelOrderButton from '@/components/account/CancelOrderButton';
 
@@ -43,6 +43,29 @@ export default async function OrderDetailsPage({ params }) {
 
   if (error || !order) {
     notFound();
+  }
+
+  // Fetch return request if any
+  const { data: returnRequest } = await supabaseAdmin
+    .from('return_requests')
+    .select('*')
+    .eq('order_id', order.id)
+    .maybeSingle();
+
+  // Fetch settings for return validity
+  const { data: settings } = await supabaseAdmin
+    .from('settings')
+    .select('return_validity_days')
+    .maybeSingle();
+
+  const validityDays = settings?.return_validity_days ?? 7;
+
+  let canRequestReturn = false;
+  let returnExpiryDate = null;
+  if (order.order_status === 'delivered' && order.delivered_at && !returnRequest) {
+    const deliveredDate = new Date(order.delivered_at);
+    returnExpiryDate = new Date(deliveredDate.getTime() + validityDays * 24 * 60 * 60 * 1000);
+    canRequestReturn = new Date() <= returnExpiryDate;
   }
 
   const getStatusColor = (status) => {
@@ -98,6 +121,61 @@ export default async function OrderDetailsPage({ params }) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8">
+          {/* Return Request Details */}
+          {returnRequest && (
+            <div className="bg-white dark:bg-black/40 border border-primary-100 dark:border-white/10 rounded-3xl p-6 md:p-8 space-y-4">
+              <div className="flex items-center justify-between border-b border-primary-50 dark:border-white/5 pb-4">
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                  <RotateCcw className="w-5 h-5 text-accent animate-pulse" /> Return Request Details
+                </h3>
+                <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
+                  returnRequest.status === 'approved' 
+                    ? 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300' 
+                    : returnRequest.status === 'rejected'
+                      ? 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300'
+                      : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-300'
+                }`}>
+                  Status: {returnRequest.status}
+                </span>
+              </div>
+              <div className="text-sm space-y-3">
+                <p className="text-primary-600 dark:text-primary-300">
+                  You requested a return for this order on{' '}
+                  <strong>{new Date(returnRequest.created_at).toLocaleDateString()}</strong>.
+                </p>
+                
+                {returnRequest.admin_notes && (
+                  <div className="p-4 bg-primary-50 dark:bg-white/5 rounded-2xl border border-primary-100 dark:border-white/10">
+                    <p className="text-xs font-bold uppercase tracking-wider text-primary-400 mb-1">Feedback from Admin</p>
+                    <p className="text-primary-700 dark:text-primary-200 italic">"{returnRequest.admin_notes}"</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {canRequestReturn && (
+            <div className="bg-white dark:bg-black/40 border border-primary-100 dark:border-white/10 rounded-3xl p-6 md:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-1">
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                  <RotateCcw className="w-5 h-5 text-accent" /> Need to Return Something?
+                </h3>
+                <p className="text-sm text-primary-500">
+                  You can request a return for this order until{' '}
+                  <strong className="text-primary-800 dark:text-white">
+                    {returnExpiryDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
+                  </strong>.
+                </p>
+              </div>
+              <Link
+                href={`/account/orders/${order.id}/return`}
+                className="btn-primary py-3 px-6 rounded-2xl shadow-lg shadow-primary-900/10 font-bold text-sm text-center shrink-0"
+              >
+                Request Return
+              </Link>
+            </div>
+          )}
+
           {/* Order Status Timeline (Simplified) */}
           <div className="bg-white dark:bg-black/40 border border-primary-100 dark:border-white/10 rounded-3xl p-6 md:p-8">
             <h3 className="text-lg font-bold mb-6 flex items-center gap-2">

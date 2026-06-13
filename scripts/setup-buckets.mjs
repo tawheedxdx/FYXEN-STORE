@@ -22,7 +22,7 @@ async function main() {
   
   console.log('Buckets:', buckets.map(b => b.name));
 
-  const requiredBuckets = ['product-images', 'category-images', 'banners', 'brand-assets'];
+  const requiredBuckets = ['product-images', 'category-images', 'banners', 'brand-assets', 'return-images'];
   
   for (const bucket of requiredBuckets) {
     if (!buckets.find(b => b.name === bucket)) {

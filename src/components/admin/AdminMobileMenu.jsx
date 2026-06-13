@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, LayoutDashboard, ShoppingCart, Users, Package, Settings, LogOut, FolderOpen, Tag, MessageSquare, FileText, Megaphone, Layout } from 'lucide-react';
+import { Menu, X, LayoutDashboard, ShoppingCart, Users, Package, Settings, LogOut, FolderOpen, Tag, MessageSquare, FileText, Megaphone, Layout, RotateCcw } from 'lucide-react';
 import { logout } from '@/app/(auth)/actions';
 
 const navLinks = [
@@ -11,6 +11,7 @@ const navLinks = [
   { href: '/admin/products', icon: Package, label: 'Products' },
   { href: '/admin/categories', icon: FolderOpen, label: 'Categories' },
   { href: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
+  { href: '/admin/returns', icon: RotateCcw, label: 'Returns' },
   { href: '/admin/inquiries', icon: MessageSquare, label: 'Inquiries' },
   { href: '/admin/pages', icon: FileText, label: 'Site Pages' },
   { href: '/admin/announcements', icon: Megaphone, label: 'Announcements' },

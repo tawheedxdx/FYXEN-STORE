@@ -15,12 +15,20 @@ export default function OrderStatusDropdown({ orderId, currentStatus }) {
     setLoading(true);
 
     const supabase = createClient();
+    const updatePayload = { 
+      order_status: newStatus,
+      updated_at: new Date().toISOString()
+    };
+
+    if (newStatus === 'delivered') {
+      updatePayload.delivered_at = new Date().toISOString();
+    } else if (status === 'delivered') {
+      updatePayload.delivered_at = null;
+    }
+
     const { error } = await supabase
       .from('orders')
-      .update({ 
-        order_status: newStatus,
-        updated_at: new Date().toISOString()
-      })
+      .update(updatePayload)
       .eq('id', orderId);
 
     if (!error) {

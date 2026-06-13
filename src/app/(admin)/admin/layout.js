@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { LayoutDashboard, ShoppingCart, Users, Package, Settings, LogOut, FolderOpen, Tag, MessageSquare, FileText, Megaphone, Layout, AlertTriangle } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Users, Package, Settings, LogOut, FolderOpen, Tag, MessageSquare, FileText, Megaphone, Layout, AlertTriangle, RotateCcw } from 'lucide-react';
 import { logout } from '@/app/(auth)/actions';
 import AdminMobileMenu from '@/components/admin/AdminMobileMenu';
 
@@ -31,6 +31,7 @@ export default async function AdminLayout({ children }) {
             { href: '/admin/products', icon: Package, label: 'Products' },
             { href: '/admin/categories', icon: FolderOpen, label: 'Categories' },
             { href: '/admin/orders', icon: ShoppingCart, label: 'Orders' },
+            { href: '/admin/returns', icon: RotateCcw, label: 'Returns' },
             { href: '/admin/inquiries', icon: MessageSquare, label: 'Inquiries' },
             { href: '/admin/pages', icon: FileText, label: 'Site Pages' },
             { href: '/admin/announcements', icon: Megaphone, label: 'Announcements' },

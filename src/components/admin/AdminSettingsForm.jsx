@@ -67,6 +67,27 @@ export default function AdminSettingsForm({ settings }) {
         </div>
       </div>
 
+      {/* Return Settings */}
+      <div className="bg-white p-6 rounded-xl border border-primary-100 shadow-sm space-y-5">
+        <h2 className="font-bold text-lg border-b border-primary-100 pb-3 flex items-center gap-2">
+          Return Settings
+        </h2>
+        <div>
+          <label className="block text-sm font-medium mb-2">Return Validity (Days)</label>
+          <input 
+            name="returnValidityDays" 
+            type="number"
+            min="1"
+            className="input-field" 
+            placeholder="e.g. 7"
+            defaultValue={settings?.return_validity_days || 7} 
+          />
+          <p className="text-xs text-primary-400 mt-2">
+            * The number of days a customer has to request a return after their order is marked as delivered.
+          </p>
+        </div>
+      </div>
+
       {/* Contact Info */}
       <div className="bg-white p-6 rounded-xl border border-primary-100 shadow-sm space-y-5">
         <h2 className="font-bold text-lg border-b border-primary-100 pb-3">Contact & Support</h2>
