@@ -1,15 +1,21 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Loader2, CheckCircle, XCircle, FileText } from 'lucide-react';
-import { processReturnRequest } from '../actions';
+import { processReturnRequest, refundReturnOrder } from '../actions';
 import { useRouter } from 'next/navigation';
 
-export default function ReviewClient({ requestId, currentStatus, initialNotes }) {
+export default function ReviewClient({ requestId, currentStatus, initialNotes, orderStatus }) {
   const [status, setStatus] = useState(currentStatus);
   const [notes, setNotes] = useState(initialNotes || '');
   const [isPending, setIsPending] = useState(false);
+  const [isRefunding, setIsRefunding] = useState(false);
+  const [localOrderStatus, setLocalOrderStatus] = useState(orderStatus);
   const router = useRouter();
+
+  useEffect(() => {
+    setLocalOrderStatus(orderStatus);
+  }, [orderStatus]);
 
   async function handleAction(newStatus) {
     if (!confirm(`Are you sure you want to mark this return request as ${newStatus}?`)) {
@@ -22,9 +28,29 @@ export default function ReviewClient({ requestId, currentStatus, initialNotes })
 
     if (res.success) {
       setStatus(newStatus);
+      if (newStatus === 'approved') {
+        setLocalOrderStatus('return_approved');
+      }
       router.refresh();
     } else {
       alert(res.error || 'Failed to process return request');
+    }
+  }
+
+  async function handleRefund() {
+    if (!confirm('Are you sure you want to process the refund for this order? This will mark the order and payment as refunded.')) {
+      return;
+    }
+
+    setIsRefunding(true);
+    const res = await refundReturnOrder(requestId);
+    setIsRefunding(false);
+
+    if (res.success) {
+      setLocalOrderStatus('refunded');
+      router.refresh();
+    } else {
+      alert(res.error || 'Failed to process refund');
     }
   }
 
@@ -73,7 +99,7 @@ export default function ReviewClient({ requestId, currentStatus, initialNotes })
                 className="flex-1 btn-primary bg-green-600 hover:bg-green-700 text-white flex items-center justify-center gap-2 py-3 rounded-xl shadow-lg shadow-green-900/10 font-bold text-sm"
               >
                 {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
-                Approve & Refund
+                Approve Return
               </button>
               <button
                 type="button"
@@ -96,8 +122,32 @@ export default function ReviewClient({ requestId, currentStatus, initialNotes })
                 {notes || 'No notes provided.'}
               </div>
             </div>
+
+            {status === 'approved' && localOrderStatus !== 'refunded' && (
+              <div className="pt-2 border-t border-primary-100 space-y-3">
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-800">
+                  <span className="font-bold">Refund Action Required:</span> This return is approved. Click below to finalize and process the refund.
+                </div>
+                <button
+                  type="button"
+                  disabled={isRefunding}
+                  onClick={handleRefund}
+                  className="w-full btn-primary bg-amber-600 hover:bg-amber-700 text-white flex items-center justify-center gap-2 py-3 rounded-xl shadow-lg shadow-amber-900/10 font-bold text-sm"
+                >
+                  {isRefunding ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
+                  Process Refund
+                </button>
+              </div>
+            )}
+
+            {status === 'approved' && localOrderStatus === 'refunded' && (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-xs text-green-800 font-medium text-center">
+                Refund has been processed and finalized.
+              </div>
+            )}
+
             <p className="text-xs text-primary-400 text-center italic">
-              This request was resolved on {new Date().toLocaleDateString()}.
+              This request was resolved.
             </p>
           </div>
         )}

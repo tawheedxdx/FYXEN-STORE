@@ -22,6 +22,7 @@ export async function upsertSettings(formData) {
     gst_number: formData.get('gstNumber'),
     site_mode: formData.get('siteMode') || 'online',
     return_validity_days: parseInt(formData.get('returnValidityDays')) || 7,
+    return_fee_under_1000: parseFloat(formData.get('returnFeeUnder1000')) || 0,
     updated_at: new Date().toISOString(),
   };
 

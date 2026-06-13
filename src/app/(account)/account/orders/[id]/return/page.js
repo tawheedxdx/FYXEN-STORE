@@ -58,13 +58,14 @@ export default async function ReturnPage({ params }) {
     redirect(`/account/orders/${id}`);
   }
 
-  // Fetch settings for return validity
+  // Fetch settings for return validity and return fee
   const { data: settings } = await supabaseAdmin
     .from('settings')
-    .select('return_validity_days')
+    .select('return_validity_days, return_fee_under_1000')
     .maybeSingle();
 
   const validityDays = settings?.return_validity_days ?? 7;
+  const returnFeeUnder1000 = settings?.return_fee_under_1000 ?? 0;
 
   const deliveredDate = new Date(order.delivered_at);
   const returnExpiryDate = new Date(deliveredDate.getTime() + validityDays * 24 * 60 * 60 * 1000);
@@ -83,7 +84,7 @@ export default async function ReturnPage({ params }) {
 
   return (
     <div className="max-w-4xl mx-auto py-10 px-4">
-      <ReturnFormClient order={order} questions={questions || []} />
+      <ReturnFormClient order={order} questions={questions || []} returnFeeUnder1000={returnFeeUnder1000} />
     </div>
   );
 }

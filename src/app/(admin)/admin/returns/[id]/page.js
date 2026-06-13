@@ -126,6 +126,12 @@ export default async function ReviewReturnRequestPage(props) {
                     <span className="font-medium text-primary-900 uppercase">{request.orders?.payment_method || '—'}</span>
                   </div>
                 </div>
+                {request.return_fee > 0 && (
+                  <div>
+                    <span className="block text-xs font-bold uppercase tracking-wider text-amber-700">Return Fee Applied</span>
+                    <span className="font-bold text-amber-700">₹{request.return_fee.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
                 <div>
                   <span className="block text-xs text-primary-400 font-semibold uppercase tracking-wider">Delivered On</span>
                   <span className="font-medium text-primary-900">
@@ -219,6 +225,7 @@ export default async function ReviewReturnRequestPage(props) {
             requestId={request.id} 
             currentStatus={request.status} 
             initialNotes={request.admin_notes} 
+            orderStatus={request.orders?.order_status}
           />
         </div>
       </div>

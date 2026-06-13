@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
-const ORDER_STATUSES = ['pending', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled'];
+const ORDER_STATUSES = ['pending', 'confirmed', 'packed', 'shipped', 'delivered', 'cancelled', 'return_approved', 'refunded'];
 
 export default function OrderStatusDropdown({ orderId, currentStatus }) {
   const [status, setStatus] = useState(currentStatus);
@@ -47,6 +47,8 @@ export default function OrderStatusDropdown({ orderId, currentStatus }) {
     shipped: 'bg-indigo-50 text-indigo-800 border-indigo-200',
     delivered: 'bg-green-50 text-green-800 border-green-200',
     cancelled: 'bg-red-50 text-red-800 border-red-200',
+    return_approved: 'bg-amber-50 text-amber-800 border-amber-200',
+    refunded: 'bg-emerald-50 text-emerald-800 border-emerald-200',
   };
 
   return (

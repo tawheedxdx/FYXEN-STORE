@@ -7,7 +7,7 @@ import { submitReturnRequest } from './actions';
 import { Loader2, ArrowLeft, Check, Camera, Plus, Minus, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
-export default function ReturnFormClient({ order, questions }) {
+export default function ReturnFormClient({ order, questions, returnFeeUnder1000 = 0 }) {
   const [selectedItems, setSelectedItems] = useState({});
   const [quantities, setQuantities] = useState(
     order.order_items.reduce((acc, item) => ({ ...acc, [item.id]: item.quantity }), {})
@@ -83,7 +83,7 @@ export default function ReturnFormClient({ order, questions }) {
             const filePath = `${order.id}/${q.id}-${Date.now()}.${fileExt}`;
             
             const { data: uploadData, error: uploadError } = await supabase.storage
-              .from('return-images')
+               .from('return-images')
               .upload(filePath, file, { cacheControl: '3600', upsert: true });
 
             if (uploadError) {
@@ -147,6 +147,15 @@ export default function ReturnFormClient({ order, questions }) {
         <h1 className="text-3xl font-bold text-primary-900">Request a Return</h1>
         <p className="text-primary-500">Select the items you wish to return and answer the questions below.</p>
       </div>
+
+      {order.grand_total < 1000 && returnFeeUnder1000 > 0 && (
+        <div className="p-4 bg-amber-50 border border-amber-200 text-amber-800 rounded-2xl text-sm flex items-start gap-2 shadow-sm">
+          <AlertCircle className="w-5 h-5 shrink-0 text-amber-500 mt-0.5" />
+          <div>
+            <span className="font-bold">Return Fee Applicable:</span> As your order value is less than ₹1,000, a return fee of <span className="font-bold">₹{returnFeeUnder1000}</span> will be charged upon approval of this return request.
+          </div>
+        </div>
+      )}
 
       {error && (
         <div className="p-4 bg-red-50 border border-red-200 text-red-600 rounded-2xl text-sm flex items-start gap-2 shadow-sm">

@@ -128,6 +128,7 @@ export default async function AdminReturnsPage(props) {
                   <th className="p-4">Customer</th>
                   <th className="p-4">Returned Items</th>
                   <th className="p-4">Total Value</th>
+                  <th className="p-4">Return Fee</th>
                   <th className="p-4">Status</th>
                   <th className="p-4">Requested On</th>
                   <th className="p-4"></th>
@@ -152,6 +153,9 @@ export default async function AdminReturnsPage(props) {
                       </td>
                       <td className="p-4 font-semibold text-primary-900">
                         ₹{req.orders?.grand_total || '—'}
+                      </td>
+                      <td className="p-4 font-semibold text-primary-900">
+                        {req.return_fee > 0 ? `₹${req.return_fee.toLocaleString('en-IN')}` : '—'}
                       </td>
                       <td className="p-4">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase border ${statusColors[req.status]}`}>

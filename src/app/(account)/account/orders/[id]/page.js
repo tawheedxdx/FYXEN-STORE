@@ -83,6 +83,8 @@ export default async function OrderDetailsPage({ params }) {
       case 'shipped': return <Truck className="w-5 h-5 text-blue-500" />;
       case 'delivered': return <Package className="w-5 h-5 text-green-600" />;
       case 'pending': return <Clock className="w-5 h-5 text-yellow-500" />;
+      case 'return_approved': return <RotateCcw className="w-5 h-5 text-accent" />;
+      case 'refunded': return <RotateCcw className="w-5 h-5 text-green-600" />;
       default: return <AlertCircle className="w-5 h-5 text-primary-400" />;
     }
   };
@@ -130,12 +132,20 @@ export default async function OrderDetailsPage({ params }) {
                 </h3>
                 <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
                   returnRequest.status === 'approved' 
-                    ? 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300' 
+                    ? order.order_status === 'refunded'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-950 dark:text-green-300' 
+                      : 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300'
                     : returnRequest.status === 'rejected'
                       ? 'bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300'
                       : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-950 dark:text-yellow-300'
                 }`}>
-                  Status: {returnRequest.status}
+                  Status: {
+                    returnRequest.status === 'approved'
+                      ? order.order_status === 'refunded'
+                        ? 'Refunded'
+                        : 'Return Initiated'
+                      : returnRequest.status
+                  }
                 </span>
               </div>
               <div className="text-sm space-y-3">
@@ -143,6 +153,18 @@ export default async function OrderDetailsPage({ params }) {
                   You requested a return for this order on{' '}
                   <strong>{new Date(returnRequest.created_at).toLocaleDateString()}</strong>.
                 </p>
+
+                {returnRequest.return_fee > 0 && (
+                  <p className="text-amber-700 dark:text-amber-400 font-semibold">
+                    Return Fee Applied: ₹{returnRequest.return_fee.toLocaleString('en-IN')}
+                  </p>
+                )}
+
+                {returnRequest.status === 'approved' && order.order_status !== 'refunded' && (
+                  <div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 text-amber-850 dark:text-amber-300 rounded-2xl">
+                    <span className="font-bold">Note:</span> You will receive a return pickup.
+                  </div>
+                )}
                 
                 {returnRequest.admin_notes && (
                   <div className="p-4 bg-primary-50 dark:bg-white/5 rounded-2xl border border-primary-100 dark:border-white/10">
@@ -187,8 +209,20 @@ export default async function OrderDetailsPage({ params }) {
                   {getOrderStatusIcon(order.order_status)}
                 </div>
                 <div>
-                  <p className="font-bold text-primary-900 dark:text-white uppercase tracking-wide text-sm">{order.order_status}</p>
-                  <p className="text-xs text-primary-500 mt-0.5">Your order is currently being processed.</p>
+                  <p className="font-bold text-primary-900 dark:text-white uppercase tracking-wide text-sm">
+                    {order.order_status === 'return_approved' 
+                      ? 'Return Initiated' 
+                      : order.order_status === 'refunded'
+                        ? 'Refunded'
+                        : order.order_status}
+                  </p>
+                  <p className="text-xs text-primary-500 mt-0.5">
+                    {order.order_status === 'return_approved' 
+                      ? 'You will receive a return pickup.' 
+                      : order.order_status === 'refunded'
+                        ? 'Refund has been processed successfully.'
+                        : 'Your order is currently being processed.'}
+                  </p>
                 </div>
               </div>
               <div className="flex flex-col items-end gap-3">

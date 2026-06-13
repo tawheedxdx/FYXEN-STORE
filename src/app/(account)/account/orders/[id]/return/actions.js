@@ -15,7 +15,7 @@ export async function submitReturnRequest({ orderId, items, answers }) {
   // Fetch order and verify ownership and deliver status
   const { data: order, error: orderError } = await supabase
     .from('orders')
-    .select('id, user_id, order_status, delivered_at')
+    .select('id, user_id, order_status, delivered_at, grand_total')
     .eq('id', orderId)
     .eq('user_id', user.id)
     .single();
@@ -39,12 +39,13 @@ export async function submitReturnRequest({ orderId, items, answers }) {
     return { error: 'A return request has already been submitted for this order.' };
   }
 
-  // Check validity days
+  // Check validity days and return fee setting
   const { data: settings } = await supabase
     .from('settings')
-    .select('return_validity_days')
+    .select('return_validity_days, return_fee_under_1000')
     .maybeSingle();
   const validityDays = settings?.return_validity_days ?? 7;
+  const returnFeeSetting = settings?.return_fee_under_1000 ?? 0;
 
   const deliveredDate = new Date(order.delivered_at);
   const expiryDate = new Date(deliveredDate.getTime() + validityDays * 24 * 60 * 60 * 1000);
@@ -59,6 +60,7 @@ export async function submitReturnRequest({ orderId, items, answers }) {
     status: 'pending',
     items,
     answers,
+    return_fee: order.grand_total < 1000 ? returnFeeSetting : 0,
     updated_at: new Date().toISOString()
   };
 

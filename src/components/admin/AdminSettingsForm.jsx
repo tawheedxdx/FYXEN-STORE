@@ -86,6 +86,20 @@ export default function AdminSettingsForm({ settings }) {
             * The number of days a customer has to request a return after their order is marked as delivered.
           </p>
         </div>
+        <div>
+          <label className="block text-sm font-medium mb-2">Return Fee (Orders under ₹1,000)</label>
+          <input 
+            name="returnFeeUnder1000" 
+            type="number"
+            min="0"
+            className="input-field" 
+            placeholder="e.g. 100"
+            defaultValue={settings?.return_fee_under_1000 || 0} 
+          />
+          <p className="text-xs text-primary-400 mt-2">
+            * The fee charged for return requests on orders whose total value is less than ₹1,000.
+          </p>
+        </div>
       </div>
 
       {/* Contact Info */}

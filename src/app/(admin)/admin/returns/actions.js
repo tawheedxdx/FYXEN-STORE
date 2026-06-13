@@ -47,22 +47,58 @@ export async function processReturnRequest(id, status, adminNotes) {
     return { error: updateRequestError.message };
   }
 
-  // If approved, update order status and payment status to refunded
+  // If approved, update order status to return_approved
   if (status === 'approved') {
     const { error: updateOrderError } = await supabase
       .from('orders')
       .update({
-        order_status: 'refunded',
-        payment_status: 'refunded',
+        order_status: 'return_approved',
         updated_at: new Date().toISOString()
       })
       .eq('id', request.order_id);
 
     if (updateOrderError) {
-      // Revert the return request status if order status update fails?
-      // Since it's not a transaction, we should log or return the error.
       return { error: `Return request status updated, but updating order failed: ${updateOrderError.message}` };
     }
+  }
+
+  revalidatePath(`/admin/returns/${id}`);
+  revalidatePath('/admin/returns');
+  revalidatePath(`/admin/orders/${request.order_id}`);
+  return { success: true };
+}
+
+export async function refundReturnOrder(id) {
+  const supabase = await createClient();
+  const adminUser = await checkAdmin(supabase);
+  if (!adminUser) return { error: 'Unauthorized' };
+
+  // Fetch the request to get the order_id
+  const { data: request, error: fetchError } = await supabase
+    .from('return_requests')
+    .select('order_id, status')
+    .eq('id', id)
+    .single();
+
+  if (fetchError || !request) {
+    return { error: 'Return request not found' };
+  }
+
+  if (request.status !== 'approved') {
+    return { error: 'Return request must be approved first.' };
+  }
+
+  const { error: updateOrderError } = await supabase
+    .from('orders')
+    .update({
+      order_status: 'refunded',
+      payment_status: 'refunded',
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', request.order_id);
+
+  if (updateOrderError) {
+    return { error: updateOrderError.message };
   }
 
   revalidatePath(`/admin/returns/${id}`);
