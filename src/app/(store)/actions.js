@@ -1,0 +1,49 @@
+'use server';
+
+import { createClient } from '@/lib/supabase/server';
+import { checkRateLimit } from '@/lib/rate-limit';
+
+export async function subscribeNewsletter(formData) {
+  const rateLimit = await checkRateLimit('newsletter', 5, 10 * 60 * 1000); // 5 attempts per 10 minutes
+  if (!rateLimit.success) return { error: rateLimit.error };
+
+  const supabase = await createClient();
+  const email = formData.get('email');
+  
+  // Security check: Check site mode
+  const { data: settings } = await supabase.from('settings').select('site_mode').single();
+  if (settings?.site_mode !== 'online') {
+    return { error: 'Service is currently unavailable due to maintenance.' };
+  }
+
+  if (!email) {
+    return { error: 'Email is required.' };
+  }
+
+  // Check if already subscribed in contact_inquiries (optional, but good)
+  const { data: existing } = await supabase
+    .from('contact_inquiries')
+    .select('id')
+    .eq('email', email)
+    .eq('message', 'Newsletter Subscription')
+    .single();
+
+  if (existing) {
+    return { success: true, message: 'You are already subscribed!' };
+  }
+
+  const { error } = await supabase
+    .from('contact_inquiries')
+    .insert([{ 
+      name: 'Newsletter Subscriber', 
+      email, 
+      message: 'Newsletter Subscription' 
+    }]);
+
+  if (error) {
+    console.error('Newsletter error:', error);
+    return { error: 'Failed to subscribe. Please try again.' };
+  }
+
+  return { success: true };
+}
