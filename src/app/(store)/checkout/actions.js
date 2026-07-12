@@ -198,8 +198,10 @@ export async function createCheckoutSession(formData) {
   const orderItemsData = items.map(item => ({
     order_id: order.id,
     product_id: item.productId,
+    variant_id: item.variantId,
     product_title_snapshot: item.title,
     image_snapshot: item.image,
+    sku_snapshot: item.sku,
     quantity: item.quantity,
     unit_price: item.price,
     total_price: item.price * item.quantity,
@@ -213,7 +215,8 @@ export async function createCheckoutSession(formData) {
     for (const item of items) {
       const { data: success } = await supabaseAdmin.rpc('decrement_stock', {
         p_product_id: item.productId,
-        p_quantity: item.quantity
+        p_quantity: item.quantity,
+        p_variant_id: item.variantId
       });
       if (!success) {
         // This shouldn't happen often due to check above, but for safety:
@@ -338,7 +341,7 @@ export async function verifyPayment(paymentData) {
     // 1. Fetch order items for stock decrement
     const { data: orderItems } = await supabaseAdmin
       .from('order_items')
-      .select('product_id, quantity, product_title_snapshot')
+      .select('product_id, variant_id, quantity, product_title_snapshot')
       .eq('order_id', orderId);
 
     // 2. Decrement Stock
@@ -346,7 +349,8 @@ export async function verifyPayment(paymentData) {
       for (const item of orderItems) {
         const { data: success } = await supabaseAdmin.rpc('decrement_stock', {
           p_product_id: item.product_id,
-          p_quantity: item.quantity
+          p_quantity: item.quantity,
+          p_variant_id: item.variant_id
         });
         if (!success) {
           console.error(`STOCK EXHAUSTED for ${item.product_title_snapshot} during payment verify!`);

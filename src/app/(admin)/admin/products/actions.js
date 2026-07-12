@@ -17,6 +17,23 @@ function slugify(text) {
   return text.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '').replace(/--+/g, '-').trim();
 }
 
+async function uploadVariantImage(variantId, file, adminSupabase) {
+  const ext = file.name.split('.').pop();
+  const fileName = `variants/${variantId}-${Date.now()}.${ext}`;
+
+  const { error: uploadError } = await adminSupabase.storage
+    .from('product-images')
+    .upload(fileName, file, { contentType: file.type, upsert: false });
+
+  if (uploadError) {
+    console.error('Variant image upload error:', uploadError);
+    return null;
+  }
+
+  const { data: urlData } = adminSupabase.storage.from('product-images').getPublicUrl(fileName);
+  return urlData.publicUrl;
+}
+
 export async function createProduct(formData) {
   const supabase = await createClient();
   const adminSupabase = createAdminClient();
@@ -109,6 +126,50 @@ export async function createProduct(formData) {
     }));
   }
 
+  // Handle product variants
+  const variantsJson = formData.get('variants');
+  const variants = variantsJson ? JSON.parse(variantsJson) : [];
+  if (variants.length > 0) {
+    for (let i = 0; i < variants.length; i++) {
+      const v = variants[i];
+      const variantName = Object.entries(v.attributes || {})
+        .map(([k, val]) => `${val}`)
+        .join(' / ');
+
+      const { data: newVar, error: varError } = await adminSupabase
+        .from('product_variants')
+        .insert({
+          product_id: product.id,
+          name: variantName,
+          sku: v.sku || null,
+          price: parseFloat(v.price) || price,
+          compare_at_price: v.compareAtPrice ? parseFloat(v.compareAtPrice) : null,
+          stock_quantity: parseInt(v.stockQuantity || '0'),
+          attributes_json: v.attributes || {},
+          images: v.images || [],
+        })
+        .select('id')
+        .single();
+
+      if (varError) {
+        console.error('Error inserting variant:', varError);
+        continue;
+      }
+
+      // Check if a file was uploaded for this variant
+      const file = formData.get(`variant_image_${v.tempId}`);
+      if (file && file.size > 0) {
+        const publicUrl = await uploadVariantImage(newVar.id, file, adminSupabase);
+        if (publicUrl) {
+          await adminSupabase
+            .from('product_variants')
+            .update({ images: [publicUrl] })
+            .eq('id', newVar.id);
+        }
+      }
+    }
+  }
+
   revalidatePath('/admin/products');
   revalidatePath('/shop');
   revalidatePath('/best-sellers');
@@ -193,6 +254,92 @@ export async function updateProduct(productId, formData) {
         sort_order: existingSortMax + i + 1,
       });
     }));
+  }
+
+  // Handle product variants
+  const variantsJson = formData.get('variants');
+  const variants = variantsJson ? JSON.parse(variantsJson) : [];
+
+  // Fetch existing variants to delete ones not present anymore
+  const { data: existingVars } = await adminSupabase
+    .from('product_variants')
+    .select('id')
+    .eq('product_id', productId);
+  
+  if (existingVars) {
+    const keepIds = variants.filter(v => v.id).map(v => v.id);
+    const toDeleteIds = existingVars.filter(ev => !keepIds.includes(ev.id)).map(ev => ev.id);
+    if (toDeleteIds.length > 0) {
+      await adminSupabase.from('product_variants').delete().in('id', toDeleteIds);
+    }
+  }
+
+  // Insert/Update variants
+  for (let i = 0; i < variants.length; i++) {
+    const v = variants[i];
+    const variantName = Object.entries(v.attributes || {})
+      .map(([k, val]) => `${val}`)
+      .join(' / ');
+
+    const variantData = {
+      product_id: productId,
+      name: variantName,
+      sku: v.sku || null,
+      price: parseFloat(v.price) || 0,
+      compare_at_price: v.compareAtPrice ? parseFloat(v.compareAtPrice) : null,
+      stock_quantity: parseInt(v.stockQuantity || '0'),
+      attributes_json: v.attributes || {},
+      images: v.images || [],
+    };
+
+    if (v.id) {
+      // Update existing variant
+      const { error: varError } = await adminSupabase
+        .from('product_variants')
+        .update(variantData)
+        .eq('id', v.id);
+      
+      if (varError) {
+        console.error('Error updating variant:', varError);
+        continue;
+      }
+
+      // Check for new file upload
+      const file = formData.get(`variant_image_${v.id}`) || formData.get(`variant_image_${v.tempId}`);
+      if (file && file.size > 0) {
+        const publicUrl = await uploadVariantImage(v.id, file, adminSupabase);
+        if (publicUrl) {
+          await adminSupabase
+            .from('product_variants')
+            .update({ images: [publicUrl] })
+            .eq('id', v.id);
+        }
+      }
+    } else {
+      // Insert new variant
+      const { data: newVar, error: varError } = await adminSupabase
+        .from('product_variants')
+        .insert(variantData)
+        .select('id')
+        .single();
+      
+      if (varError) {
+        console.error('Error inserting variant:', varError);
+        continue;
+      }
+
+      // Check for file upload
+      const file = formData.get(`variant_image_${v.tempId}`);
+      if (file && file.size > 0) {
+        const publicUrl = await uploadVariantImage(newVar.id, file, adminSupabase);
+        if (publicUrl) {
+          await adminSupabase
+            .from('product_variants')
+            .update({ images: [publicUrl] })
+            .eq('id', newVar.id);
+        }
+      }
+    }
   }
 
   revalidatePath('/admin/products');

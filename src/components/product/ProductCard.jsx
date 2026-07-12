@@ -64,11 +64,20 @@ export default function ProductCard({ product }) {
         </div>
       </Link>
 
-      {/* Add to Cart Button */}
-      <AddToCartButton
-        productId={product.id}
-        stockQuantity={product.stock_quantity}
-      />
+      {/* Add to Cart or Select Options Button */}
+      {product.product_variants && product.product_variants.length > 0 ? (
+        <Link 
+          href={`/product/${product.slug}`} 
+          className="w-full h-11 flex items-center justify-center text-xs font-bold uppercase tracking-wider text-center text-primary-900 border border-primary-300 rounded-lg hover:bg-primary-50 dark:text-white dark:border-white/10 dark:hover:bg-white/10 transition-colors"
+        >
+          Select Options
+        </Link>
+      ) : (
+        <AddToCartButton
+          productId={product.id}
+          stockQuantity={product.stock_quantity}
+        />
+      )}
     </div>
   );
 }

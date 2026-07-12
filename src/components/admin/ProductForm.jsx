@@ -22,6 +22,135 @@ export default function ProductForm({ categories, product }) {
   const [titleValue, setTitleValue] = useState(product?.title || '');
   const [highlights, setHighlights] = useState(product?.highlights || []);
 
+  // --- Variants State ---
+  const [hasVariants, setHasVariants] = useState(
+    product?.product_variants?.length > 0 || false
+  );
+
+  const getInitialOptions = (variants) => {
+    if (!variants || variants.length === 0) {
+      return [{ name: 'Size', values: [] }];
+    }
+    const optionsMap = {};
+    variants.forEach(v => {
+      Object.entries(v.attributes_json || {}).forEach(([name, value]) => {
+        if (!optionsMap[name]) {
+          optionsMap[name] = new Set();
+        }
+        optionsMap[name].add(value);
+      });
+    });
+    return Object.entries(optionsMap).map(([name, set]) => ({
+      name,
+      values: Array.from(set)
+    }));
+  };
+
+  const [options, setOptions] = useState(() => getInitialOptions(product?.product_variants));
+
+  const [variantsList, setVariantsList] = useState(() => {
+    if (!product?.product_variants) return [];
+    return product.product_variants.map(v => ({
+      id: v.id,
+      sku: v.sku || '',
+      price: v.price || '',
+      compareAtPrice: v.compare_at_price || '',
+      stockQuantity: v.stock_quantity || 0,
+      attributes: v.attributes_json || {},
+      images: v.images || [],
+      file: null,
+      previewUrl: ''
+    }));
+  });
+
+  const [basePrice, setBasePrice] = useState(product?.price || '');
+  const [baseComparePrice, setBaseComparePrice] = useState(product?.compare_at_price || '');
+  const [baseStock, setBaseStock] = useState(product?.stock_quantity || 0);
+
+  const cartesianProduct = (arrays) => {
+    return arrays.reduce((acc, curr) => {
+      return acc.flatMap(d => curr.map(e => [...d, e]));
+    }, [[]]);
+  };
+
+  const generateCombinations = () => {
+    const activeOptions = options.filter(opt => opt.name.trim() && opt.values.length > 0);
+    if (activeOptions.length === 0) {
+      setVariantsList([]);
+      return;
+    }
+
+    const arrays = activeOptions.map(opt => opt.values.map(val => ({ name: opt.name.trim(), value: val.trim() })));
+    const combinations = cartesianProduct(arrays);
+
+    const newList = combinations.map(combination => {
+      const attributes = {};
+      combination.forEach(item => {
+        attributes[item.name] = item.value;
+      });
+
+      const match = variantsList.find(v => {
+        return Object.entries(attributes).every(([key, value]) => v.attributes[key] === value) &&
+               Object.keys(v.attributes).length === Object.keys(attributes).length;
+      });
+
+      if (match) {
+        return match;
+      } else {
+        return {
+          tempId: `var-${Math.random().toString(36).substr(2, 9)}`,
+          attributes,
+          price: basePrice || '',
+          compareAtPrice: baseComparePrice || '',
+          sku: '',
+          stockQuantity: baseStock || 0,
+          images: [],
+          file: null,
+          previewUrl: ''
+        };
+      }
+    });
+
+    setVariantsList(newList);
+  };
+
+  const addOption = () => {
+    setOptions([...options, { name: '', values: [] }]);
+  };
+
+  const removeOption = (index) => {
+    setOptions(options.filter((_, i) => i !== index));
+  };
+
+  const updateOptionName = (index, name) => {
+    const newOptions = [...options];
+    newOptions[index].name = name;
+    setOptions(newOptions);
+  };
+
+  const updateOptionValues = (index, valueString) => {
+    const values = valueString.split(',').map(v => v.trim()).filter(Boolean);
+    const newOptions = [...options];
+    newOptions[index].values = values;
+    setOptions(newOptions);
+  };
+
+  const updateVariantField = (index, field, value) => {
+    const newVariants = [...variantsList];
+    newVariants[index][field] = value;
+    setVariantsList(newVariants);
+  };
+
+  const handleVariantImageChange = (index, e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const newVariants = [...variantsList];
+      newVariants[index].file = file;
+      newVariants[index].previewUrl = URL.createObjectURL(file);
+      setVariantsList(newVariants);
+    }
+  };
+
   const addHighlight = () => {
     setHighlights([...highlights, { icon: 'Zap', text: '' }]);
   };
@@ -76,6 +205,30 @@ export default function ProductForm({ categories, product }) {
     imagePreviews.forEach(p => formData.append('images', p.file));
     if (isEditing) {
       formData.set('existingSortMax', String(existingImages.length));
+    }
+
+    // Attach variant images and variant JSON
+    if (hasVariants) {
+      const cleanVariants = variantsList.map(v => ({
+        id: v.id,
+        tempId: v.tempId,
+        sku: v.sku,
+        price: v.price,
+        compareAtPrice: v.compareAtPrice,
+        stockQuantity: v.stockQuantity,
+        attributes: v.attributes,
+        images: v.images
+      }));
+      formData.set('variants', JSON.stringify(cleanVariants));
+
+      // Append files
+      variantsList.forEach(v => {
+        if (v.file) {
+          formData.append(`variant_image_${v.id || v.tempId}`, v.file);
+        }
+      });
+    } else {
+      formData.set('variants', JSON.stringify([]));
     }
 
     try {
@@ -214,6 +367,188 @@ export default function ProductForm({ categories, product }) {
             <input type="hidden" name="highlights" value={JSON.stringify(highlights)} />
           </div>
 
+          {/* Product Variants */}
+          <div className="bg-white p-6 rounded-xl border border-primary-100 shadow-sm space-y-5">
+            <div className="flex items-center justify-between border-b border-primary-100 pb-3">
+              <h2 className="font-bold text-lg">Product Variants</h2>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-primary-500 font-medium">Enable Variants</span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" checked={hasVariants} onChange={(e) => setHasVariants(e.target.checked)} className="sr-only peer" />
+                  <div className="w-10 h-5 bg-primary-200 rounded-full peer peer-checked:bg-primary-900 transition-colors"></div>
+                  <span className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform"></span>
+                </label>
+              </div>
+            </div>
+
+            {hasVariants && (
+              <div className="space-y-6">
+                {/* Options Configuration */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-bold text-primary-700">Configure Options</span>
+                    <button
+                      type="button"
+                      onClick={addOption}
+                      className="text-xs font-bold text-primary-600 hover:text-primary-900 bg-primary-50 px-2.5 py-1.5 rounded-md transition-colors"
+                    >
+                      + Add Option (e.g. Size, Color)
+                    </button>
+                  </div>
+
+                  {options.map((opt, index) => (
+                    <div key={index} className="flex gap-4 items-start bg-primary-50/30 p-4 rounded-xl border border-primary-100">
+                      <div className="flex-1 space-y-3">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="md:col-span-1">
+                            <label className="block text-[10px] uppercase font-bold text-primary-400 mb-1">Option Name</label>
+                            <input
+                              className="input-field py-1.5 text-sm"
+                              placeholder="e.g. Size or Color"
+                              value={opt.name}
+                              onChange={(e) => updateOptionName(index, e.target.value)}
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <label className="block text-[10px] uppercase font-bold text-primary-400 mb-1">Values (comma-separated)</label>
+                            <input
+                              className="input-field py-1.5 text-sm"
+                              placeholder="e.g. Small, Medium, Large"
+                              value={opt.values.join(', ')}
+                              onChange={(e) => updateOptionValues(index, e.target.value)}
+                            />
+                          </div>
+                        </div>
+
+                        {opt.values.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 pt-1">
+                            {opt.values.map((v, valIdx) => (
+                              <span key={valIdx} className="bg-primary-100 text-primary-800 text-xs px-2.5 py-0.5 rounded-full font-medium">
+                                {v}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => removeOption(index)}
+                        className="p-1.5 text-red-400 hover:text-red-600 transition-colors mt-5"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+
+                  <div className="pt-2">
+                    <button
+                      type="button"
+                      onClick={generateCombinations}
+                      className="w-full btn-outline py-2 text-xs font-bold border-primary-900 text-primary-900 dark:border-white dark:text-white hover:bg-primary-50 dark:hover:bg-white/10"
+                    >
+                      Generate/Update Combinations ({variantsList.length})
+                    </button>
+                  </div>
+                </div>
+
+                {/* Variants List / Combinations */}
+                {variantsList.length > 0 && (
+                  <div className="space-y-4 border-t border-primary-100 pt-4">
+                    <span className="text-sm font-bold text-primary-700 block">Edit Variant Variations</span>
+                    
+                    <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1 no-scrollbar">
+                      {variantsList.map((v, index) => {
+                        const variantDisplayName = Object.entries(v.attributes)
+                          .map(([key, val]) => `${key}: ${val}`)
+                          .join(', ');
+
+                        return (
+                          <div key={v.id || v.tempId} className="p-4 rounded-xl border border-primary-100 bg-white dark:bg-primary-900/10 space-y-4 shadow-sm hover:border-primary-300 transition-all">
+                            {/* Header: Title and Image Upload */}
+                            <div className="flex items-center justify-between gap-4 border-b border-primary-50 pb-2">
+                              <span className="font-bold text-sm text-primary-950 dark:text-white">{variantDisplayName}</span>
+                              
+                              <div className="flex items-center gap-3">
+                                {/* Variant Image Preview */}
+                                <div className="w-12 h-12 rounded-lg border border-primary-200 overflow-hidden bg-primary-50 shrink-0 relative">
+                                  {v.previewUrl || (v.images && v.images.length > 0) ? (
+                                    <img src={v.previewUrl || v.images[0]} alt="Variant preview" className="w-full h-full object-cover" />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-[10px] text-primary-400 font-bold">No Img</div>
+                                  )}
+                                </div>
+
+                                {/* Custom Upload Button */}
+                                <label className="cursor-pointer text-xs font-bold text-primary-600 hover:text-primary-900 bg-primary-50 dark:bg-primary-800 px-2.5 py-1.5 rounded border border-primary-200 dark:border-white/10 dark:text-white">
+                                  Upload Image
+                                  <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => handleVariantImageChange(index, e)}
+                                  />
+                                </label>
+                              </div>
+                            </div>
+
+                            {/* Inputs Grid */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                              <div>
+                                <label className="block text-[9px] uppercase font-bold text-primary-400 mb-0.5">Price (₹)</label>
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  className="input-field py-1 text-xs"
+                                  placeholder="Price"
+                                  value={v.price}
+                                  onChange={(e) => updateVariantField(index, 'price', e.target.value)}
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[9px] uppercase font-bold text-primary-400 mb-0.5">Compare (₹)</label>
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  className="input-field py-1 text-xs"
+                                  placeholder="Compare"
+                                  value={v.compareAtPrice}
+                                  onChange={(e) => updateVariantField(index, 'compareAtPrice', e.target.value)}
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[9px] uppercase font-bold text-primary-400 mb-0.5">SKU</label>
+                                <input
+                                  className="input-field py-1 text-xs"
+                                  placeholder="SKU"
+                                  value={v.sku}
+                                  onChange={(e) => updateVariantField(index, 'sku', e.target.value)}
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-[9px] uppercase font-bold text-primary-400 mb-0.5">Stock</label>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  className="input-field py-1 text-xs"
+                                  placeholder="Stock"
+                                  value={v.stockQuantity}
+                                  onChange={(e) => updateVariantField(index, 'stockQuantity', e.target.value)}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* SEO */}
           <div className="bg-white p-6 rounded-xl border border-primary-100 shadow-sm space-y-5">
             <h2 className="font-bold text-lg border-b border-primary-100 pb-3">SEO (Optional)</h2>
@@ -236,11 +571,11 @@ export default function ProductForm({ categories, product }) {
             <h2 className="font-bold text-lg border-b border-primary-100 pb-3">Pricing & Promotions</h2>
             <div>
               <label className="block text-sm font-medium mb-2">Price (₹) *</label>
-              <input name="price" type="number" step="0.01" required min="0" className="input-field" placeholder="0.00" defaultValue={product?.price || ''} />
+              <input name="price" type="number" step="0.01" required min="0" className="input-field" placeholder="0.00" value={basePrice} onChange={(e) => setBasePrice(e.target.value)} />
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Compare At Price (₹)</label>
-              <input name="compareAtPrice" type="number" step="0.01" min="0" className="input-field" placeholder="0.00 (for sale badge)" defaultValue={product?.compare_at_price || ''} />
+              <input name="compareAtPrice" type="number" step="0.01" min="0" className="input-field" placeholder="0.00 (for sale badge)" value={baseComparePrice} onChange={(e) => setBaseComparePrice(e.target.value)} />
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Promo Tag (Deal Badge)</label>
@@ -268,7 +603,7 @@ export default function ProductForm({ categories, product }) {
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Stock Quantity *</label>
-              <input name="stockQuantity" type="number" min="0" required className="input-field" placeholder="0" defaultValue={product?.stock_quantity ?? 0} />
+              <input name="stockQuantity" type="number" min="0" required className="input-field" placeholder="0" value={baseStock} onChange={(e) => setBaseStock(e.target.value)} />
             </div>
             <div>
               <label className="block text-sm font-medium mb-2">Brand</label>

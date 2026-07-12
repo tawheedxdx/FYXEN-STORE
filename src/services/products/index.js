@@ -46,7 +46,8 @@ export async function getProducts(options = {}) {
         brand,
         promo_tag,
         product_images(image_url, sort_order),
-        categories(name, slug)
+        categories(name, slug),
+        product_variants(id)
       `).eq('is_active', true);
 
       // FIX: resolve category slug → id in the same client, no extra createClient call
