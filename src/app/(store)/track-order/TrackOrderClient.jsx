@@ -155,8 +155,16 @@ export default function TrackOrderClient() {
                 </div>
                 <div>
                   <p className="text-primary-500 text-xs mb-1">Payment</p>
-                  <span className={`inline-block text-xs font-bold uppercase px-2 py-0.5 rounded ${order.payment_status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                    {order.payment_status}
+                  <span className={`inline-block text-xs font-bold uppercase px-2 py-0.5 rounded ${
+                    order.payment_status === 'paid'
+                      ? 'bg-green-100 text-green-800'
+                      : order.payment_status === 'partial_paid'
+                        ? 'bg-purple-100 text-purple-800'
+                        : order.payment_status === 'cod'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {order.payment_status === 'partial_paid' ? 'Partially Paid' : order.payment_status === 'cod' ? 'COD' : order.payment_status}
                   </span>
                 </div>
               </div>
@@ -261,6 +269,18 @@ export default function TrackOrderClient() {
                 <span>Total</span>
                 <span>₹{Number(order.grand_total).toFixed(2)}</span>
               </div>
+              {order.payment_status === 'partial_paid' && (
+                <div className="mt-4 pt-4 border-t border-primary-100 dark:border-white/10 space-y-2 text-xs">
+                  <div className="flex justify-between text-primary-500">
+                    <span>Paid Online</span>
+                    <span>₹{Number(order.partial_payment_amount || 0).toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-accent font-bold">
+                    <span>COD Balance Due</span>
+                    <span>₹{Number(order.cod_balance_amount || 0).toFixed(2)}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

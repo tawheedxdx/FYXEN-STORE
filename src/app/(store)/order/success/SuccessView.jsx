@@ -7,6 +7,27 @@ import Script from 'next/script';
 
 export default function SuccessView({ orderId, orderNumber, paymentStatus }) {
   const isCod = paymentStatus === 'cod';
+  const isPartial = paymentStatus === 'partial_paid';
+
+  let themeBg = 'bg-green-500/20';
+  let themeText = 'text-green-500';
+  let gradientColors = 'from-green-500 to-emerald-400';
+  let headline = 'Payment Verified!';
+  let description = 'Your premium order has been successfully placed and is now being processed.';
+
+  if (isCod) {
+    themeBg = 'bg-blue-500/20';
+    themeText = 'text-blue-500';
+    gradientColors = 'from-blue-500 to-indigo-400';
+    headline = 'Order Placed!';
+    description = 'Your order has been received and will be delivered shortly. Please keep the cash ready!';
+  } else if (isPartial) {
+    themeBg = 'bg-purple-500/20';
+    themeText = 'text-purple-500';
+    gradientColors = 'from-purple-500 to-indigo-400';
+    headline = 'Booking Confirmed!';
+    description = 'Your partial payment was successful. The booking is confirmed, and the remaining balance will be collected on delivery.';
+  }
 
   return (
     <div className="container-custom py-24 min-h-[70vh] flex flex-col items-center justify-center text-center">
@@ -30,11 +51,11 @@ export default function SuccessView({ orderId, orderNumber, paymentStatus }) {
         }}
         className="relative"
       >
-        <div className={`absolute inset-0 ${isCod ? 'bg-blue-500/20' : 'bg-green-500/20'} blur-3xl rounded-full`} />
+        <div className={`absolute inset-0 ${themeBg} blur-3xl rounded-full`} />
         {isCod ? (
-          <Package className="w-28 h-28 text-blue-500 relative z-10" strokeWidth={1.5} />
+          <Package className={`w-28 h-28 ${themeText} relative z-10`} strokeWidth={1.5} />
         ) : (
-          <CheckCircle className="w-28 h-28 text-green-500 relative z-10" strokeWidth={1.5} />
+          <CheckCircle className={`w-28 h-28 ${themeText} relative z-10`} strokeWidth={1.5} />
         )}
       </motion.div>
 
@@ -44,13 +65,11 @@ export default function SuccessView({ orderId, orderNumber, paymentStatus }) {
         transition={{ delay: 0.3, duration: 0.5 }}
         className="mt-8 space-y-4"
       >
-        <h1 className={`text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${isCod ? 'from-blue-500 to-indigo-400' : 'from-green-500 to-emerald-400'}`}>
-          {isCod ? 'Order Placed!' : 'Payment Verified!'}
+        <h1 className={`text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r ${gradientColors}`}>
+          {headline}
         </h1>
         <p className="text-xl text-primary-600 dark:text-primary-300 max-w-lg mx-auto">
-          {isCod 
-            ? 'Your order has been received and will be delivered shortly. Please keep the cash ready!'
-            : 'Your premium order has been successfully placed and is now being processed.'}
+          {description}
         </p>
       </motion.div>
 

@@ -23,6 +23,8 @@ export async function upsertSettings(formData) {
     site_mode: formData.get('siteMode') || 'online',
     return_validity_days: parseInt(formData.get('returnValidityDays')) || 7,
     return_fee_under_1000: parseFloat(formData.get('returnFeeUnder1000')) || 0,
+    partial_payment_enabled: formData.get('partialPaymentEnabled') === 'true',
+    partial_payment_percentage: parseInt(formData.get('partialPaymentPercentage')) || 10,
     updated_at: new Date().toISOString(),
   };
 

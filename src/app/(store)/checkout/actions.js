@@ -77,6 +77,13 @@ export async function createCheckoutSession(formData) {
     return { error: 'Not authenticated' };
   }
 
+  const { data: settings } = await supabaseAdmin
+    .from('settings')
+    .select('partial_payment_enabled, partial_payment_percentage')
+    .single();
+  const partialPaymentEnabled = settings?.partial_payment_enabled || false;
+  const partialPaymentPercentage = settings?.partial_payment_percentage || 10;
+
   const { items, subtotal, totalShipping, totalTax } = await getCart();
   if (items.length === 0) {
     return { error: 'Cart is empty' };
@@ -140,6 +147,15 @@ export async function createCheckoutSession(formData) {
     country: 'India',
   };
 
+  const isPartial = paymentMethod === 'PARTIAL' && partialPaymentEnabled;
+  let partialPaymentAmount = 0;
+  let codBalanceAmount = 0;
+
+  if (isPartial) {
+    partialPaymentAmount = Math.round((grandTotal * (partialPaymentPercentage / 100)) * 100) / 100;
+    codBalanceAmount = Math.round((grandTotal - partialPaymentAmount) * 100) / 100;
+  }
+
   // 1. Create Order in DB
   const orderNumber = generateOrderNumber();
   
@@ -166,7 +182,9 @@ export async function createCheckoutSession(formData) {
       placed_at: paymentMethod === 'COD' ? new Date().toISOString() : null,
       coupon_id: couponId,
       wallet_amount_used: walletAmountUsed,
-      wallet_cashback_amount: walletCashbackAmount
+      wallet_cashback_amount: walletCashbackAmount,
+      partial_payment_amount: partialPaymentAmount,
+      cod_balance_amount: isPartial ? codBalanceAmount : (paymentMethod === 'COD' ? grandTotal : 0)
     })
     .select('id')
     .single();
@@ -237,10 +255,11 @@ export async function createCheckoutSession(formData) {
     };
   }
 
-  // 3. Create Razorpay Order (for ONLINE)
+  // 3. Create Razorpay Order (for ONLINE or PARTIAL)
   try {
+    const chargeAmount = paymentMethod === 'PARTIAL' ? partialPaymentAmount : grandTotal;
     const rzpOrder = await razorpay.orders.create({
-      amount: Math.round(grandTotal * 100), // in paise, must be integer
+      amount: Math.round(chargeAmount * 100), // in paise, must be integer
       currency: 'INR',
       receipt: order.id,
       notes: { orderNumber, couponCode: couponCode || 'none' }
@@ -260,7 +279,7 @@ export async function createCheckoutSession(formData) {
       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID,
       userEmail: user.email,
       shippingInfo,
-      paymentMethod: 'ONLINE'
+      paymentMethod
     };
   } catch (error) {
     console.error('Razorpay Error:', error);
@@ -288,18 +307,27 @@ export async function verifyPayment(paymentData) {
   if (generatedSignature === razorpay_signature) {
     // Payment verified
     
+    // Get existing order payment_method
+    const { data: existingOrder } = await supabaseAdmin
+      .from('orders')
+      .select('payment_method')
+      .eq('id', orderId)
+      .single();
+
+    const isPartial = existingOrder?.payment_method === 'PARTIAL';
+
     // Update Order Status and fetch details in one step
     const { data: order, error: orderUpdateError } = await supabaseAdmin
       .from('orders')
       .update({ 
-        payment_status: 'paid', 
+        payment_status: isPartial ? 'partial_paid' : 'paid', 
         order_status: 'confirmed',
         razorpay_payment_id,
         razorpay_signature,
         placed_at: new Date().toISOString()
       })
       .eq('id', orderId)
-      .select('id, user_id, grand_total, wallet_amount_used, order_number, coupon_id')
+      .select('id, user_id, grand_total, wallet_amount_used, order_number, coupon_id, partial_payment_amount')
       .single();
 
     if (orderUpdateError || !order) {
@@ -354,7 +382,7 @@ export async function verifyPayment(paymentData) {
         provider_order_id: razorpay_order_id,
         provider_payment_id: razorpay_payment_id,
         status: 'captured',
-        amount: order.grand_total,
+        amount: isPartial ? order.partial_payment_amount : order.grand_total,
       });
 
     // Clear Cart
@@ -398,14 +426,17 @@ export async function retryPayment(orderId) {
     return { error: 'Order not found' };
   }
 
-  if (order.payment_status === 'paid') {
+  if (order.payment_status === 'paid' || order.payment_status === 'partial_paid') {
     return { error: 'Order already paid' };
   }
 
   // 2. Create Razorpay Order
   try {
+    const isPartial = order.payment_method === 'PARTIAL';
+    const paymentAmount = isPartial ? order.partial_payment_amount : order.grand_total;
+
     const rzpOrder = await razorpay.orders.create({
-      amount: Math.round(order.grand_total * 100),
+      amount: Math.round(paymentAmount * 100),
       currency: 'INR',
       receipt: order.id,
       notes: { orderNumber: order.order_number }

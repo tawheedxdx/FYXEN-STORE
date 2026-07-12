@@ -8,7 +8,7 @@ import { Loader2, Ticket, CheckCircle2, X, Star, CreditCard, Wallet } from 'luci
 import PaymentSelectionModal from './PaymentSelectionModal';
 import WalletRedemption from './WalletRedemption';
 
-export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: initialGrandTotal, profile, user }) {
+export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: initialGrandTotal, profile, user, settings }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -376,6 +376,8 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
         onClose={() => setIsModalOpen(false)}
         onConfirm={onConfirmPayment}
         amount={finalGrandTotal}
+        partialPaymentEnabled={settings?.partial_payment_enabled || false}
+        partialPaymentPercentage={settings?.partial_payment_percentage || 10}
       />
     </>
   );

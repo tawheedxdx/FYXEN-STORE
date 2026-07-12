@@ -29,6 +29,11 @@ export default async function CheckoutPage() {
     .eq('id', user.id)
     .single();
 
+  const { data: settings } = await supabase
+    .from('settings')
+    .select('partial_payment_enabled, partial_payment_percentage')
+    .single();
+
   const shipping = totalShipping;
   const tax = totalTax;
   const grandTotal = subtotal + shipping + tax;
@@ -48,6 +53,7 @@ export default async function CheckoutPage() {
               grandTotal={grandTotal} 
               profile={profile}
               user={user}
+              settings={settings}
             />
           </div>
           

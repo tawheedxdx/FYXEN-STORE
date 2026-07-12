@@ -102,6 +102,47 @@ export default function AdminSettingsForm({ settings }) {
         </div>
       </div>
 
+      {/* Partial Payment Settings */}
+      <div className="bg-white p-6 rounded-xl border border-primary-100 shadow-sm space-y-5">
+        <h2 className="font-bold text-lg border-b border-primary-100 pb-3 flex items-center gap-2">
+          Partial Payment Settings
+        </h2>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <label className="text-sm font-bold block">Enable Partial Payment</label>
+              <span className="text-xs text-primary-400">If enabled, COD option will be replaced with Partial Payment.</span>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                name="partialPaymentEnabled"
+                value="true"
+                defaultChecked={settings?.partial_payment_enabled}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-primary-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-primary-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent"></div>
+            </label>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Partial Payment Percentage (%)</label>
+            <input 
+              name="partialPaymentPercentage" 
+              type="number"
+              min="1"
+              max="100"
+              className="input-field" 
+              placeholder="e.g. 10"
+              defaultValue={settings?.partial_payment_percentage || 10} 
+            />
+            <p className="text-xs text-primary-400 mt-2">
+              * The percentage of the grand total amount that the customer pays online at checkout. The remaining balance is paid on delivery.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Contact Info */}
       <div className="bg-white p-6 rounded-xl border border-primary-100 shadow-sm space-y-5">
         <h2 className="font-bold text-lg border-b border-primary-100 pb-3">Contact & Support</h2>

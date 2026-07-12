@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import PayNowButton from './PayNowButton';
 import CancelOrderButton from './CancelOrderButton';
 import Script from 'next/script';
-import { ChevronRight, Clock, CheckCircle2, AlertCircle, Star } from 'lucide-react';
+import { ChevronRight, Clock, CheckCircle2, AlertCircle, Star, Package } from 'lucide-react';
 
 export default function OrderCard({ order }) {
   const router = useRouter();
@@ -13,8 +13,10 @@ export default function OrderCard({ order }) {
   const getStatusColor = (status) => {
     switch (status) {
       case 'paid': return 'bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400 border-green-200 dark:border-green-500/20';
+      case 'partial_paid': return 'bg-purple-100 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400 border-purple-200 dark:border-purple-500/20';
       case 'pending': return 'bg-yellow-100 text-yellow-700 dark:bg-yellow-500/10 dark:text-yellow-400 border-yellow-200 dark:border-yellow-500/20';
       case 'failed': return 'bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400 border-red-200 dark:border-red-500/20';
+      case 'cod': return 'bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400 border-blue-200 dark:border-blue-500/20';
       default: return 'bg-primary-100 text-primary-700 dark:bg-white/5 dark:text-primary-400 border-primary-200 dark:border-white/10';
     }
   };
@@ -22,10 +24,18 @@ export default function OrderCard({ order }) {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'paid': return <CheckCircle2 className="w-3 h-3" />;
+      case 'partial_paid': return <CheckCircle2 className="w-3 h-3" />;
       case 'pending': return <Clock className="w-3 h-3" />;
       case 'failed': return <AlertCircle className="w-3 h-3" />;
+      case 'cod': return <Package className="w-3 h-3" />;
       default: return null;
     }
+  };
+
+  const getStatusText = (status) => {
+    if (status === 'partial_paid') return 'Partially Paid';
+    if (status === 'cod') return 'COD';
+    return status;
   };
 
   return (
@@ -38,14 +48,14 @@ export default function OrderCard({ order }) {
       >
         {/* Hover Gradient Effect */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary-50/50 to-transparent dark:from-white/5 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-
+ 
         <div className="relative flex flex-col md:flex-row justify-between gap-6">
           <div className="space-y-4 flex-1">
             <div className="flex flex-wrap items-center gap-3">
               {order.order_status !== 'cancelled' && (
                 <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase border ${getStatusColor(order.payment_status)}`}>
                   {getStatusIcon(order.payment_status)}
-                  {order.payment_status}
+                  {getStatusText(order.payment_status)}
                 </span>
               )}
               {order.wallet_cashback_amount > 0 && (

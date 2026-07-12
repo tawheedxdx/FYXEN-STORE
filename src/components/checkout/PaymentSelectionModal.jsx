@@ -4,9 +4,16 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CreditCard, Truck, ArrowRight, Check, X, Star, Gift } from 'lucide-react';
 
-export default function PaymentSelectionModal({ isOpen, onClose, onConfirm, amount }) {
+export default function PaymentSelectionModal({ 
+  isOpen, 
+  onClose, 
+  onConfirm, 
+  amount,
+  partialPaymentEnabled = false,
+  partialPaymentPercentage = 10
+}) {
   const [step, setStep] = useState('choice'); // 'choice' or 'confirm'
-  const [selectedMethod, setSelectedMethod] = useState(null); // 'COD' or 'ONLINE'
+  const [selectedMethod, setSelectedMethod] = useState(null); // 'COD' or 'ONLINE' or 'PARTIAL'
   const [maxDrag, setMaxDrag] = useState(0);
   const trackRef = useRef(null);
 
@@ -73,21 +80,44 @@ export default function PaymentSelectionModal({ isOpen, onClose, onConfirm, amou
                 </p>
 
                 <div className="grid grid-cols-1 gap-4">
-                  <button 
-                    onClick={() => handleMethodSelect('COD')}
-                    className="flex items-center gap-4 p-4 rounded-xl border-2 border-primary-100 dark:border-white/5 hover:border-accent hover:bg-accent/5 transition-all group text-left"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
-                      <Truck className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-primary-900 dark:text-white">CoD (Cash on Delivery)</p>
-                      <p className="text-sm text-primary-500">Pay when you receive the order</p>
-                      <p className="text-[10px] text-primary-400 mt-2 flex items-center gap-1 font-bold italic">
-                        No points earned on CoD
-                      </p>
-                    </div>
-                  </button>
+                  {partialPaymentEnabled ? (
+                    <button 
+                      onClick={() => handleMethodSelect('PARTIAL')}
+                      className="flex items-center gap-4 p-4 rounded-xl border-2 border-primary-100 dark:border-white/5 hover:border-accent hover:bg-accent/5 transition-all group text-left"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                        <Truck className="w-6 h-6" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-bold text-primary-900 dark:text-white">Partial Payment</p>
+                          <span className="px-1.5 py-0.5 text-[9px] font-black text-white bg-accent rounded-md uppercase tracking-wider animate-pulse">NEW</span>
+                        </div>
+                        <p className="text-xs text-primary-500 mt-1">
+                          Pay {partialPaymentPercentage}% (₹{(amount * partialPaymentPercentage / 100).toFixed(2)}) now & rest ₹{(amount * (100 - partialPaymentPercentage) / 100).toFixed(2)} on Delivery (COD).
+                        </p>
+                        <p className="text-[9px] text-primary-400 mt-1.5 font-bold italic">
+                          Booking amount is paid online securely.
+                        </p>
+                      </div>
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={() => handleMethodSelect('COD')}
+                      className="flex items-center gap-4 p-4 rounded-xl border-2 border-primary-100 dark:border-white/5 hover:border-accent hover:bg-accent/5 transition-all group text-left"
+                    >
+                      <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-500/20 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                        <Truck className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <p className="font-bold text-primary-900 dark:text-white">CoD (Cash on Delivery)</p>
+                        <p className="text-sm text-primary-500">Pay when you receive the order</p>
+                        <p className="text-[10px] text-primary-400 mt-2 flex items-center gap-1 font-bold italic">
+                          No points earned on CoD
+                        </p>
+                      </div>
+                    </button>
+                  )}
 
                   <button 
                     onClick={() => handleMethodSelect('ONLINE')}
@@ -126,11 +156,20 @@ export default function PaymentSelectionModal({ isOpen, onClose, onConfirm, amou
                 className="space-y-8"
               >
                 <div className="text-center">
-                  <p className="text-sm text-primary-500 mb-1">Confirm your order for</p>
-                  <p className="text-3xl font-black text-primary-900 dark:text-white">₹{amount.toFixed(2)}</p>
+                  <p className="text-sm text-primary-500 mb-1">
+                    {selectedMethod === 'PARTIAL' ? 'Confirm booking payment of' : 'Confirm your order for'}
+                  </p>
+                  <p className="text-3xl font-black text-primary-900 dark:text-white">
+                    ₹{selectedMethod === 'PARTIAL' ? (amount * partialPaymentPercentage / 100).toFixed(2) : amount.toFixed(2)}
+                  </p>
+                  {selectedMethod === 'PARTIAL' && (
+                    <p className="text-xs text-primary-500 mt-2 font-medium">
+                      Remaining ₹{(amount * (100 - partialPaymentPercentage) / 100).toFixed(2)} to be paid via COD
+                    </p>
+                  )}
                   <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary-100 dark:bg-white/10 text-xs font-bold uppercase tracking-wider">
-                    {selectedMethod === 'COD' ? <Truck className="w-3 h-3" /> : <CreditCard className="w-3 h-3" />}
-                    {selectedMethod === 'COD' ? 'Cash on Delivery' : 'Online Payment'}
+                    {selectedMethod === 'COD' ? <Truck className="w-3 h-3" /> : (selectedMethod === 'PARTIAL' ? <Star className="w-3 h-3 fill-current text-accent" /> : <CreditCard className="w-3 h-3" />)}
+                    {selectedMethod === 'COD' ? 'Cash on Delivery' : (selectedMethod === 'PARTIAL' ? 'Partial Payment' : 'Online Payment')}
                   </div>
                 </div>
 

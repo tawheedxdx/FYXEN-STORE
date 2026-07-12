@@ -6,7 +6,12 @@ export async function generateMetadata({ searchParams }) {
   const supabase = await createClient();
   const { data: order } = await supabase.from('orders').select('payment_status').eq('id', id).single();
   
-  const title = order?.payment_status === 'cod' ? 'Order Placed' : 'Payment Verified';
+  let title = 'Payment Verified';
+  if (order?.payment_status === 'cod') {
+    title = 'Order Placed';
+  } else if (order?.payment_status === 'partial_paid') {
+    title = 'Booking Confirmed';
+  }
   
   return {
     title: `${title} | Fyxen`,

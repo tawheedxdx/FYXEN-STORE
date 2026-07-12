@@ -103,6 +103,19 @@ export default async function AdminOrderDetailPage({ params }) {
                 <span>Total</span>
                 <span>₹{order.grand_total.toFixed(2)}</span>
               </div>
+
+              {order.payment_method === 'PARTIAL' && (
+                <div className="mt-4 pt-4 border-t border-primary-100 space-y-2 text-sm">
+                  <div className="flex justify-between text-primary-500">
+                    <span>Paid Online (Booking)</span>
+                    <span className="font-semibold text-primary-900">₹{order.partial_payment_amount?.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-amber-700">
+                    <span>COD Balance Due</span>
+                    <span className="font-bold text-amber-800">₹{order.cod_balance_amount?.toFixed(2)}</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -155,7 +168,7 @@ export default async function AdminOrderDetailPage({ params }) {
               <h2 className="text-lg font-bold">Transaction Details</h2>
             </div>
             <div className="space-y-3 text-sm opacity-80">
-              <p>Payment Method: <span className="font-bold text-white uppercase">{order.payment_method || 'Online'}</span></p>
+              <p>Payment Method: <span className="font-bold text-white uppercase">{order.payment_method === 'PARTIAL' ? 'Partial Payment' : (order.payment_method || 'Online')}</span></p>
               {order.razorpay_order_id && <p>RZP Order: {order.razorpay_order_id}</p>}
               {order.razorpay_payment_id && <p>RZP Payment: {order.razorpay_payment_id}</p>}
               <p>Internal ID: {order.id}</p>

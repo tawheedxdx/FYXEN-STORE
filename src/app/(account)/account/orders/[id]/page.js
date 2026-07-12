@@ -71,8 +71,10 @@ export default async function OrderDetailsPage({ params }) {
   const getStatusColor = (status) => {
     switch (status) {
       case 'paid': return 'text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-500/10 border-green-100 dark:border-green-500/20';
+      case 'partial_paid': return 'text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-500/10 border-purple-100 dark:border-purple-500/20';
       case 'pending': return 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-500/10 border-yellow-100 dark:border-yellow-500/20';
       case 'failed': return 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-500/20';
+      case 'cod': return 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-500/10 border-blue-100 dark:border-blue-500/20';
       default: return 'text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-white/5 border-primary-100 dark:border-white/10';
     }
   };
@@ -87,6 +89,12 @@ export default async function OrderDetailsPage({ params }) {
       case 'refunded': return <RotateCcw className="w-5 h-5 text-green-600" />;
       default: return <AlertCircle className="w-5 h-5 text-primary-400" />;
     }
+  };
+
+  const getPaymentStatusText = (status) => {
+    if (status === 'partial_paid') return 'Partially Paid';
+    if (status === 'cod') return 'COD';
+    return status;
   };
 
   return (
@@ -114,8 +122,8 @@ export default async function OrderDetailsPage({ params }) {
         </div>
         {order.order_status !== 'cancelled' && (
           <div className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-bold uppercase ${getStatusColor(order.payment_status)}`}>
-            {order.payment_status === 'paid' ? <CheckCircle2 className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
-            Payment: {order.payment_status}
+            {order.payment_status === 'paid' || order.payment_status === 'partial_paid' ? <CheckCircle2 className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
+            Payment: {getPaymentStatusText(order.payment_status)}
           </div>
         )}
       </div>
@@ -302,6 +310,19 @@ export default async function OrderDetailsPage({ params }) {
                 <span className="font-bold text-base">Grand Total</span>
                 <span className="font-bold text-2xl tracking-tight">₹{order.grand_total.toLocaleString('en-IN')}</span>
               </div>
+
+              {order.payment_status === 'partial_paid' && (
+                <div className="mt-4 pt-4 border-t border-white/10 space-y-2 text-xs">
+                  <div className="flex justify-between text-primary-300">
+                    <span>Paid Online</span>
+                    <span>₹{order.partial_payment_amount?.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div className="flex justify-between text-accent font-bold">
+                    <span>COD Balance Due</span>
+                    <span>₹{order.cod_balance_amount?.toLocaleString('en-IN')}</span>
+                  </div>
+                </div>
+              )}
 
               {/* Wallet Cashback Info */}
               {order.wallet_cashback_amount > 0 && (

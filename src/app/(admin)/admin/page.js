@@ -25,12 +25,17 @@ export default async function AdminDashboardPage() {
     supabase.from('products').select('*', { count: 'exact', head: true }),
     supabase.from('orders').select('*', { count: 'exact', head: true }),
     supabase.from('profiles').select('*', { count: 'exact', head: true }),
-    supabase.from('orders').select('grand_total').eq('payment_status', 'paid'),
+    supabase.from('orders').select('grand_total, payment_status, partial_payment_amount').in('payment_status', ['paid', 'partial_paid']),
     supabase.from('orders').select('id, order_number, grand_total, payment_status, created_at, profiles(full_name)').order('created_at', { ascending: false }).limit(5),
     supabase.from('products').select('id, title, stock_quantity').lt('stock_quantity', 10).order('stock_quantity').limit(5),
   ]);
 
-  const totalRevenue = revenueOrders?.reduce((acc, o) => acc + o.grand_total, 0) || 0;
+  const totalRevenue = revenueOrders?.reduce((acc, o) => {
+    if (o.payment_status === 'partial_paid') {
+      return acc + (o.partial_payment_amount || 0);
+    }
+    return acc + o.grand_total;
+  }, 0) || 0;
 
   const stats = [
     { label: 'Total Revenue', value: `₹${totalRevenue.toFixed(0)}`, icon: TrendingUp, color: 'text-accent', bg: 'bg-accent/10', href: '/admin/orders' },
@@ -41,8 +46,10 @@ export default async function AdminDashboardPage() {
 
   const paymentStatusColors = {
     paid: 'bg-green-100 text-green-700',
+    partial_paid: 'bg-purple-100 text-purple-700',
     pending: 'bg-yellow-100 text-yellow-700',
     failed: 'bg-red-100 text-red-700',
+    cod: 'bg-blue-100 text-blue-700',
   };
 
   return (
@@ -97,7 +104,7 @@ export default async function AdminDashboardPage() {
                   </div>
                   <div className="flex items-center gap-3">
                     <span className={`px-2 py-1 rounded text-xs font-bold uppercase ${paymentStatusColors[order.payment_status] || 'bg-gray-100 text-gray-600'}`}>
-                      {order.payment_status}
+                      {order.payment_status === 'partial_paid' ? 'Partial' : order.payment_status}
                     </span>
                     <span className="font-semibold text-sm">₹{order.grand_total}</span>
                   </div>
