@@ -29,7 +29,7 @@ export default function ProductForm({ categories, product }) {
 
   const getInitialOptions = (variants) => {
     if (!variants || variants.length === 0) {
-      return [{ name: 'Size', values: [] }];
+      return [{ name: 'Size', values: [], rawInput: '' }];
     }
     const optionsMap = {};
     variants.forEach(v => {
@@ -40,10 +40,14 @@ export default function ProductForm({ categories, product }) {
         optionsMap[name].add(value);
       });
     });
-    return Object.entries(optionsMap).map(([name, set]) => ({
-      name,
-      values: Array.from(set)
-    }));
+    return Object.entries(optionsMap).map(([name, set]) => {
+      const values = Array.from(set);
+      return {
+        name,
+        values,
+        rawInput: values.join(', ')
+      };
+    });
   };
 
   const [options, setOptions] = useState(() => getInitialOptions(product?.product_variants));
@@ -115,7 +119,7 @@ export default function ProductForm({ categories, product }) {
   };
 
   const addOption = () => {
-    setOptions([...options, { name: '', values: [] }]);
+    setOptions([...options, { name: '', values: [], rawInput: '' }]);
   };
 
   const removeOption = (index) => {
@@ -132,6 +136,7 @@ export default function ProductForm({ categories, product }) {
     const values = valueString.split(',').map(v => v.trim()).filter(Boolean);
     const newOptions = [...options];
     newOptions[index].values = values;
+    newOptions[index].rawInput = valueString;
     setOptions(newOptions);
   };
 
@@ -414,7 +419,7 @@ export default function ProductForm({ categories, product }) {
                             <input
                               className="input-field py-1.5 text-sm"
                               placeholder="e.g. Small, Medium, Large"
-                              value={opt.values.join(', ')}
+                              value={opt.rawInput !== undefined ? opt.rawInput : opt.values.join(', ')}
                               onChange={(e) => updateOptionValues(index, e.target.value)}
                             />
                           </div>
