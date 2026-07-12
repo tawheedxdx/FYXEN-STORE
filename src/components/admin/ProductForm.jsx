@@ -62,8 +62,8 @@ export default function ProductForm({ categories, product }) {
       stockQuantity: v.stock_quantity || 0,
       attributes: v.attributes_json || {},
       images: v.images || [],
-      file: null,
-      previewUrl: ''
+      newFiles: [],
+      previewUrls: []
     }));
   });
 
@@ -109,8 +109,8 @@ export default function ProductForm({ categories, product }) {
           sku: '',
           stockQuantity: baseStock || 0,
           images: [],
-          file: null,
-          previewUrl: ''
+          newFiles: [],
+          previewUrls: []
         };
       }
     });
@@ -147,13 +147,39 @@ export default function ProductForm({ categories, product }) {
   };
 
   const handleVariantImageChange = (index, e) => {
-    const file = e.target.files[0];
-    if (file) {
+    const files = Array.from(e.target.files);
+    if (files.length > 0) {
       const newVariants = [...variantsList];
-      newVariants[index].file = file;
-      newVariants[index].previewUrl = URL.createObjectURL(file);
+      const currentFiles = newVariants[index].newFiles || [];
+      const currentPreviews = newVariants[index].previewUrls || [];
+      
+      newVariants[index].newFiles = [...currentFiles, ...files];
+      newVariants[index].previewUrls = [
+        ...currentPreviews,
+        ...files.map(file => URL.createObjectURL(file))
+      ];
       setVariantsList(newVariants);
     }
+  };
+
+  const removeUploadedVariantImage = (variantIndex, imageIndex) => {
+    const newVariants = [...variantsList];
+    newVariants[variantIndex].images = newVariants[variantIndex].images.filter((_, i) => i !== imageIndex);
+    setVariantsList(newVariants);
+  };
+
+  const removeNewVariantImage = (variantIndex, fileIndex) => {
+    const newVariants = [...variantsList];
+    const newFiles = [...(newVariants[variantIndex].newFiles || [])];
+    const previewUrls = [...(newVariants[variantIndex].previewUrls || [])];
+    
+    if (previewUrls[fileIndex]) {
+      URL.revokeObjectURL(previewUrls[fileIndex]);
+    }
+    
+    newVariants[variantIndex].newFiles = newFiles.filter((_, i) => i !== fileIndex);
+    newVariants[variantIndex].previewUrls = previewUrls.filter((_, i) => i !== fileIndex);
+    setVariantsList(newVariants);
   };
 
   const addHighlight = () => {
@@ -228,8 +254,10 @@ export default function ProductForm({ categories, product }) {
 
       // Append files
       variantsList.forEach(v => {
-        if (v.file) {
-          formData.append(`variant_image_${v.id || v.tempId}`, v.file);
+        if (v.newFiles && v.newFiles.length > 0) {
+          v.newFiles.forEach(file => {
+            formData.append(`variant_images_${v.id || v.tempId}`, file);
+          });
         }
       });
     } else {
@@ -471,29 +499,58 @@ export default function ProductForm({ categories, product }) {
                         return (
                           <div key={v.id || v.tempId} className="p-4 rounded-xl border border-primary-100 bg-white dark:bg-primary-900/10 space-y-4 shadow-sm hover:border-primary-300 transition-all">
                             {/* Header: Title and Image Upload */}
-                            <div className="flex items-center justify-between gap-4 border-b border-primary-50 pb-2">
-                              <span className="font-bold text-sm text-primary-950 dark:text-white">{variantDisplayName}</span>
-                              
-                              <div className="flex items-center gap-3">
-                                {/* Variant Image Preview */}
-                                <div className="w-12 h-12 rounded-lg border border-primary-200 overflow-hidden bg-primary-50 shrink-0 relative">
-                                  {v.previewUrl || (v.images && v.images.length > 0) ? (
-                                    <img src={v.previewUrl || v.images[0]} alt="Variant preview" className="w-full h-full object-cover" />
-                                  ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-[10px] text-primary-400 font-bold">No Img</div>
-                                  )}
-                                </div>
-
+                            <div className="flex flex-col gap-3 border-b border-primary-50 pb-3">
+                              <div className="flex items-center justify-between gap-4">
+                                <span className="font-bold text-sm text-primary-950 dark:text-white">{variantDisplayName}</span>
+                                
                                 {/* Custom Upload Button */}
                                 <label className="cursor-pointer text-xs font-bold text-primary-600 hover:text-primary-900 bg-primary-50 dark:bg-primary-800 px-2.5 py-1.5 rounded border border-primary-200 dark:border-white/10 dark:text-white">
-                                  Upload Image
+                                  Upload Images
                                   <input
                                     type="file"
                                     accept="image/*"
+                                    multiple
                                     className="hidden"
                                     onChange={(e) => handleVariantImageChange(index, e)}
                                   />
                                 </label>
+                              </div>
+
+                              {/* Multi-Image Preview Container */}
+                              <div className="flex flex-wrap gap-2 items-center">
+                                {/* Already Uploaded Images */}
+                                {v.images && v.images.map((imgUrl, imgIdx) => (
+                                  <div key={`uploaded-${imgIdx}`} className="w-14 h-14 rounded-lg border border-primary-200 overflow-hidden bg-primary-50 shrink-0 relative group">
+                                    <img src={imgUrl} alt="Variant" className="w-full h-full object-cover" />
+                                    <button
+                                      type="button"
+                                      onClick={() => removeUploadedVariantImage(index, imgIdx)}
+                                      className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity duration-150 rounded-lg cursor-pointer"
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                ))}
+
+                                {/* New Image Previews */}
+                                {v.previewUrls && v.previewUrls.map((prevUrl, prevIdx) => (
+                                  <div key={`new-${prevIdx}`} className="w-14 h-14 rounded-lg border border-blue-300 overflow-hidden bg-primary-50 shrink-0 relative group">
+                                    <img src={prevUrl} alt="New preview" className="w-full h-full object-cover" />
+                                    <button
+                                      type="button"
+                                      onClick={() => removeNewVariantImage(index, prevIdx)}
+                                      className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity duration-150 rounded-lg cursor-pointer"
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </button>
+                                    <span className="absolute top-0 right-0 bg-blue-500 text-white text-[8px] px-1 rounded-bl">New</span>
+                                  </div>
+                                ))}
+
+                                {/* No Images Empty State */}
+                                {(!v.images || v.images.length === 0) && (!v.previewUrls || v.previewUrls.length === 0) && (
+                                  <div className="text-xs text-primary-400 font-medium italic">No images added</div>
+                                )}
                               </div>
                             </div>
 

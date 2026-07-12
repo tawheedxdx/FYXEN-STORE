@@ -156,14 +156,19 @@ export async function createProduct(formData) {
         continue;
       }
 
-      // Check if a file was uploaded for this variant
-      const file = formData.get(`variant_image_${v.tempId}`);
-      if (file && file.size > 0) {
-        const publicUrl = await uploadVariantImage(newVar.id, file, adminSupabase);
-        if (publicUrl) {
+      // Check if any files were uploaded for this variant
+      const files = formData.getAll(`variant_images_${v.tempId}`);
+      const validFiles = files.filter(f => f && f.size > 0);
+      if (validFiles.length > 0) {
+        const uploadedUrls = await Promise.all(
+          validFiles.map(file => uploadVariantImage(newVar.id, file, adminSupabase))
+        );
+        const filteredUrls = uploadedUrls.filter(Boolean);
+        if (filteredUrls.length > 0) {
+          const finalImages = [...(v.images || []), ...filteredUrls];
           await adminSupabase
             .from('product_variants')
-            .update({ images: [publicUrl] })
+            .update({ images: finalImages })
             .eq('id', newVar.id);
         }
       }
@@ -304,14 +309,22 @@ export async function updateProduct(productId, formData) {
         continue;
       }
 
-      // Check for new file upload
-      const file = formData.get(`variant_image_${v.id}`) || formData.get(`variant_image_${v.tempId}`);
-      if (file && file.size > 0) {
-        const publicUrl = await uploadVariantImage(v.id, file, adminSupabase);
-        if (publicUrl) {
+      // Check for new file uploads
+      let files = formData.getAll(`variant_images_${v.id}`);
+      if (files.length === 0) {
+        files = formData.getAll(`variant_images_${v.tempId}`);
+      }
+      const validFiles = files.filter(f => f && f.size > 0);
+      if (validFiles.length > 0) {
+        const uploadedUrls = await Promise.all(
+          validFiles.map(file => uploadVariantImage(v.id, file, adminSupabase))
+        );
+        const filteredUrls = uploadedUrls.filter(Boolean);
+        if (filteredUrls.length > 0) {
+          const finalImages = [...(v.images || []), ...filteredUrls];
           await adminSupabase
             .from('product_variants')
-            .update({ images: [publicUrl] })
+            .update({ images: finalImages })
             .eq('id', v.id);
         }
       }
@@ -328,14 +341,19 @@ export async function updateProduct(productId, formData) {
         continue;
       }
 
-      // Check for file upload
-      const file = formData.get(`variant_image_${v.tempId}`);
-      if (file && file.size > 0) {
-        const publicUrl = await uploadVariantImage(newVar.id, file, adminSupabase);
-        if (publicUrl) {
+      // Check for file uploads
+      const files = formData.getAll(`variant_images_${v.tempId}`);
+      const validFiles = files.filter(f => f && f.size > 0);
+      if (validFiles.length > 0) {
+        const uploadedUrls = await Promise.all(
+          validFiles.map(file => uploadVariantImage(newVar.id, file, adminSupabase))
+        );
+        const filteredUrls = uploadedUrls.filter(Boolean);
+        if (filteredUrls.length > 0) {
+          const finalImages = [...(v.images || []), ...filteredUrls];
           await adminSupabase
             .from('product_variants')
-            .update({ images: [publicUrl] })
+            .update({ images: finalImages })
             .eq('id', newVar.id);
         }
       }
