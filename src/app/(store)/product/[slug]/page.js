@@ -65,6 +65,10 @@ export default async function ProductPage({ params }) {
     notFound();
   }
 
+  const discount = product.compare_at_price > product.price
+    ? Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100)
+    : 0;
+
   const [fbt, related] = await Promise.all([
     getFrequentlyBoughtTogether(product.id, 1),
     getContentBasedRecommendations(product.id, 6)
@@ -80,11 +84,34 @@ export default async function ProductPage({ params }) {
           {/* Right: Product Info */}
           <div className="flex flex-col">
             <div className="mb-6 border-b border-primary-100 dark:border-white/10 pb-6">
-              {product.promo_tag && (
-                <span className="text-[10px] md:text-xs font-bold text-green-700 bg-green-50 px-2 py-0.5 rounded uppercase tracking-wider mb-3 inline-block">
-                  {product.promo_tag}
-                </span>
-              )}
+              {/* Badges */}
+              <div className="flex flex-wrap gap-2 mb-4">
+                {product.promo_tag && (
+                  <span className="badge badge-promo px-3 py-1 text-[11px] rounded-full">
+                    {product.promo_tag}
+                  </span>
+                )}
+                {(discount > 0 || product.is_on_sale) && (
+                  <span className="badge badge-sale px-3 py-1 text-[11px] rounded-full">
+                    {discount > 0 ? `${discount}% OFF` : 'SALE'}
+                  </span>
+                )}
+                {product.is_best_seller && (
+                  <span className="badge badge-best px-3 py-1 text-[11px] rounded-full text-black">
+                    Best Seller
+                  </span>
+                )}
+                {product.is_new_arrival && (
+                  <span className="badge badge-new px-3 py-1 text-[11px] rounded-full">
+                    New
+                  </span>
+                )}
+                {product.featured && !product.promo_tag && !product.is_best_seller && !product.is_new_arrival && (
+                  <span className="badge badge-featured px-3 py-1 text-[11px] rounded-full">
+                    Featured
+                  </span>
+                )}
+              </div>
               
               <span className="text-sm font-bold tracking-widest uppercase text-primary-400 mb-2 block">{product.brand || 'Fyxen'}</span>
               <div className="flex justify-between items-start gap-4 mb-4">
