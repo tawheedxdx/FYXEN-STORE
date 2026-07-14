@@ -10,10 +10,18 @@ export default function SignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [passwords, setPasswords] = useState({ password: '', confirmPassword: '' });
+  const [acceptedPolicies, setAcceptedPolicies] = useState(false);
 
   async function handleSubmit(formData) {
     setIsLoading(true);
     setError(null);
+
+    const acceptPolicies = formData.get('acceptPolicies') === 'on' || formData.get('acceptPolicies') === 'true';
+    if (!acceptPolicies) {
+      setError('Please accept the Terms & Conditions and Privacy Policy before creating your account.');
+      setIsLoading(false);
+      return;
+    }
 
     const password = formData.get('password');
     const confirmPassword = formData.get('confirmPassword');
@@ -128,10 +136,33 @@ export default function SignupForm() {
           </div>
         </div>
 
+        <div className="flex items-start gap-2.5 px-1 py-1">
+          <input
+            id="acceptPolicies"
+            name="acceptPolicies"
+            type="checkbox"
+            checked={acceptedPolicies}
+            onChange={(e) => setAcceptedPolicies(e.target.checked)}
+            className="mt-0.5 w-4 h-4 rounded border-primary-300 text-accent focus:ring-accent accent-accent cursor-pointer"
+            required
+          />
+          <label htmlFor="acceptPolicies" className="text-xs text-primary-500 select-none leading-relaxed cursor-pointer">
+            I have read and agree to the{' '}
+            <Link href="/terms-and-conditions" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary-900 dark:text-white hover:underline transition-all">
+              Terms & Conditions
+            </Link>{' '}
+            and{' '}
+            <Link href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary-900 dark:text-white hover:underline transition-all">
+              Privacy Policy
+            </Link>
+            .
+          </label>
+        </div>
+
         <button 
           type="submit" 
-          disabled={isLoading}
-          className="btn-primary w-full h-11 rounded-xl shadow-lg shadow-primary-900/10 mt-2"
+          disabled={isLoading || !acceptedPolicies}
+          className="btn-primary w-full h-11 rounded-xl shadow-lg shadow-primary-900/10 mt-2 disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {isLoading ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : (
             <span className="flex items-center justify-center gap-2 font-bold">

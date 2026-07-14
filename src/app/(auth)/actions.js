@@ -43,6 +43,11 @@ export async function signup(formData) {
   const fullName = formData.get('fullName');
   const phone = formData.get('phone');
 
+  const acceptPolicies = formData.get('acceptPolicies') === 'on' || formData.get('acceptPolicies') === 'true';
+  if (!acceptPolicies) {
+    return { error: 'Please accept the Terms & Conditions and Privacy Policy before creating your account.' };
+  }
+
   if (!email || !password || !fullName || !phone) {
     return { error: 'All fields are required.' };
   }
@@ -61,10 +66,16 @@ export async function signup(formData) {
   if (error) return { error: error.message };
 
   if (data.user) {
-    // Sync with profiles table
+    // Sync with profiles table and save terms acceptance proof
     await supabase
       .from('profiles')
-      .update({ phone, full_name: fullName })
+      .update({ 
+        phone, 
+        full_name: fullName,
+        terms_accepted: true,
+        terms_accepted_at: new Date().toISOString(),
+        terms_version: 'v1.0'
+      })
       .eq('id', data.user.id);
   }
 

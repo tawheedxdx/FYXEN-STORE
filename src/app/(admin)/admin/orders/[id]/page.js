@@ -172,6 +172,17 @@ export default async function AdminOrderDetailPage({ params }) {
               {order.razorpay_order_id && <p>RZP Order: {order.razorpay_order_id}</p>}
               {order.razorpay_payment_id && <p>RZP Payment: {order.razorpay_payment_id}</p>}
               <p>Internal ID: {order.id}</p>
+              
+              {/* Policy Acceptance details */}
+              <div className="border-t border-white/20 pt-3 mt-3 space-y-1 text-xs">
+                <p className="text-accent font-bold">✓ Policy Agreement Signed</p>
+                <p>Accepted: {order.terms_accepted ? 'Yes' : 'No'}</p>
+                {order.terms_accepted_at && (
+                  <p>Accepted At: {new Date(order.terms_accepted_at).toLocaleString()}</p>
+                )}
+                {order.terms_version && <p>Version: {order.terms_version}</p>}
+                {order.user_ip && <p>User IP: {order.user_ip}</p>}
+              </div>
             </div>
           </div>
         </div>

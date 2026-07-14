@@ -16,6 +16,7 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formDataObj, setFormDataObj] = useState(null);
   const paymentStatusRef = useRef('none'); // 'none', 'success', 'failed'
+  const [acceptedPolicies, setAcceptedPolicies] = useState(false);
 
   // Coupon State
   const [couponCode, setCouponCode] = useState('');
@@ -60,6 +61,10 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
 
   async function handlePayment(e) {
     e.preventDefault();
+    if (!acceptedPolicies) {
+      setError('Please accept the Terms & Conditions before placing your order.');
+      return;
+    }
     const formData = new FormData(e.target);
     
     // Add applied coupon code if any
@@ -67,6 +72,7 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
       formData.append('couponCode', appliedCoupon.code);
     }
 
+    formData.append('acceptPolicies', 'true');
     setFormDataObj(formData);
     setIsModalOpen(true);
   }
@@ -348,11 +354,48 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
                 </p>
               </div>
             </div>
+            {/* Policy Acceptance Checkbox */}
+            <div className="space-y-3 mb-6 p-4 bg-primary-50/50 dark:bg-white/5 rounded-xl border border-primary-100 dark:border-white/5 mt-6">
+              <div className="flex items-start gap-3">
+                <input
+                  id="acceptPolicies"
+                  name="acceptPolicies"
+                  type="checkbox"
+                  checked={acceptedPolicies}
+                  onChange={(e) => setAcceptedPolicies(e.target.checked)}
+                  className="mt-1 w-4 h-4 rounded border-primary-300 text-accent focus:ring-accent accent-accent cursor-pointer"
+                  required
+                />
+                <label htmlFor="acceptPolicies" className="text-xs text-primary-600 dark:text-primary-400 select-none leading-relaxed cursor-pointer">
+                  I have read and agree to the{' '}
+                  <a href="/terms-and-conditions" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary-900 dark:text-white hover:underline transition-all">
+                    Terms & Conditions
+                  </a>
+                  ,{' '}
+                  <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary-900 dark:text-white hover:underline transition-all">
+                    Privacy Policy
+                  </a>
+                  ,{' '}
+                  <a href="/shipping-policy" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary-900 dark:text-white hover:underline transition-all">
+                    Shipping Policy
+                  </a>
+                  , and{' '}
+                  <a href="/cancellation-refunds" target="_blank" rel="noopener noreferrer" className="font-semibold text-primary-900 dark:text-white hover:underline transition-all">
+                    Cancellation & Refund Policy
+                  </a>
+                  .
+                </label>
+              </div>
+              
+              <p className="text-[11px] text-primary-500 leading-normal pl-7 border-t border-primary-100 dark:border-white/5 pt-2 mt-2">
+                <span className="font-semibold text-primary-700 dark:text-primary-350">Note:</span> Returns for orders below ₹1,000 are subject to a ₹150 return processing fee, except where the product is damaged, defective, or incorrectly delivered by FYXEN.
+              </p>
+            </div>
           </div>
 
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isLoading || !acceptedPolicies}
             className="btn-primary w-full text-lg py-4 shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {isLoading ? (

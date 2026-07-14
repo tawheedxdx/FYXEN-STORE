@@ -32,6 +32,7 @@ export default async function AdminUsersPage() {
               <th className="p-4 font-medium">Phone</th>
               <th className="p-4 font-medium">Role</th>
               <th className="p-4 font-medium">Joined</th>
+              <th className="p-4 font-medium">Terms Accepted</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-primary-100">
@@ -49,6 +50,18 @@ export default async function AdminUsersPage() {
                 </td>
                 <td className="p-4 text-primary-500">
                   {new Date(u.created_at).toLocaleDateString()}
+                </td>
+                <td className="p-4">
+                  {u.terms_accepted ? (
+                    <span 
+                      className="inline-flex text-xs text-green-700 bg-green-50 border border-green-200 px-2 py-1 rounded font-medium cursor-help"
+                      title={`Accepted at: ${u.terms_accepted_at ? new Date(u.terms_accepted_at).toLocaleString() : 'N/A'}`}
+                    >
+                      Yes ({u.terms_version || 'v1.0'})
+                    </span>
+                  ) : (
+                    <span className="text-xs text-primary-400">No</span>
+                  )}
                 </td>
               </tr>
             ))}

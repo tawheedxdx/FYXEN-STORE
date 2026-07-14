@@ -8,6 +8,8 @@ import crypto from 'crypto';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
+import { headers } from 'next/headers';
+
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_dummy',
   key_secret: process.env.RAZORPAY_KEY_SECRET || 'dummy_secret',
@@ -76,6 +78,16 @@ export async function createCheckoutSession(formData) {
   if (!user) {
     return { error: 'Not authenticated' };
   }
+
+  const acceptPolicies = formData.get('acceptPolicies') === 'on' || formData.get('acceptPolicies') === 'true';
+  if (!acceptPolicies) {
+    return { error: 'Please accept the Terms & Conditions before placing your order.' };
+  }
+
+  const headerList = await headers();
+  const userIp = headerList.get('x-forwarded-for')?.split(',')[0].trim() || 
+                 headerList.get('x-real-ip') || 
+                 '127.0.0.1';
 
   const { data: settings } = await supabaseAdmin
     .from('settings')
@@ -184,7 +196,11 @@ export async function createCheckoutSession(formData) {
       wallet_amount_used: walletAmountUsed,
       wallet_cashback_amount: walletCashbackAmount,
       partial_payment_amount: partialPaymentAmount,
-      cod_balance_amount: isPartial ? codBalanceAmount : (paymentMethod === 'COD' ? grandTotal : 0)
+      cod_balance_amount: isPartial ? codBalanceAmount : (paymentMethod === 'COD' ? grandTotal : 0),
+      terms_accepted: true,
+      terms_accepted_at: new Date().toISOString(),
+      terms_version: 'v1.0',
+      user_ip: userIp
     })
     .select('id')
     .single();
