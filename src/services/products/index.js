@@ -23,6 +23,20 @@ export const getCategories = unstable_cache(
   { revalidate: 60, tags: ['categories'] }
 );
 
+const getSubcategoryIds = (categoryId, categories) => {
+  const ids = [categoryId];
+  const findChildren = (parentId) => {
+    categories.forEach(c => {
+      if (c.parent_id === parentId) {
+        ids.push(c.id);
+        findChildren(c.id);
+      }
+    });
+  };
+  findChildren(categoryId);
+  return ids;
+};
+
 // ─── Cached: getProducts ──────────────────────────────────────────────────────
 // Cache key includes all filter options so each unique filter set is cached.
 export async function getProducts(options = {}) {
@@ -46,7 +60,7 @@ export async function getProducts(options = {}) {
         brand,
         promo_tag,
         product_images(image_url, sort_order),
-        categories(name, slug),
+        categories(id, name, slug, parent_id),
         product_variants(id)
       `).eq('is_active', true);
 
@@ -66,7 +80,9 @@ export async function getProducts(options = {}) {
             .maybeSingle();
 
           if (cat) {
-            query = query.eq('category_id', cat.id);
+            const allCategories = await getCategories();
+            const categoryIds = getSubcategoryIds(cat.id, allCategories);
+            query = query.in('category_id', categoryIds);
           } else {
             // Category doesn't exist — return empty without a second round-trip
             return [];
@@ -133,7 +149,7 @@ export async function getProductBySlug(slug) {
       const supabase = createAdminClient();
       const { data, error } = await supabase
         .from('products')
-        .select('*, product_images(*), product_variants(*), categories(name, slug), reviews(*, profiles(full_name))')
+        .select('*, product_images(*), product_variants(*), categories(id, name, slug, parent_id), reviews(*, profiles(full_name))')
         .eq('slug', slug)
         .single();
 

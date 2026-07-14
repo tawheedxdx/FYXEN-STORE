@@ -46,12 +46,15 @@ export async function createCategory(formData) {
     imageUrl = urlData.publicUrl;
   }
 
+  const parentId = formData.get('parentId');
+
   const { error } = await adminSupabase.from('categories').insert({
     name,
     slug,
     description,
     image_url: imageUrl,
     is_active: formData.get('isActive') === 'true' || formData.get('isActive') === null,
+    parent_id: parentId === 'none' ? null : parentId || null,
   });
 
   if (error) return { error: error.message };
@@ -91,12 +94,15 @@ export async function updateCategory(categoryId, formData) {
     imageUrl = urlData.publicUrl;
   }
 
+  const parentId = formData.get('parentId');
+
   const { error } = await adminSupabase.from('categories').update({
     name,
     slug,
     description: formData.get('description'),
     image_url: imageUrl,
     is_active: formData.get('isActive') === 'true',
+    parent_id: parentId === 'none' ? null : parentId || null,
     updated_at: new Date().toISOString(),
   }).eq('id', categoryId);
 

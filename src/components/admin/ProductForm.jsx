@@ -67,8 +67,30 @@ const compressImage = (file, maxWidth = 1200, maxHeight = 1200, quality = 0.8) =
   });
 };
 
+const buildCategoryPath = (cat, allCategories) => {
+  if (!cat) return '';
+  const path = [cat.name];
+  let current = cat;
+  const visited = new Set();
+  while (current.parent_id) {
+    if (visited.has(current.parent_id)) break;
+    visited.add(current.parent_id);
+    const parent = allCategories.find(c => c.id === current.parent_id);
+    if (!parent) break;
+    path.unshift(parent.name);
+    current = parent;
+  }
+  return path.join(' > ');
+};
+
 export default function ProductForm({ categories, product }) {
   const router = useRouter();
+  const formattedCategories = categories.map(c => ({
+    id: c.id,
+    name: c.name,
+    parent_id: c.parent_id,
+    path: buildCategoryPath(c, categories)
+  })).sort((a, b) => a.path.localeCompare(b.path));
   const isEditing = !!product;
   const fileInputRef = useRef(null);
 
@@ -837,8 +859,8 @@ export default function ProductForm({ categories, product }) {
               <label className="block text-sm font-medium mb-2">Category</label>
               <select name="categoryId" className="input-field" defaultValue={product?.category_id || ''}>
                 <option value="">No Category</option>
-                {categories.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                {formattedCategories.map(c => (
+                  <option key={c.id} value={c.id}>{c.path}</option>
                 ))}
               </select>
             </div>

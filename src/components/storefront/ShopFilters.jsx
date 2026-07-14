@@ -23,6 +23,7 @@ export default function ShopFilters({ categories, currentParams = {} }) {
   const activeMin      = searchParams.get('minPrice') || '';
   const activeMax      = searchParams.get('maxPrice') || '';
   const activeSort     = searchParams.get('sort') || '';
+  const rootCategories = categories.filter(c => !c.parent_id);
 
   const buildUrl = useCallback((overrides = {}) => {
     const params = new URLSearchParams();
@@ -102,18 +103,56 @@ export default function ShopFilters({ categories, currentParams = {} }) {
               All Products
             </button>
           </li>
-          {categories.map(cat => (
-            <li key={cat.id}>
-              <button
-                onClick={() => setCategory(cat.slug)}
-                className={`w-full text-left py-1.5 px-2 rounded-lg text-sm transition-colors ${
-                  activeCategory === cat.slug ? 'text-accent font-semibold bg-accent/10' : 'text-primary-700 dark:text-primary-300 hover:text-accent hover:bg-primary-50 dark:hover:bg-white/5'
-                }`}
-              >
-                {cat.name}
-              </button>
-            </li>
-          ))}
+          {rootCategories.map(rootCat => {
+            const children = categories.filter(c => c.parent_id === rootCat.id);
+            return (
+              <li key={rootCat.id} className="space-y-1">
+                <button
+                  onClick={() => setCategory(rootCat.slug)}
+                  className={`w-full text-left py-1.5 px-2 rounded-lg text-sm transition-colors ${
+                    activeCategory === rootCat.slug ? 'text-accent font-semibold bg-accent/10' : 'text-primary-700 dark:text-primary-300 hover:text-accent hover:bg-primary-50 dark:hover:bg-white/5'
+                  }`}
+                >
+                  {rootCat.name}
+                </button>
+                {children.length > 0 && (
+                  <ul className="pl-4 border-l border-primary-100 dark:border-white/5 space-y-1 my-1">
+                    {children.map(childCat => {
+                      const grandchildren = categories.filter(c => c.parent_id === childCat.id);
+                      return (
+                        <li key={childCat.id} className="space-y-1">
+                          <button
+                            onClick={() => setCategory(childCat.slug)}
+                            className={`w-full text-left py-1 px-1.5 rounded text-xs transition-colors ${
+                              activeCategory === childCat.slug ? 'text-accent font-semibold bg-accent/5' : 'text-primary-600 dark:text-primary-400 hover:text-accent hover:bg-primary-50 dark:hover:bg-white/5'
+                            }`}
+                          >
+                            {childCat.name}
+                          </button>
+                          {grandchildren.length > 0 && (
+                            <ul className="pl-3 border-l border-primary-100 dark:border-white/5 space-y-1 my-1">
+                              {grandchildren.map(gChildCat => (
+                                <li key={gChildCat.id}>
+                                  <button
+                                    onClick={() => setCategory(gChildCat.slug)}
+                                    className={`w-full text-left py-0.5 px-1 rounded text-[11px] transition-colors ${
+                                      activeCategory === gChildCat.slug ? 'text-accent font-semibold bg-accent/5' : 'text-primary-500/80 dark:text-primary-500/80 hover:text-accent hover:bg-primary-50 dark:hover:bg-white/5'
+                                    }`}
+                                  >
+                                    {gChildCat.name}
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </div>
 

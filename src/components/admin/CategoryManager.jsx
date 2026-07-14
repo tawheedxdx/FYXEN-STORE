@@ -17,15 +17,33 @@ export default function CategoryManager({ initialCategories }) {
   const slugify = (text) =>
     text.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '').replace(/--+/g, '-').trim();
 
+  const buildCategoryPath = (cat, allCategories) => {
+    if (!cat) return '';
+    const path = [cat.name];
+    let current = cat;
+    const visited = new Set();
+    while (current.parent_id) {
+      if (visited.has(current.parent_id)) break;
+      visited.add(current.parent_id);
+      const parent = allCategories.find(c => c.id === current.parent_id);
+      if (!parent) break;
+      path.unshift(parent.name);
+      current = parent;
+    }
+    return path.join(' > ');
+  };
+
   // Create Form State
   const [newName, setNewName] = useState('');
   const [newDescription, setNewDescription] = useState('');
+  const [newParentId, setNewParentId] = useState('none');
   const [newImage, setNewImage] = useState(null);
   const [newIsActive, setNewIsActive] = useState(true);
 
   // Edit Form State
   const [editName, setEditName] = useState('');
   const [editDescription, setEditDescription] = useState('');
+  const [editParentId, setEditParentId] = useState('none');
   const [editImage, setEditImage] = useState(null);
   const [editIsActive, setEditIsActive] = useState(true);
 
@@ -57,6 +75,7 @@ export default function CategoryManager({ initialCategories }) {
     formData.set('name', newName);
     formData.set('slug', slugify(newName));
     formData.set('description', newDescription);
+    formData.set('parentId', newParentId);
     formData.set('isActive', String(newIsActive));
     if (newImage) formData.set('image', newImage);
 
@@ -68,6 +87,7 @@ export default function CategoryManager({ initialCategories }) {
         setSuccess('Category added successfully!');
         setNewName('');
         setNewDescription('');
+        setNewParentId('none');
         setNewImage(null);
         setNewIsActive(true);
         router.refresh();
@@ -90,6 +110,7 @@ export default function CategoryManager({ initialCategories }) {
     formData.set('name', editName);
     formData.set('slug', slugify(editName));
     formData.set('description', editDescription);
+    formData.set('parentId', editParentId);
     formData.set('isActive', String(editIsActive));
     formData.set('existingImageUrl', editingCategory.image_url);
     if (editImage) formData.set('image', editImage);
@@ -116,6 +137,7 @@ export default function CategoryManager({ initialCategories }) {
     setEditingCategory(cat);
     setEditName(cat.name);
     setEditDescription(cat.description || '');
+    setEditParentId(cat.parent_id || 'none');
     setEditImage(null);
     setEditIsActive(cat.is_active ?? true);
     setError(null);
@@ -162,6 +184,24 @@ export default function CategoryManager({ initialCategories }) {
                 className="input-field"
                 placeholder="e.g. Accessories"
               />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium mb-2 text-primary-700">Parent Category</label>
+              <select
+                value={editingCategory ? editParentId : newParentId}
+                onChange={e => editingCategory ? setEditParentId(e.target.value) : setNewParentId(e.target.value)}
+                className="input-field text-sm"
+              >
+                <option value="none">None (Top Level)</option>
+                {categories
+                  .filter(c => !editingCategory || c.id !== editingCategory.id)
+                  .map(c => (
+                    <option key={c.id} value={c.id}>
+                      {buildCategoryPath(c, categories)}
+                    </option>
+                  ))}
+              </select>
             </div>
             
             <div>
@@ -277,7 +317,7 @@ export default function CategoryManager({ initialCategories }) {
                   </div>
                   <div className="overflow-hidden">
                     <div className="flex items-center gap-2">
-                      <p className="font-bold text-primary-900 truncate">{cat.name}</p>
+                      <p className="font-bold text-primary-900 truncate">{buildCategoryPath(cat, categories)}</p>
                       {!cat.is_active && <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded uppercase font-bold">Hidden</span>}
                     </div>
                     <p className="text-xs text-primary-400 truncate">/category/{cat.slug}</p>
