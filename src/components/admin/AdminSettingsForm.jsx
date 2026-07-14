@@ -140,6 +140,102 @@ export default function AdminSettingsForm({ settings }) {
               * The percentage of the grand total amount that the customer pays online at checkout. The remaining balance is paid on delivery.
             </p>
           </div>
+      </div>
+
+      {/* Homepage Customization */}
+      <div className="bg-white p-6 rounded-xl border border-primary-100 shadow-sm space-y-6">
+        <h2 className="font-bold text-lg border-b border-primary-100 pb-3 flex items-center justify-between">
+          <span>Homepage Curated Section</span>
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input 
+              type="checkbox" 
+              name="curatedSectionEnabled"
+              value="true"
+              defaultChecked={settings?.curated_section_enabled ?? true}
+              className="sr-only peer"
+            />
+            <div className="w-11 h-6 bg-primary-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-primary-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent"></div>
+          </label>
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Section Badge / Title</label>
+            <input 
+              name="curatedSectionTitle" 
+              className="input-field" 
+              defaultValue={settings?.curated_section_title || 'Curated For You'} 
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Section Heading</label>
+            <input 
+              name="curatedSectionHeading" 
+              className="input-field" 
+              defaultValue={settings?.curated_section_heading || 'Fyxen Favourites'} 
+            />
+          </div>
+        </div>
+
+        <div className="space-y-6 pt-4 border-t border-primary-100">
+          {[0, 1, 2].map((idx) => {
+            const b = settings?.curated_banners_json?.[idx] || {};
+            const num = idx + 1;
+            return (
+              <div key={idx} className="p-4 bg-primary-50/50 dark:bg-primary-950/20 rounded-xl space-y-4 border border-primary-100/50">
+                <h3 className="font-bold text-sm text-primary-800 dark:text-primary-200 font-bold">Banner {num}</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold mb-1 text-primary-600">Label</label>
+                    <input 
+                      name={`banner${num}_label`} 
+                      className="input-field bg-white" 
+                      defaultValue={b.label || ''} 
+                      placeholder={idx === 0 ? 'Best Sellers' : idx === 1 ? 'New Arrivals' : 'On Sale'}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold mb-1 text-primary-600">CTA (Button Text)</label>
+                    <input 
+                      name={`banner${num}_cta`} 
+                      className="input-field bg-white" 
+                      defaultValue={b.cta || ''} 
+                      placeholder={idx === 0 ? 'Shop the Collection' : idx === 1 ? 'View New Arrivals' : 'Shop the Sale'}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold mb-1 text-primary-600">Tagline / Description</label>
+                  <input 
+                    name={`banner${num}_tagline`} 
+                    className="input-field bg-white" 
+                    defaultValue={b.tagline || ''} 
+                    placeholder="Brief description line..."
+                  />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-semibold mb-1 text-primary-600">Link URL</label>
+                    <input 
+                      name={`banner${num}_href`} 
+                      className="input-field bg-white" 
+                      defaultValue={b.href || ''} 
+                      placeholder="/category/slug"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold mb-1 text-primary-600">Image URL</label>
+                    <input 
+                      name={`banner${num}_image`} 
+                      className="input-field bg-white" 
+                      defaultValue={b.image || ''} 
+                      placeholder="https://..."
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

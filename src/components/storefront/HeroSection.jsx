@@ -36,21 +36,6 @@ export default function HeroSection() {
             New Arrivals <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
-
-        {/* Stats */}
-        <div className="flex items-center justify-center gap-8 md:gap-16 mt-12 pt-8 border-t border-primary-100 dark:border-white/10 w-full max-w-md">
-          {[
-            { num: '2K+', label: 'Orders Shipped' },
-            { num: '500+', label: 'Happy Customers' },
-            { num: '4.9★', label: 'Rating' },
-          ].map(s => (
-            <div key={s.label} className="text-center">
-              <p className="text-xl md:text-2xl font-black text-primary-900 dark:text-white">{s.num}</p>
-              <p className="text-[10px] text-primary-400 uppercase tracking-wider mt-0.5">{s.label}</p>
-            </div>
-          ))}
-        </div>
-
       </div>
     </section>
   );

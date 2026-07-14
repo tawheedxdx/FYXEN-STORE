@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 
-const banners = [
+const defaultBanners = [
   {
     href: '/category/best-sellers',
     label: 'Best Sellers',
@@ -28,21 +28,32 @@ const banners = [
   },
 ];
 
-export default function CollectionBanners() {
+export default function CollectionBanners({ settings }) {
+  const sectionTitle = settings?.curated_section_title || 'Curated For You';
+  const sectionHeading = settings?.curated_section_heading || 'Fyxen Favourites';
+  const displayBanners = settings?.curated_banners_json || defaultBanners;
+
+  const headingParts = sectionHeading.split(' ');
+  const lastWord = headingParts.length > 1 ? headingParts.pop() : '';
+  const mainHeading = headingParts.join(' ');
+
+  const activeBanners = displayBanners.filter(b => b.image && b.label);
+  if (activeBanners.length === 0) return null;
+
   return (
     <section className="py-16 md:py-24 bg-primary-50 dark:bg-primary-950/40">
       <div className="container-custom">
         <div className="mb-10 md:mb-14">
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary-400 mb-2">Curated For You</p>
+          <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary-400 mb-2">{sectionTitle}</p>
           <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-primary-900 dark:text-white">
-            Fyxen <span className="italic font-light">Favourites</span>
+            {mainHeading} {lastWord && <span className="italic font-light">{lastWord}</span>}
           </h2>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {banners.map((banner) => (
+          {activeBanners.map((banner, index) => (
             <Link
-              key={banner.href}
+              key={`${banner.href}-${index}`}
               href={banner.href}
               className="group relative block overflow-hidden rounded-2xl aspect-[4/5] bg-primary-200 dark:bg-primary-800"
             >

@@ -26,14 +26,16 @@ const trustFeatures = [
 
 export default async function HomePage() {
   const supabase = await createClient();
-  const [featuredProducts, bestSellers, categories, { data: banners }] = await Promise.all([
+  const [featuredProducts, bestSellers, categories, { data: banners }, { data: settings }] = await Promise.all([
     getProducts({ featured: true }),
     getProducts({ bestSeller: true }),
     getCategories(),
     supabase.from('promo_banners').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(1),
+    supabase.from('settings').select('*').single(),
   ]);
 
   const activeBanner = banners?.[0];
+  const showCurated = settings?.curated_section_enabled ?? true;
 
   return (
     <div className="flex flex-col w-full bg-white dark:bg-black">
@@ -136,26 +138,8 @@ export default async function HomePage() {
       {activeBanner && <PromoBanner banner={activeBanner} />}
 
       {/* 7. Curated Collection Banners */}
-      <CollectionBanners />
+      {showCurated && <CollectionBanners settings={settings} />}
 
-      {/* 8. Stats Bar */}
-      <section className="py-14 md:py-20 bg-white dark:bg-black border-y border-primary-100 dark:border-white/5">
-        <div className="container-custom">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-0 md:divide-x divide-primary-100 dark:divide-white/10">
-            {[
-              { num: '2,000+', text: 'Orders Shipped' },
-              { num: '500+', text: 'Happy Customers' },
-              { num: '4.9 / 5', text: 'Customer Rating' },
-              { num: '100%', text: 'Authentic Products' },
-            ].map(({ num, text }) => (
-              <div key={text} className="flex flex-col items-center text-center md:px-8 py-2">
-                <span className="text-3xl md:text-4xl font-black text-primary-900 dark:text-white tracking-tighter">{num}</span>
-                <span className="text-xs text-primary-500 dark:text-primary-400 uppercase tracking-widest font-medium mt-2">{text}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* 9. Newsletter */}
       <section className="py-16 md:py-24 bg-primary-900 dark:bg-primary-950">
