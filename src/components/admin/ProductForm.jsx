@@ -7,6 +7,66 @@ import { Upload, X, Loader2, ImagePlus, ArrowLeft, Check } from 'lucide-react';
 import Link from 'next/link';
 import IconPicker from './IconPicker';
 
+const compressImage = (file, maxWidth = 1200, maxHeight = 1200, quality = 0.8) => {
+  return new Promise((resolve) => {
+    if (!file.type.startsWith('image/')) {
+      resolve(file);
+      return;
+    }
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target.result;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round((height * maxWidth) / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round((width * maxHeight) / height);
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              resolve(file); // fallback to original
+              return;
+            }
+            const compressedFile = new File([blob], file.name, {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = () => {
+        resolve(file);
+      };
+    };
+    reader.onerror = () => {
+      resolve(file);
+    };
+  });
+};
+
 export default function ProductForm({ categories, product }) {
   const router = useRouter();
   const isEditing = !!product;
@@ -15,6 +75,7 @@ export default function ProductForm({ categories, product }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [isCompressing, setIsCompressing] = useState(false);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [existingImages, setExistingImages] = useState(
     product?.product_images?.sort((a, b) => a.sort_order - b.sort_order) || []
@@ -147,19 +208,29 @@ export default function ProductForm({ categories, product }) {
     setVariantsList(newVariants);
   };
 
-  const handleVariantImageChange = (index, e) => {
+  const handleVariantImageChange = async (index, e) => {
     const files = Array.from(e.target.files);
     if (files.length > 0) {
-      const newVariants = [...variantsList];
-      const currentFiles = newVariants[index].newFiles || [];
-      const currentPreviews = newVariants[index].previewUrls || [];
-      
-      newVariants[index].newFiles = [...currentFiles, ...files];
-      newVariants[index].previewUrls = [
-        ...currentPreviews,
-        ...files.map(file => URL.createObjectURL(file))
-      ];
-      setVariantsList(newVariants);
+      setIsCompressing(true);
+      try {
+        const compressedFiles = await Promise.all(
+          files.map(file => compressImage(file))
+        );
+        const newVariants = [...variantsList];
+        const currentFiles = newVariants[index].newFiles || [];
+        const currentPreviews = newVariants[index].previewUrls || [];
+        
+        newVariants[index].newFiles = [...currentFiles, ...compressedFiles];
+        newVariants[index].previewUrls = [
+          ...currentPreviews,
+          ...compressedFiles.map(file => URL.createObjectURL(file))
+        ];
+        setVariantsList(newVariants);
+      } catch (err) {
+        console.error('Error compressing variant images:', err);
+      } finally {
+        setIsCompressing(false);
+      }
     }
   };
 
@@ -214,10 +285,22 @@ export default function ProductForm({ categories, product }) {
   const slugify = (text) =>
     text.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]+/g, '').replace(/--+/g, '-').trim();
 
-  const handleImageSelect = (e) => {
+  const handleImageSelect = async (e) => {
     const files = Array.from(e.target.files);
-    const previews = files.map(f => ({ file: f, url: URL.createObjectURL(f) }));
-    setImagePreviews(prev => [...prev, ...previews]);
+    if (files.length > 0) {
+      setIsCompressing(true);
+      try {
+        const compressedFiles = await Promise.all(
+          files.map(file => compressImage(file))
+        );
+        const previews = compressedFiles.map(f => ({ file: f, url: URL.createObjectURL(f) }));
+        setImagePreviews(prev => [...prev, ...previews]);
+      } catch (err) {
+        console.error('Error compressing images:', err);
+      } finally {
+        setIsCompressing(false);
+      }
+    }
   };
 
   const removeNewImage = (index) => {
@@ -886,9 +969,11 @@ export default function ProductForm({ categories, product }) {
         <Link href="/admin/products" className="btn-outline flex items-center gap-2">
           <ArrowLeft className="w-4 h-4" /> Back to Products
         </Link>
-        <button type="submit" disabled={isLoading} className="btn-primary min-w-[160px] h-11">
+        <button type="submit" disabled={isLoading || isCompressing} className="btn-primary min-w-[160px] h-11">
           {isLoading ? (
             <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Saving...</span>
+          ) : isCompressing ? (
+            <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Compressing...</span>
           ) : (
             isEditing ? 'Update Product' : 'Create Product'
           )}
