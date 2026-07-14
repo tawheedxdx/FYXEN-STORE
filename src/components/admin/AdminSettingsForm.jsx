@@ -140,6 +140,7 @@ export default function AdminSettingsForm({ settings }) {
               * The percentage of the grand total amount that the customer pays online at checkout. The remaining balance is paid on delivery.
             </p>
           </div>
+        </div>
       </div>
 
       {/* Homepage Customization */}
