@@ -21,6 +21,7 @@ export default function ProductForm({ categories, product }) {
   );
   const [titleValue, setTitleValue] = useState(product?.title || '');
   const [highlights, setHighlights] = useState(product?.highlights || []);
+  const [boxContents, setBoxContents] = useState(product?.box_contents || []);
 
   // --- Variants State ---
   const [hasVariants, setHasVariants] = useState(
@@ -194,6 +195,20 @@ export default function ProductForm({ categories, product }) {
 
   const removeHighlight = (index) => {
     setHighlights(highlights.filter((_, i) => i !== index));
+  };
+
+  const addBoxContent = () => {
+    setBoxContents([...boxContents, { icon: 'Package', text: '' }]);
+  };
+
+  const updateBoxContent = (index, field, value) => {
+    const newBoxContents = [...boxContents];
+    newBoxContents[index][field] = value;
+    setBoxContents(newBoxContents);
+  };
+
+  const removeBoxContent = (index) => {
+    setBoxContents(boxContents.filter((_, i) => i !== index));
   };
 
   const slugify = (text) =>
@@ -398,6 +413,65 @@ export default function ProductForm({ categories, product }) {
             )}
             
             <input type="hidden" name="highlights" value={JSON.stringify(highlights)} />
+          </div>
+
+          {/* What's Inside The Box */}
+          <div className="bg-white p-6 rounded-xl border border-primary-100 shadow-sm space-y-5">
+            <div className="flex items-center justify-between border-b border-primary-100 pb-3">
+              <h2 className="font-bold text-lg">What's Inside The Box</h2>
+              <button 
+                type="button" 
+                onClick={addBoxContent}
+                className="text-sm font-bold text-primary-600 hover:text-primary-900 flex items-center gap-1 bg-primary-50 px-3 py-1.5 rounded-lg transition-colors"
+              >
+                <Upload className="w-3.5 h-3.5 rotate-180" /> Add Item
+              </button>
+            </div>
+
+            {boxContents.length === 0 ? (
+              <div className="text-center py-8 border-2 border-dashed border-primary-50 rounded-xl">
+                <p className="text-sm text-primary-400">No items added yet. Click the button above to add one.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {boxContents.map((item, i) => (
+                  <div key={i} className="flex gap-4 items-start bg-primary-50/50 p-4 rounded-xl border border-primary-50">
+                    <div className="shrink-0 pt-1">
+                      <div className="w-8 h-8 rounded-lg bg-white border border-primary-200 flex items-center justify-center text-primary-500 font-bold text-xs">
+                        {i + 1}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 flex-1">
+                      <div>
+                        <label className="block text-[10px] uppercase font-bold text-primary-400 mb-1">Select Icon</label>
+                        <IconPicker 
+                          value={item.icon}
+                          onChange={(newIcon) => updateBoxContent(i, 'icon', newIcon)}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] uppercase font-bold text-primary-400 mb-1">Item Description / Name</label>
+                        <input 
+                          className="input-field py-1.5 text-sm" 
+                          placeholder="e.g. Type-C charging cable, User manual" 
+                          value={item.text}
+                          onChange={(e) => updateBoxContent(i, 'text', e.target.value)}
+                        />
+                      </div>
+                    </div>
+                    <button 
+                      type="button" 
+                      onClick={() => removeBoxContent(i)}
+                      className="shrink-0 p-2 text-red-400 hover:text-red-600 transition-colors mt-5"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <input type="hidden" name="boxContents" value={JSON.stringify(boxContents)} />
           </div>
 
           {/* Product Variants */}

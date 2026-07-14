@@ -8,6 +8,7 @@ import RazorpayAffordabilityWidget from '@/components/common/RazorpayAffordabili
 import ShareButton from '@/components/product/ShareButton';
 import { ShieldCheck, Truck, RotateCcw, CheckCircle2 } from 'lucide-react';
 import ProductHighlights from '@/components/product/ProductHighlights';
+import ProductBoxContents from '@/components/product/ProductBoxContents';
 
 export default function ProductInteractiveSection({ product }) {
   // Parse available options and values
@@ -248,6 +249,9 @@ export default function ProductInteractiveSection({ product }) {
 
         {/* Dynamic Product Highlights */}
         <ProductHighlights highlights={product.highlights} />
+
+        {/* What's Inside The Box */}
+        <ProductBoxContents boxContents={product.box_contents} />
 
         {/* Full Description */}
         <div className="mt-8 prose prose-primary dark:prose-invert max-w-none">

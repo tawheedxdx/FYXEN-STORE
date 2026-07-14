@@ -60,6 +60,7 @@ export async function createProduct(formData) {
   const isOnSale = formData.get('isOnSale') === 'true';
 
   const highlights = formData.get('highlights') ? JSON.parse(formData.get('highlights')) : [];
+  const boxContents = formData.get('boxContents') ? JSON.parse(formData.get('boxContents')) : [];
   const shippingPrice = parseFloat(formData.get('shippingPrice') || '0');
   const taxRate = parseFloat(formData.get('taxRate') || '0');
   
@@ -84,6 +85,7 @@ export async function createProduct(formData) {
       seo_title: seoTitle,
       seo_description: seoDescription,
       highlights,
+      box_contents: boxContents,
       promo_tag: formData.get('promoTag') || null,
       is_best_seller: isBestSeller,
       is_new_arrival: isNewArrival,
@@ -200,6 +202,7 @@ export async function updateProduct(productId, formData) {
   const isNewArrival = formData.get('isNewArrival') === 'true';
   const isOnSale = formData.get('isOnSale') === 'true';
   const highlights = formData.get('highlights') ? JSON.parse(formData.get('highlights')) : [];
+  const boxContents = formData.get('boxContents') ? JSON.parse(formData.get('boxContents')) : [];
   const shippingPrice = parseFloat(formData.get('shippingPrice') || '0');
   const taxRate = parseFloat(formData.get('taxRate') || '0');
 
@@ -221,6 +224,7 @@ export async function updateProduct(productId, formData) {
     seo_title: seoTitle,
     seo_description: seoDescription,
     highlights,
+    box_contents: boxContents,
     promo_tag: formData.get('promoTag') || null,
     is_best_seller: isBestSeller,
     is_new_arrival: isNewArrival,
