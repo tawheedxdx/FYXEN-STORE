@@ -3,6 +3,7 @@ import CheckoutForm from '@/components/checkout/CheckoutForm';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import CheckoutItemsManager from '@/components/checkout/CheckoutItemsManager';
+import CheckoutOffersBadge from '@/components/checkout/CheckoutOffersBadge';
 
 export const metadata = {
   title: 'Secure Checkout | Fyxen',
@@ -34,6 +35,16 @@ export default async function CheckoutPage() {
     .select('partial_payment_enabled, partial_payment_percentage')
     .single();
 
+  // Fetch active promotions/offers
+  const now = new Date().toISOString();
+  const { data: offers } = await supabase
+    .from('offers')
+    .select('*')
+    .eq('active', true)
+    .lte('starts_at', now)
+    .gte('ends_at', now)
+    .order('created_at', { ascending: false });
+
   const shipping = totalShipping;
   const tax = totalTax;
   const grandTotal = subtotal + shipping + tax;
@@ -61,6 +72,8 @@ export default async function CheckoutPage() {
           <div className="w-full lg:w-[400px] shrink-0">
             <div className="bg-white dark:bg-black p-5 md:p-6 rounded-xl border border-primary-200 dark:border-white/10 lg:sticky lg:top-24 shadow-sm">
               <h2 className="text-xl font-bold mb-6">Order Summary</h2>
+              
+              <CheckoutOffersBadge items={items} offers={offers || []} />
               
               <CheckoutItemsManager items={items} />
               

@@ -9,8 +9,9 @@ import ShareButton from '@/components/product/ShareButton';
 import { ShieldCheck, Truck, RotateCcw, CheckCircle2 } from 'lucide-react';
 import ProductHighlights from '@/components/product/ProductHighlights';
 import ProductBoxContents from '@/components/product/ProductBoxContents';
+import ProductOfferBadge from '@/components/product/ProductOfferBadge';
 
-export default function ProductInteractiveSection({ product }) {
+export default function ProductInteractiveSection({ product, offers = [] }) {
   // Parse available options and values
   const optionsMap = {};
   product.product_variants?.forEach(v => {
@@ -175,6 +176,8 @@ export default function ProductInteractiveSection({ product }) {
           <p className="text-primary-600 dark:text-primary-300 text-lg leading-relaxed">
             {product.short_description || product.description}
           </p>
+
+          <ProductOfferBadge offers={offers} />
         </div>
 
         <div className="mb-8">

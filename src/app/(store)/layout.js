@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import MaintenancePage from '@/components/common/MaintenancePage';
 import { AlertTriangle } from 'lucide-react';
 import WelcomeModal from '@/components/modals/WelcomeModal';
+import OffersPopup from '@/components/modals/OffersPopup';
 import { getCart } from '@/app/(store)/cart/actions';
 
 export default async function StoreLayout({ children }) {
@@ -31,6 +32,16 @@ export default async function StoreLayout({ children }) {
   const { items } = await getCart();
   const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
+  // Fetch active promotions/offers
+  const now = new Date().toISOString();
+  const { data: offers } = await supabase
+    .from('offers')
+    .select('*')
+    .eq('active', true)
+    .lte('starts_at', now)
+    .gte('ends_at', now)
+    .order('created_at', { ascending: false });
+
   // Handling Offline Mode (No one can see)
   if (mode === 'offline' && !isAdmin) {
     return <MaintenancePage mode="offline" />;
@@ -54,6 +65,7 @@ export default async function StoreLayout({ children }) {
       <main>{children}</main>
       <Footer settings={settings} />
       <WelcomeModal show={showWelcome} />
+      <OffersPopup offers={offers || []} />
     </>
   );
 }

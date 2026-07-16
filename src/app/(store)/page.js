@@ -7,6 +7,7 @@ import PromoBanner from '@/components/storefront/PromoBanner';
 import NewsletterForm from '@/components/storefront/NewsletterForm';
 import ProductCard from '@/components/product/ProductCard';
 import HomeRecommendations from '@/components/storefront/HomeRecommendations';
+import ActiveOffersGrid from '@/components/storefront/ActiveOffersGrid';
 import { getProducts, getCategories } from '@/services/products';
 import { createClient } from '@/lib/supabase/server';
 
@@ -26,12 +27,14 @@ const trustFeatures = [
 
 export default async function HomePage() {
   const supabase = await createClient();
-  const [featuredProducts, bestSellers, categories, { data: banners }, { data: settings }] = await Promise.all([
+  const now = new Date().toISOString();
+  const [featuredProducts, bestSellers, categories, { data: banners }, { data: settings }, { data: offers }] = await Promise.all([
     getProducts({ featured: true }),
     getProducts({ bestSeller: true }),
     getCategories(),
     supabase.from('promo_banners').select('*').eq('is_active', true).order('created_at', { ascending: false }).limit(1),
     supabase.from('settings').select('*').single(),
+    supabase.from('offers').select('*').eq('active', true).lte('starts_at', now).gte('ends_at', now).order('created_at', { ascending: false }),
   ]);
 
   const activeBanner = banners?.[0];
@@ -68,7 +71,7 @@ export default async function HomePage() {
               {/* Right: Product Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
                 {featuredProducts.slice(0, 6).map(product => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard key={product.id} product={product} offers={offers || []} />
                 ))}
               </div>
             </div>
@@ -101,7 +104,7 @@ export default async function HomePage() {
               {/* Right: Product Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6">
                 {bestSellers.slice(0, 6).map(product => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard key={product.id} product={product} offers={offers || []} />
                 ))}
               </div>
             </div>
@@ -111,6 +114,9 @@ export default async function HomePage() {
 
       {/* Recommended for you Section */}
       <HomeRecommendations />
+
+      {/* Active Offers & Giveaways Grid */}
+      <ActiveOffersGrid offers={offers || []} />
 
       {/* 4. Hero */}
       <HeroSection />

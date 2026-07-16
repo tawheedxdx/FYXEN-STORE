@@ -84,10 +84,17 @@ export default async function ProductPage({ params }) {
     ? Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100)
     : 0;
 
-  const [fbt, related] = await Promise.all([
+  const now = new Date().toISOString();
+  const [fbt, related, { data: offers }] = await Promise.all([
     getFrequentlyBoughtTogether(product.id, 1),
-    getContentBasedRecommendations(product.id, 6)
+    getContentBasedRecommendations(product.id, 6),
+    supabase.from('offers').select('*').eq('active', true).lte('starts_at', now).gte('ends_at', now).order('created_at', { ascending: false })
   ]);
+
+  const productOffers = (offers || []).filter(offer => {
+    const isSiteWide = !offer.eligible_product_ids || offer.eligible_product_ids.length === 0;
+    return isSiteWide || offer.eligible_product_ids.includes(product.id);
+  });
 
   return (
     <div className="bg-white dark:bg-black min-h-screen">
@@ -114,7 +121,7 @@ export default async function ProductPage({ params }) {
           </span>
         </nav>
 
-        <ProductInteractiveSection product={product} />
+        <ProductInteractiveSection product={product} offers={productOffers} />
 
         {/* Track recently viewed products */}
         <RecentlyViewedTracker slug={product.slug} />
