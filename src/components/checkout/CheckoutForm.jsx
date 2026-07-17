@@ -4,11 +4,11 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { createCheckoutSession, verifyPayment, validateCoupon, deleteOrder } from '@/app/(store)/checkout/actions';
 import Script from 'next/script';
-import { Loader2, Ticket, CheckCircle2, X, Star, CreditCard, Wallet } from 'lucide-react';
+import { Loader2, Ticket, CheckCircle2, X, Star, CreditCard, Wallet, Gift } from 'lucide-react';
 import PaymentSelectionModal from './PaymentSelectionModal';
 import WalletRedemption from './WalletRedemption';
 
-export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: initialGrandTotal, profile, user, settings }) {
+export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: initialGrandTotal, profile, user, settings, offers = [], items = [] }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -17,6 +17,12 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
   const [formDataObj, setFormDataObj] = useState(null);
   const paymentStatusRef = useRef('none'); // 'none', 'success', 'failed'
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
+
+  const applicableOffers = (offers || []).filter(offer => {
+    const isSiteWide = !offer.eligible_product_ids || offer.eligible_product_ids.length === 0;
+    if (isSiteWide) return true;
+    return (items || []).some(item => offer.eligible_product_ids.includes(item.product_id));
+  });
 
   // Coupon State
   const [couponCode, setCouponCode] = useState('');
@@ -354,6 +360,76 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
                 </p>
               </div>
             </div>
+
+            {/* Available Promotions & Giveaways */}
+            {applicableOffers.length > 0 && (
+              <div className="space-y-3 mb-6 p-5 bg-accent/5 rounded-2xl border border-accent/15 mt-6">
+                <h3 className="text-sm font-bold text-primary-900 dark:text-primary-200 flex items-center gap-2">
+                  <Gift className="w-5 h-5 text-accent" /> Available Promotions & Giveaways
+                </h3>
+                <div className="space-y-3">
+                  {applicableOffers.map(offer => {
+                    const minAmount = Number(offer.min_purchase_amount || 0);
+                    const isEligible = subtotal >= minAmount;
+                    const missingAmount = minAmount - subtotal;
+
+                    return (
+                      <div 
+                        key={offer.id} 
+                        className={`p-3.5 rounded-xl border transition-all ${
+                          isEligible 
+                            ? 'bg-green-500/5 border-green-500/20 dark:border-green-500/10' 
+                            : 'bg-primary-50/50 dark:bg-white/5 border-primary-100 dark:border-white/5 opacity-80'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          {isEligible ? (
+                            <div className="mt-0.5">
+                              <input
+                                id={`opted-offer-${offer.id}`}
+                                name="opted_offers"
+                                type="checkbox"
+                                value={offer.id}
+                                className="w-4.5 h-4.5 rounded border-primary-300 text-accent focus:ring-accent accent-accent cursor-pointer"
+                              />
+                            </div>
+                          ) : (
+                            <div className="mt-0.5 w-4.5 h-4.5 rounded border border-dashed border-primary-300 dark:border-white/20 flex items-center justify-center text-[10px] text-primary-400 shrink-0 select-none">
+                              🔒
+                            </div>
+                          )}
+                          
+                          <div className="flex-1 min-w-0">
+                            <label 
+                              htmlFor={isEligible ? `opted-offer-${offer.id}` : undefined} 
+                              className={`block text-sm font-bold ${isEligible ? 'text-primary-900 dark:text-white cursor-pointer' : 'text-primary-500'}`}
+                            >
+                              {offer.title}
+                            </label>
+                            {offer.description && (
+                              <p className="text-xs text-primary-500 mt-1 leading-relaxed">
+                                {offer.description}
+                              </p>
+                            )}
+                            
+                            {isEligible ? (
+                              <span className="inline-block mt-2 text-[10px] font-bold text-green-700 dark:text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">
+                                Eligible to Opt In!
+                              </span>
+                            ) : (
+                              <div className="mt-2 text-xs font-semibold text-accent flex items-center gap-1.5">
+                                <span>⚠️ Add ₹{missingAmount.toFixed(2)} to unlock this offer</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Policy Acceptance Checkbox */}
             <div className="space-y-3 mb-6 p-4 bg-primary-50/50 dark:bg-white/5 rounded-xl border border-primary-100 dark:border-white/5 mt-6">
               <div className="flex items-start gap-3">

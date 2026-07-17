@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, Package, MapPin, CreditCard, Calendar, Truck, CheckCircle2, Clock, AlertCircle, Star, RotateCcw } from 'lucide-react';
+import { ChevronLeft, Package, MapPin, CreditCard, Calendar, Truck, CheckCircle2, Clock, AlertCircle, Star, RotateCcw, Gift } from 'lucide-react';
 import PayNowButton from '@/components/account/PayNowButton';
 import CancelOrderButton from '@/components/account/CancelOrderButton';
 
@@ -66,6 +66,16 @@ export default async function OrderDetailsPage({ params }) {
     const deliveredDate = new Date(order.delivered_at);
     returnExpiryDate = new Date(deliveredDate.getTime() + validityDays * 24 * 60 * 60 * 1000);
     canRequestReturn = new Date() <= returnExpiryDate;
+  }
+
+  // Fetch opted offers details
+  let optedOffersDetails = [];
+  if (order.opted_in_offers && order.opted_in_offers.length > 0) {
+    const { data: dbOffers } = await supabaseAdmin
+      .from('offers')
+      .select('title, description')
+      .in('id', order.opted_in_offers);
+    if (dbOffers) optedOffersDetails = dbOffers;
   }
 
   const getStatusColor = (status) => {
@@ -278,6 +288,25 @@ export default async function OrderDetailsPage({ params }) {
               ))}
             </div>
           </div>
+
+          {/* Opted-in Promotions & Giveaways */}
+          {optedOffersDetails.length > 0 && (
+            <div className="bg-green-500/5 border border-green-500/20 dark:border-green-500/10 rounded-3xl p-6 md:p-8 space-y-4">
+              <h3 className="text-lg font-bold flex items-center gap-2 text-green-950 dark:text-green-400">
+                <Gift className="w-5 h-5 text-green-600 dark:text-green-400" /> Opted-in Promotions & Giveaways
+              </h3>
+              <div className="divide-y divide-green-500/10 dark:divide-green-500/10">
+                {optedOffersDetails.map((offer, idx) => (
+                  <div key={idx} className="py-3 first:pt-0 last:pb-0 space-y-1">
+                    <p className="font-bold text-green-800 dark:text-green-400">{offer.title}</p>
+                    {offer.description && (
+                      <p className="text-xs text-green-700/80 dark:text-green-500/75 leading-relaxed">{offer.description}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Sidebar */}

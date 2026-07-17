@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Package, Truck, CreditCard, User, MapPin, Phone, Calendar, Hash } from 'lucide-react';
+import { ArrowLeft, Package, Truck, CreditCard, User, MapPin, Phone, Calendar, Hash, Gift } from 'lucide-react';
 import OrderStatusDropdown from '@/components/admin/OrderStatusDropdown';
 import PaymentStatusDropdown from '@/components/admin/PaymentStatusDropdown';
 
@@ -24,6 +24,15 @@ export default async function AdminOrderDetailPage({ params }) {
     .single();
 
   if (error || !order) notFound();
+
+  let optedOffersDetails = [];
+  if (order.opted_in_offers && order.opted_in_offers.length > 0) {
+    const { data: dbOffers } = await supabase
+      .from('offers')
+      .select('title, description')
+      .in('id', order.opted_in_offers);
+    if (dbOffers) optedOffersDetails = dbOffers;
+  }
 
   return (
     <div className="space-y-8 pb-12">
@@ -82,6 +91,26 @@ export default async function AdminOrderDetailPage({ params }) {
               ))}
             </div>
           </div>
+
+          {/* Opted-in Promotions & Giveaways */}
+          {optedOffersDetails.length > 0 && (
+            <div className="bg-green-500/5 rounded-xl border border-green-500/20 dark:border-green-500/10 shadow-sm overflow-hidden">
+              <div className="p-6 border-b border-green-500/10 dark:border-green-500/15 flex items-center gap-2">
+                <Gift className="w-5 h-5 text-green-600 dark:text-green-400" />
+                <h2 className="text-lg font-bold text-green-950 dark:text-green-400">Opted-in Promotions & Giveaways</h2>
+              </div>
+              <div className="divide-y divide-green-500/10 dark:divide-green-500/10">
+                {optedOffersDetails.map((offer, idx) => (
+                  <div key={idx} className="p-6 space-y-1">
+                    <h3 className="font-bold text-green-800 dark:text-green-400">{offer.title}</h3>
+                    {offer.description && (
+                      <p className="text-sm text-green-700/80 dark:text-green-500/75 leading-relaxed">{offer.description}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Price Summary */}
           <div className="bg-white rounded-xl border border-primary-100 shadow-sm p-6 space-y-4">

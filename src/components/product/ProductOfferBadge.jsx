@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Gift, HelpCircle, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function ProductOfferBadge({ offers = [] }) {
+export default function ProductOfferBadge({ offers = [], activePrice = 0 }) {
   const [activeTerms, setActiveTerms] = useState(null);
 
   if (!offers || offers.length === 0) return null;
@@ -13,31 +13,54 @@ export default function ProductOfferBadge({ offers = [] }) {
     <div className="space-y-3 mt-4">
       {offers.map((offer) => {
         const isSiteWide = !offer.eligible_product_ids || offer.eligible_product_ids.length === 0;
+        const minAmount = Number(offer.min_purchase_amount || 0);
+        const isBelowMin = activePrice > 0 && activePrice < minAmount;
+        const missingAmount = minAmount - activePrice;
 
         return (
           <div 
             key={offer.id}
-            className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-accent/5 dark:bg-accent/10 border border-accent/15 dark:border-accent/20 transition-all hover:scale-[1.01]"
+            className={`flex items-center justify-between gap-4 p-4 rounded-2xl border transition-all hover:scale-[1.01] ${
+              isBelowMin 
+                ? 'bg-primary-50/50 dark:bg-white/2 border-primary-200 dark:border-white/5 opacity-80' 
+                : 'bg-accent/5 dark:bg-accent/10 border-accent/15 dark:border-accent/20'
+            }`}
           >
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-accent/10 dark:bg-accent/20 flex items-center justify-center text-accent shrink-0">
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                isBelowMin 
+                  ? 'bg-primary-100 dark:bg-white/5 text-primary-400' 
+                  : 'bg-accent/10 dark:bg-accent/20 text-accent'
+              }`}>
                 <Gift className="w-5 h-5" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-black text-primary-900 dark:text-white leading-tight">
+                  <p className={`text-sm font-black leading-tight ${
+                    isBelowMin ? 'text-primary-600 dark:text-primary-400' : 'text-primary-900 dark:text-white'
+                  }`}>
                     {offer.title}
                   </p>
                   {isSiteWide && (
-                    <span className="text-[9px] font-bold text-accent uppercase tracking-wider bg-accent/10 dark:bg-accent/20 px-1.5 py-0.5 rounded">
+                    <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                      isBelowMin 
+                        ? 'bg-primary-100 dark:bg-white/10 text-primary-500' 
+                        : 'bg-accent/10 dark:bg-accent/20 text-accent'
+                    }`}>
                       Site-wide
                     </span>
                   )}
                 </div>
-                {offer.subtitle && (
-                  <p className="text-xs text-primary-500 dark:text-primary-400 mt-0.5 font-medium">
-                    {offer.subtitle}
+                {isBelowMin ? (
+                  <p className="text-xs text-accent font-bold mt-1">
+                    Add ₹{missingAmount.toFixed(2)} to get this offer
                   </p>
+                ) : (
+                  offer.subtitle && (
+                    <p className="text-xs text-primary-500 dark:text-primary-400 mt-0.5 font-medium">
+                      {offer.subtitle}
+                    </p>
+                  )
                 )}
               </div>
             </div>

@@ -168,6 +168,34 @@ export async function createCheckoutSession(formData) {
     codBalanceAmount = Math.round((grandTotal - partialPaymentAmount) * 100) / 100;
   }
 
+  // Validate and get opted offers
+  const optedOffers = formData.getAll('opted_offers') || [];
+  let validatedOptedOffers = [];
+
+  if (optedOffers.length > 0) {
+    const nowStr = new Date().toISOString();
+    const { data: dbOffers } = await supabaseAdmin
+      .from('offers')
+      .select('*')
+      .in('id', optedOffers)
+      .eq('active', true)
+      .lte('starts_at', nowStr)
+      .gte('ends_at', nowStr);
+
+    if (dbOffers) {
+      for (const offer of dbOffers) {
+        const minAmount = Number(offer.min_purchase_amount || 0);
+        if (subtotal >= minAmount) {
+          const isSiteWide = !offer.eligible_product_ids || offer.eligible_product_ids.length === 0;
+          const isProductEligible = isSiteWide || items.some(item => offer.eligible_product_ids.includes(item.product_id));
+          if (isProductEligible) {
+            validatedOptedOffers.push(offer.id);
+          }
+        }
+      }
+    }
+  }
+
   // 1. Create Order in DB
   const orderNumber = generateOrderNumber();
   
@@ -200,7 +228,8 @@ export async function createCheckoutSession(formData) {
       terms_accepted: true,
       terms_accepted_at: new Date().toISOString(),
       terms_version: 'v1.0',
-      user_ip: userIp
+      user_ip: userIp,
+      opted_in_offers: validatedOptedOffers
     })
     .select('id')
     .single();

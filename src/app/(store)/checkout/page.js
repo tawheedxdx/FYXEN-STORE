@@ -65,6 +65,8 @@ export default async function CheckoutPage() {
               profile={profile}
               user={user}
               settings={settings}
+              offers={offers || []}
+              items={items}
             />
           </div>
           

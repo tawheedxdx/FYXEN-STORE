@@ -40,6 +40,7 @@ export async function createOffer(formData) {
   const startsAt = formData.get('starts_at');
   const endsAt = formData.get('ends_at');
   const active = formData.get('active') === 'true';
+  const minPurchaseAmount = parseFloat(formData.get('min_purchase_amount') || '0');
   
   const eligibleProductIdsRaw = formData.get('eligible_product_ids');
   let eligibleProductIds = [];
@@ -78,7 +79,8 @@ export async function createOffer(formData) {
     ends_at: endsAt,
     image_url: imageUrl,
     active,
-    eligible_product_ids: eligibleProductIds
+    eligible_product_ids: eligibleProductIds,
+    min_purchase_amount: minPurchaseAmount
   });
 
   if (error) return { error: error.message };
@@ -103,6 +105,7 @@ export async function updateOffer(id, formData) {
   const endsAt = formData.get('ends_at');
   const active = formData.get('active') === 'true';
   const currentImageUrl = formData.get('current_image_url') || null;
+  const minPurchaseAmount = parseFloat(formData.get('min_purchase_amount') || '0');
   
   const eligibleProductIdsRaw = formData.get('eligible_product_ids');
   let eligibleProductIds = [];
@@ -141,7 +144,8 @@ export async function updateOffer(id, formData) {
     ends_at: endsAt,
     image_url: imageUrl,
     active,
-    eligible_product_ids: eligibleProductIds
+    eligible_product_ids: eligibleProductIds,
+    min_purchase_amount: minPurchaseAmount
   }).eq('id', id);
 
   if (error) return { error: error.message };

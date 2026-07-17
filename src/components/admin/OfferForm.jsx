@@ -244,6 +244,19 @@ export default function OfferForm({ offer = null, products = [], onSuccess }) {
               </div>
 
               <div>
+                <label className="block text-xs font-bold text-primary-900 dark:text-primary-200 mb-1.5 uppercase tracking-wider">Minimum Purchase Amount (₹)</label>
+                <input 
+                  name="min_purchase_amount" 
+                  type="number" 
+                  min="0"
+                  step="0.01"
+                  defaultValue={offer ? offer.min_purchase_amount : 0.00} 
+                  placeholder="0.00" 
+                  className="input-field" 
+                />
+              </div>
+
+              <div>
                 <label className="flex items-center gap-3 cursor-pointer group py-2">
                   <div className="relative">
                     <input
