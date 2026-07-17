@@ -7,6 +7,7 @@ import Script from 'next/script';
 import { Loader2, Ticket, CheckCircle2, X, Star, CreditCard, Wallet, Gift } from 'lucide-react';
 import PaymentSelectionModal from './PaymentSelectionModal';
 import WalletRedemption from './WalletRedemption';
+import OfferCountdown from '@/components/common/OfferCountdown';
 
 export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: initialGrandTotal, profile, user, settings, offers = [], items = [] }) {
   const router = useRouter();
@@ -411,6 +412,7 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
                                 {offer.description}
                               </p>
                             )}
+                            <OfferCountdown endsAt={offer.ends_at} />
                             
                             {isEligible ? (
                               <span className="inline-block mt-2 text-[10px] font-bold text-green-700 dark:text-green-400 bg-green-500/10 px-2 py-0.5 rounded-full">

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Gift, HelpCircle, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import OfferCountdown from '@/components/common/OfferCountdown';
 
 export default function ProductOfferBadge({ offers = [] }) {
   const [activeTerms, setActiveTerms] = useState(null);
@@ -39,6 +40,7 @@ export default function ProductOfferBadge({ offers = [] }) {
                     {offer.subtitle}
                   </p>
                 )}
+                <OfferCountdown endsAt={offer.ends_at} />
               </div>
             </div>
 
