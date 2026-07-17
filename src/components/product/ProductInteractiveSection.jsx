@@ -177,7 +177,7 @@ export default function ProductInteractiveSection({ product, offers = [] }) {
             {product.short_description || product.description}
           </p>
 
-          <ProductOfferBadge offers={offers} activePrice={activePrice} />
+          <ProductOfferBadge offers={offers} />
         </div>
 
         <div className="mb-8">
