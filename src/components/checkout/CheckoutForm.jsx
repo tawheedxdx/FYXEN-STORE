@@ -370,8 +370,8 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
                 <div className="space-y-3">
                   {applicableOffers.map(offer => {
                     const minAmount = Number(offer.min_purchase_amount || 0);
-                    const isEligible = finalGrandTotal >= minAmount;
-                    const missingAmount = minAmount - finalGrandTotal;
+                    const isEligible = subtotal >= minAmount;
+                    const missingAmount = minAmount - subtotal;
 
                     return (
                       <div 

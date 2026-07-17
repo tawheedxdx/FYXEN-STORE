@@ -185,7 +185,7 @@ export async function createCheckoutSession(formData) {
     if (dbOffers) {
       for (const offer of dbOffers) {
         const minAmount = Number(offer.min_purchase_amount || 0);
-        if (grandTotal >= minAmount) {
+        if (subtotal >= minAmount) {
           const isSiteWide = !offer.eligible_product_ids || offer.eligible_product_ids.length === 0;
           const isProductEligible = isSiteWide || items.some(item => offer.eligible_product_ids.includes(item.product_id));
           if (isProductEligible) {
