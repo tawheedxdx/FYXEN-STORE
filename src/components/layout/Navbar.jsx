@@ -88,7 +88,7 @@ export default function Navbar({ cartCount = 0 }) {
               <img
                 src="/logo.png"
                 alt="Fyxen Logo"
-                className={`w-auto object-contain transition-[filter] duration-500 h-10 md:h-14 ${
+                className={`w-auto object-contain transition-[filter] duration-500 h-10 md:h-14 dark:brightness-0 dark:invert ${
                   heroMode ? 'brightness-0 invert' : ''
                 }`}
               />

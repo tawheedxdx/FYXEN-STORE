@@ -97,7 +97,7 @@ export default function AboutClient({ productCount, parentCompany, gstNumber }) 
             <img 
               src="/logo.png" 
               alt="Fyxen Logo" 
-              className="h-16 md:h-24 w-auto object-contain brightness-0 invert" 
+              className="h-28 md:h-44 w-auto object-contain brightness-0 invert" 
             />
           </motion.div>
 
