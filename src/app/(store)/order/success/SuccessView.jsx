@@ -1,8 +1,9 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CheckCircle, ArrowRight, Package } from 'lucide-react';
+import { ArrowRight, Package } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Script from 'next/script';
 
 export default function SuccessView({ orderId, orderNumber, paymentStatus }) {
@@ -41,22 +42,37 @@ export default function SuccessView({ orderId, orderNumber, paymentStatus }) {
         `}
       </Script>
       <motion.div
-        initial={{ scale: 0, opacity: 0 }}
+        initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{
           type: "spring",
-          stiffness: 260,
+          stiffness: 200,
           damping: 20,
-          duration: 1
+          duration: 0.8
         }}
-        className="relative"
+        className="relative mb-6 select-none"
       >
-        <div className={`absolute inset-0 ${themeBg} blur-3xl rounded-full`} />
-        {isCod ? (
-          <Package className={`w-28 h-28 ${themeText} relative z-10`} strokeWidth={1.5} />
-        ) : (
-          <CheckCircle className={`w-28 h-28 ${themeText} relative z-10`} strokeWidth={1.5} />
-        )}
+        <div className={`absolute inset-0 ${themeBg} blur-3xl rounded-full opacity-30`} />
+        <motion.div
+          animate={{
+            y: [0, -8, 0],
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="relative z-10 w-full max-w-[280px] md:max-w-[320px] mx-auto filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.05)] dark:drop-shadow-[0_10px_20px_rgba(255,255,255,0.02)]"
+        >
+          <Image
+            src="/order conform svg/order conform-amico.svg"
+            alt="Order Success Illustration"
+            width={320}
+            height={320}
+            className="w-full h-auto object-contain"
+            priority
+          />
+        </motion.div>
       </motion.div>
 
       <motion.div

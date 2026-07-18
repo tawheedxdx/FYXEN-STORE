@@ -1,25 +1,45 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { XCircle, RefreshCcw, Headset } from 'lucide-react';
+import { RefreshCcw, Headset } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function FailedView({ orderId, orderNumber }) {
   return (
     <div className="container-custom py-24 min-h-[70vh] flex flex-col items-center justify-center text-center">
       <motion.div
-        initial={{ scale: 0, opacity: 0, rotate: -45 }}
-        animate={{ scale: 1, opacity: 1, rotate: 0 }}
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
         transition={{
           type: "spring",
-          stiffness: 260,
+          stiffness: 200,
           damping: 20,
           duration: 0.8
         }}
-        className="relative"
+        className="relative mb-6 select-none"
       >
-        <div className="absolute inset-0 bg-red-500/20 blur-3xl rounded-full" />
-        <XCircle className="w-28 h-28 text-red-500 relative z-10" strokeWidth={1.5} />
+        <div className="absolute inset-0 bg-red-500/10 blur-3xl rounded-full opacity-30" />
+        <motion.div
+          animate={{
+            y: [0, -8, 0],
+          }}
+          transition={{
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+          className="relative z-10 w-full max-w-[280px] md:max-w-[320px] mx-auto filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.05)] dark:drop-shadow-[0_10px_20px_rgba(255,255,255,0.02)]"
+        >
+          <Image
+            src="/order failed svg/Missed chances-amico.svg"
+            alt="Order Failed Illustration"
+            width={320}
+            height={320}
+            className="w-full h-auto object-contain"
+            priority
+          />
+        </motion.div>
       </motion.div>
 
       <motion.div
