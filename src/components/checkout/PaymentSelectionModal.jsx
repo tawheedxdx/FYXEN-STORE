@@ -137,6 +137,15 @@ export default function PaymentSelectionModal({
                           <span className="text-[10px] font-black">{Math.floor(amount / 100) * 10}</span>
                         </div>
                       </div>
+
+                      {/* Accepted Payment Method Icons */}
+                      <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[9px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/10 tracking-wider">UPI</span>
+                        <span className="text-[9px] font-bold text-orange-500 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/10">Cards</span>
+                        <span className="text-[9px] font-bold text-purple-500 bg-purple-500/10 px-2 py-0.5 rounded border border-purple-500/10">Net Banking</span>
+                        <span className="text-[9px] font-bold text-teal-500 bg-teal-500/10 px-2 py-0.5 rounded border border-teal-500/10">Wallets</span>
+                      </div>
+                      
                       <div className="mt-3 p-2 bg-green-500/10 border border-green-500/20 rounded-lg">
                         <p className="text-[10px] font-bold text-green-600 dark:text-green-400 flex items-center gap-1.5 uppercase tracking-tight">
                           <Gift className="w-3 h-3" />

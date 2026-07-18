@@ -641,10 +641,45 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
               `Confirm & Proceed`
             )}
           </button>
-          <div className="flex justify-center mt-4 opacity-70">
-            <p className="text-xs flex items-center gap-2 text-center">
-              🔒 100% Secure Checkout
-            </p>
+          <div className="flex flex-col items-center justify-center mt-6 pt-4 border-t border-primary-100 dark:border-white/5 space-y-3">
+            <p className="text-[10px] font-bold text-primary-400 dark:text-primary-500 uppercase tracking-widest">Accepted Payment Methods</p>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              {/* UPI */}
+              <div className="flex items-center gap-1.5 bg-primary-50 dark:bg-white/5 px-2.5 py-1.5 rounded-lg border border-primary-100 dark:border-white/10" title="UPI Payments">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 tracking-wider">UPI</span>
+              </div>
+              
+              {/* Cards */}
+              <div className="flex items-center gap-1.5 bg-primary-50 dark:bg-white/5 px-2.5 py-1.5 rounded-lg border border-primary-100 dark:border-white/10" title="Credit / Debit Cards">
+                <CreditCard className="w-3.5 h-3.5 text-orange-500" />
+                <span className="text-[10px] font-bold text-primary-700 dark:text-primary-300">Cards</span>
+              </div>
+
+              {/* Net Banking */}
+              <div className="flex items-center gap-1.5 bg-primary-50 dark:bg-white/5 px-2.5 py-1.5 rounded-lg border border-primary-100 dark:border-white/10" title="Net Banking">
+                <svg className="w-3.5 h-3.5 text-purple-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="2" y="10" width="20" height="12" rx="2" ry="2" />
+                  <path d="M12 2L2 7h20L12 2z" />
+                  <path d="M6 10v12" />
+                  <path d="M10 10v12" />
+                  <path d="M14 10v12" />
+                  <path d="M18 10v12" />
+                </svg>
+                <span className="text-[10px] font-bold text-primary-700 dark:text-primary-300">Net Banking</span>
+              </div>
+
+              {/* Wallets */}
+              <div className="flex items-center gap-1.5 bg-primary-50 dark:bg-white/5 px-2.5 py-1.5 rounded-lg border border-primary-100 dark:border-white/10" title="Mobile Wallets">
+                <Wallet className="w-3.5 h-3.5 text-teal-500" />
+                <span className="text-[10px] font-bold text-primary-700 dark:text-primary-300">Wallets</span>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-[10px] text-primary-400 dark:text-primary-500 font-semibold mt-1">
+              <span>🔒 100% Secure Checkout</span>
+              <span>•</span>
+              <span>⚡ Powered by Razorpay</span>
+            </div>
           </div>
         </div>
       </form>
