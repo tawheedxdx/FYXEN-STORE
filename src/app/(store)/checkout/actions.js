@@ -148,11 +148,18 @@ export async function createCheckoutSession(formData) {
   // Calculate potential wallet cashback (₹2 per ₹100 spent)
   const walletCashbackAmount = Math.floor(grandTotal / 100) * 2;
 
+  const houseNo = formData.get('houseNo');
+  const street = formData.get('street');
+  const landmark = formData.get('landmark');
+  const line1 = houseNo ? `${houseNo}, ${street}` : (street || '');
+  const line2 = landmark || '';
+
   // Extract address info
   const shippingInfo = {
     full_name: formData.get('fullName'),
     phone: formData.get('phone'),
-    line1: formData.get('line1'),
+    line1,
+    line2,
     city: formData.get('city'),
     state: formData.get('state'),
     postal_code: formData.get('postalCode'),
@@ -215,6 +222,8 @@ export async function createCheckoutSession(formData) {
       shipping_full_name: shippingInfo.full_name,
       shipping_phone: shippingInfo.phone,
       shipping_line1: shippingInfo.line1,
+      shipping_line2: shippingInfo.line2,
+      shipping_landmark: shippingInfo.line2,
       shipping_city: shippingInfo.city,
       shipping_state: shippingInfo.state,
       shipping_postal_code: shippingInfo.postal_code,

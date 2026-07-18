@@ -38,6 +38,70 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
 
   const [finalGrandTotal, setFinalGrandTotal] = useState(initialGrandTotal);
 
+  // PIN Code / Address Auto-fill State
+  const [pinCode, setPinCode] = useState('');
+  const [isPinLoading, setIsPinLoading] = useState(false);
+  const [pinError, setPinError] = useState(false);
+  const [city, setCity] = useState('');
+  const [state, setState] = useState('');
+  const [deliveryInfo, setDeliveryInfo] = useState(null);
+
+  const handlePinCodeChange = async (e) => {
+    const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+    setPinCode(value);
+    
+    if (value.length < 6) {
+      setCity('');
+      setState('');
+      setDeliveryInfo(null);
+      setPinError(false);
+      return;
+    }
+
+    if (value.length === 6) {
+      setIsPinLoading(true);
+      setPinError(false);
+      setDeliveryInfo(null);
+
+      try {
+        const response = await fetch(`https://api.postalpincode.in/pincode/${value}`);
+        const data = await response.json();
+
+        if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice && data[0].PostOffice.length > 0) {
+          const firstOffice = data[0].PostOffice[0];
+          setCity(firstOffice.District || firstOffice.Block || '');
+          setState(firstOffice.State || '');
+          
+          // Calculate delivery dates (5 to 9 days after)
+          const today = new Date();
+          const minDelDate = new Date(today);
+          minDelDate.setDate(today.getDate() + 5);
+          const maxDelDate = new Date(today);
+          maxDelDate.setDate(today.getDate() + 9);
+
+          const minDateStr = minDelDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'long' });
+          const maxDateStr = maxDelDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'long' });
+
+          setDeliveryInfo({
+            available: true,
+            estimate: `${minDateStr} - ${maxDateStr}`
+          });
+        } else {
+          setPinError(true);
+          setCity('');
+          setState('');
+        }
+      } catch (err) {
+        console.error('PIN code lookup failed:', err);
+        setPinError(true);
+        setCity('');
+        setState('');
+      } finally {
+        setIsPinLoading(false);
+      }
+    }
+  };
+
   useEffect(() => {
     setFinalGrandTotal(Math.max(0, subtotal - currentDiscount - walletDiscount + shipping + tax));
   }, [subtotal, currentDiscount, walletDiscount, shipping, tax]);
@@ -233,24 +297,117 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
             </div>
           </div>
 
-          <div>
-            <label htmlFor="line1" className="block text-sm font-medium text-primary-900 dark:text-primary-200 mb-2">Address Line 1 *</label>
-            <input id="line1" name="line1" type="text" required className="input-field" placeholder="Flat No., Building, Street" />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* PIN Code, City & State Auto-fill */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+            <div>
+              <label htmlFor="postalCode" className="block text-sm font-medium text-primary-900 dark:text-primary-200 mb-2">PIN Code *</label>
+              <div className="relative">
+                <input 
+                  id="postalCode" 
+                  name="postalCode" 
+                  type="text" 
+                  required 
+                  value={pinCode}
+                  onChange={handlePinCodeChange}
+                  className={`input-field pr-10 ${pinError ? 'border-red-500 focus:ring-red-500 focus:border-red-500' : ''}`}
+                  placeholder="400001" 
+                  maxLength={6}
+                />
+                {isPinLoading && (
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                    <Loader2 className="w-4 h-4 animate-spin text-accent" />
+                  </div>
+                )}
+              </div>
+              {pinError && (
+                <p className="text-xs text-red-500 font-bold mt-1.5 flex items-center gap-1">❌ Invalid PIN Code</p>
+              )}
+            </div>
             <div>
               <label htmlFor="city" className="block text-sm font-medium text-primary-900 dark:text-primary-200 mb-2">City *</label>
-              <input id="city" name="city" type="text" required className="input-field" placeholder="Mumbai" />
+              <div className="relative">
+                <input 
+                  id="city" 
+                  name="city" 
+                  type="text" 
+                  required 
+                  readOnly
+                  value={city}
+                  className="input-field bg-primary-50 dark:bg-white/5 cursor-not-allowed select-none pr-10" 
+                  placeholder="Auto-filled" 
+                />
+                {city && !pinError && !isPinLoading && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600 dark:text-green-400 font-bold text-sm">✓</span>
+                )}
+              </div>
             </div>
             <div>
               <label htmlFor="state" className="block text-sm font-medium text-primary-900 dark:text-primary-200 mb-2">State *</label>
-              <input id="state" name="state" type="text" required className="input-field" placeholder="Maharashtra" />
+              <div className="relative">
+                <input 
+                  id="state" 
+                  name="state" 
+                  type="text" 
+                  required 
+                  readOnly
+                  value={state}
+                  className="input-field bg-primary-50 dark:bg-white/5 cursor-not-allowed select-none pr-10" 
+                  placeholder="Auto-filled" 
+                />
+                {state && !pinError && !isPinLoading && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-green-600 dark:text-green-400 font-bold text-sm">✓</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Delivery Availability Info */}
+          {deliveryInfo && (
+            <div className="p-3.5 bg-green-500/5 dark:bg-green-500/10 border border-green-500/20 rounded-xl space-y-1 mt-2">
+              <div className="flex items-center gap-1.5 text-xs font-bold text-green-700 dark:text-green-400">
+                <span>✓ Delivery Available</span>
+              </div>
+              <p className="text-xs text-primary-600 dark:text-primary-400 font-semibold">
+                Estimated Delivery: <span className="font-bold text-primary-900 dark:text-white">{deliveryInfo.estimate}</span>
+              </p>
+            </div>
+          )}
+
+          {/* Detailed Address Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label htmlFor="houseNo" className="block text-sm font-medium text-primary-900 dark:text-primary-200 mb-2">House No. / Flat No. *</label>
+              <input 
+                id="houseNo" 
+                name="houseNo" 
+                type="text" 
+                required 
+                className="input-field" 
+                placeholder="102, 1st Floor" 
+              />
             </div>
             <div>
-              <label htmlFor="postalCode" className="block text-sm font-medium text-primary-900 dark:text-primary-200 mb-2">PIN Code *</label>
-              <input id="postalCode" name="postalCode" type="text" required className="input-field" placeholder="400001" />
+              <label htmlFor="street" className="block text-sm font-medium text-primary-900 dark:text-primary-200 mb-2">Street / Area / Locality *</label>
+              <input 
+                id="street" 
+                name="street" 
+                type="text" 
+                required 
+                className="input-field" 
+                placeholder="MG Road, Fort" 
+              />
             </div>
+          </div>
+
+          <div>
+            <label htmlFor="landmark" className="block text-sm font-medium text-primary-900 dark:text-primary-200 mb-2">Landmark (Optional)</label>
+            <input 
+              id="landmark" 
+              name="landmark" 
+              type="text" 
+              className="input-field" 
+              placeholder="Near SBI Bank" 
+            />
           </div>
         </div>
 
