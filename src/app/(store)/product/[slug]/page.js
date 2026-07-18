@@ -18,7 +18,8 @@ export async function generateMetadata({ params }) {
   
   if (!product) return { title: 'Product Not Found' };
   
-  const title = product.seo_title || `${product.title} | Fyxen`;
+  const categoryName = product.categories?.name ? ` | ${product.categories.name}` : '';
+  const title = product.seo_title || `${product.title}${categoryName} | Fyxen`;
   const description = product.seo_description || product.short_description || `Purchase ${product.title} at Fyxen. Premium quality and express shipping.`;
   const image = product.product_images?.[0]?.image_url || 'https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/brand-assets/og-image.png';
 
@@ -96,8 +97,73 @@ export default async function ProductPage({ params }) {
     return isSiteWide || offer.eligible_product_ids.includes(product.id);
   });
 
+  const productImages = product.product_images?.map(img => img.image_url) || [];
+  const productPrice = Number(product.price);
+  const priceValidUntil = new Date();
+  priceValidUntil.setFullYear(priceValidUntil.getFullYear() + 1);
+
+  const productSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.title,
+    "image": productImages,
+    "description": product.description || product.short_description || product.title,
+    "sku": product.sku || product.id,
+    "mpn": product.sku || product.id,
+    "brand": {
+      "@type": "Brand",
+      "name": product.brand || "Fyxen"
+    },
+    "offers": {
+      "@type": "Offer",
+      "url": `https://www.fyxen.in/product/${product.slug}`,
+      "priceCurrency": "INR",
+      "price": productPrice,
+      "priceValidUntil": priceValidUntil.toISOString().split('T')[0],
+      "itemCondition": "https://schema.org/NewCondition",
+      "availability": product.stock_quantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+      "seller": {
+        "@type": "Organization",
+        "name": "Fyxen"
+      }
+    }
+  };
+
+  const breadcrumbListSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://www.fyxen.in"
+      },
+      ...breadcrumbs.map((crumb, idx) => ({
+        "@type": "ListItem",
+        "position": idx + 2,
+        "name": crumb.name,
+        "item": `https://www.fyxen.in${crumb.url}`
+      })),
+      {
+        "@type": "ListItem",
+        "position": breadcrumbs.length + 2,
+        "name": product.title,
+        "item": `https://www.fyxen.in/product/${product.slug}`
+      }
+    ]
+  };
+
   return (
     <div className="bg-white dark:bg-black min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbListSchema) }}
+      />
       <div className="container-custom py-8 md:py-12">
         {/* Breadcrumbs */}
         <nav className="flex items-center space-x-2 text-xs md:text-sm text-primary-400 dark:text-primary-500 mb-6 overflow-x-auto whitespace-nowrap scrollbar-none py-1">

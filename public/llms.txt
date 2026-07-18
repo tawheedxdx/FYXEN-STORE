@@ -1,0 +1,37 @@
+# FYXEN - Modern Premium Essentials Store
+> FYXEN is a curated, high-end, and minimalist e-commerce store offering premium manufacturing, lifestyle, and household essentials. We build shopping experiences that prioritize absolute quality, complete transparency, and customer satisfaction.
+
+## Main Sections
+- `Home -> https://www.fyxen.in`: Featured collections, trust badges, and navigation.
+- `Shop -> https://www.fyxen.in/shop`: Full product catalog with categories, filtering, and search.
+- `About Us -> https://www.fyxen.in/about`: Our brand vision, operational details (Bytread International Pvt. Ltd.), and core values.
+- `FAQ -> https://www.fyxen.in/faq`: Answers to frequently asked questions about shipping, returns, and support.
+- `Contact -> https://www.fyxen.in/contact`: Customer support and correspondence center.
+- `Track Order -> https://www.fyxen.in/track-order`: Order status tracking interface.
+
+## Product Categories
+- `Home Category -> https://www.fyxen.in/category/home`: Curated products under Home.
+- `Electronics Category -> https://www.fyxen.in/category/electronics`: Curated products under Electronics.
+- `Portable Printers Category -> https://www.fyxen.in/category/portable-printers`: Curated products under Portable Printers.
+- `Mini Bluetooth Thermal Printer Category -> https://www.fyxen.in/category/mini-bluetooth-thermal-printer`: Curated products under Mini Bluetooth Thermal Printer.
+- `Kitchen & Dining Category -> https://www.fyxen.in/category/kitchen-dining`: Curated products under Kitchen & Dining.
+- `Kitchen Tools & Gadgets Category -> https://www.fyxen.in/category/kitchen-tools-gadgets`: Curated products under Kitchen Tools & Gadgets.
+- `Oil Dispensers & Sprayers Category -> https://www.fyxen.in/category/oil-dispensers-sprayers`: Curated products under Oil Dispensers & Sprayers.
+
+## Active Products Catalog
+- `Neck Fan USB Air Cooler, Rechargeable Fan, USB Fan -> https://www.fyxen.in/product/neck-fan-usb-air-cooler-rechargeable-fan-usb-fan`: Fyxen FYXEN Neck Fan NEK-FAN USB Air Cooler, Rechargeable Fan, USB Fan (Price: ₹499.00)
+- `2 in 1 wiper Strip Mop (White) -> https://www.fyxen.in/product/2-in-1-wiper-strip-mop-white`: 2 in 1 wiper Strip Mop (White) (Price: ₹199.00)
+- `USB Rechargeable fan desktop double-head powerful  -> https://www.fyxen.in/product/usb-rechargeable-fan-desktop-double-head-powerful-`: Fyxen USB Rechargable fan desktop double-head powerful air USB cooler Rechargeable Fan, USB Air Cooler, USB Air Freshener (White) (Price: ₹1299.00)
+- `Fyxen 900 ml Cooking Oil Dispenser -> https://www.fyxen.in/product/fyxen-900-ml-cooking-oil-dispenser`: Fyxen 900 ml Cooking Oil Dispenser (Pack of 1) (Price: ₹255.00)
+- `Fyxen Water Bottle For Kids, School and outdoor, BPA Free 1000 ml PET -> https://www.fyxen.in/product/fyxen-water-bottle-for-kids-school-and-outdoor-bpa-free-1000-ml-pet`: Fyxen Water Bottle For Kids, School and outdoor, BPA Free 1000 ml PET, Plastic Bottle (Pack of 1, Pink) (Price: ₹259.00)
+- `Mosquito killer Electric Insect Killer Indoor (Lamp) -> https://www.fyxen.in/product/mosquito-killer-electric-insect-killer-indoor-lamp`: Mosquito killer Electric Insect Killer Indoor (Lamp) (Price: ₹279.00)
+- `Fyxen MZ Speaker 7 W Laptop/Desktop Speaker (Multicolor, 3.1.1 Channel) with FM radio -> https://www.fyxen.in/product/fyxen-mz-speaker-7-w-laptopdesktop-speaker-multicolor-311-channel-with-fm-radio`: Fyxen MZ Speaker 7 W Laptop/Desktop Speaker (Multicolor, 3.1.1 Channel) with FM radio (Price: ₹450.00)
+- `Cooking Oil Sprayer (Pack of 1) -> https://www.fyxen.in/product/cooking-oil-sprayer-pack-of-1`: Cooking Oil Sprayer  (Price: ₹250.00)
+- `Mini Bluetooth Thermal Printer (Inkless) -> https://www.fyxen.in/product/mini-bluetooth-thermal-printer-inkless`: Print notes, labels, checklists, study materials, receipts, to-do lists, photos, and more anytime, anywhere with this adorable pocket-sized Bluetooth thermal printer. Compact, lightweight, and ink-free, it's the perfect companion for students, professionals, and creative users. (Price: ₹599.00)
+
+## Key Facts & Customer Policies
+- **GST Invoice Support**: All orders come with official GST invoices issued under Bytread International Pvt. Ltd.
+- **Shipping**: Quick nationwide delivery across India. Free shipping options available.
+- **Returns & Refunds**: Hassle-free 7-day return policy for standard eligible products.
+- **Secure Payments**: Fully integrated payment gateways with support for UPI, Cards, Net Banking, and Wallets.
+- **Auto-PIN verification**: Pin code verification automatically fetches City and State details instantly.

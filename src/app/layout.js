@@ -8,10 +8,10 @@ export const metadata = {
   metadataBase: new URL('https://www.fyxen.in'),
   title: {
     template: "%s | Fyxen",
-    default: "Fyxen | Premium Lifestyle & Manufacturing Essentials",
+    default: "Fyxen | Buy Premium Home, Kitchen & Electronic Utility Accessories Online",
   },
-  description: "Experience premium shopping with Fyxen. We offer high-end manufacturing products and lifestyle essentials crafted by Bytread International Private Limited.",
-  keywords: ["eCommerce", "Premium Products", "Manufacturing", "Fyxen", "Bytread", "Lifestyle Essentials", "Online Shopping India"],
+  description: "Fyxen offers a curated selection of premium home utility products, kitchen organizers, inkless thermal printers, and rechargeable neck fans. High-end lifestyle essentials crafted for quality and simplicity.",
+  keywords: ["kitchen accessories", "home utility gadgets", "inkless bluetooth printer", "mosquito killer lamp", "portable neck fan", "double head usb desktop fan", "bpa free kids water bottle", "cooking oil sprayer dispenser", "wiper strip mop", "premium lifestyle essentials", "online shopping India", "Fyxen", "Bytread"],
   authors: [{ name: "Bytread International Private Limited" }],
   creator: "Fyxen Team",
   publisher: "Bytread International Private Limited",
@@ -21,8 +21,8 @@ export const metadata = {
     telephone: false,
   },
   openGraph: {
-    title: 'Fyxen | Premium Lifestyle & Manufacturing Essentials',
-    description: 'Experience premium shopping with Fyxen. Quality you can trust.',
+    title: 'Fyxen | Buy Premium Home, Kitchen & Electronic Utility Accessories Online',
+    description: 'Explore our curated selection of premium home utility products, kitchen organizers, and high-end lifestyle essentials.',
     url: 'https://www.fyxen.in',
     siteName: 'Fyxen',
     images: [
@@ -38,8 +38,8 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Fyxen | Premium Essentials',
-    description: 'Quality lifestyle and manufacturing essentials from Bytread International.',
+    title: 'Fyxen | Buy Premium Home, Kitchen & Electronic Utility Accessories Online',
+    description: 'Explore our curated selection of premium home utility products, kitchen organizers, and high-end lifestyle essentials.',
     images: ['https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/brand-assets/og-image.png'],
   },
   robots: {
@@ -70,12 +70,38 @@ export const viewport = {
 };
 
 export default function RootLayout({ children }) {
+  const orgSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Fyxen",
+    "alternateName": "FYXEN Store",
+    "url": "https://www.fyxen.in",
+    "logo": "https://www.fyxen.in/logo.png",
+    "sameAs": [
+      "https://www.instagram.com/fyxen.in"
+    ],
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+91 98765 43210",
+      "contactType": "customer service",
+      "email": "support@fyxen.com",
+      "areaServed": "IN",
+      "availableLanguage": "en"
+    }
+  };
+
   return (
     <html lang="en" className="h-full antialiased">
-      {/* Google Fonts — Outfit */}
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
+        />
+        {/* Google Fonts — Outfit */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap" rel="stylesheet" />
+      </head>
       {/* Google Tag (gtag.js) */}
       <Script
         src="https://www.googletagmanager.com/gtag/js?id=AW-18110601963"

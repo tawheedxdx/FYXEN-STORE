@@ -12,8 +12,8 @@ import { getProducts, getCategories } from '@/services/products';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata = {
-  title: 'Fyxen — Premium Essentials',
-  description: 'Elevating everyday living with premium essentials crafted for those who appreciate the finer details.',
+  title: 'Fyxen | Buy Premium Home, Kitchen & Electronic Utility Accessories Online',
+  description: 'Buy premium home utility accessories, kitchen organizers, inkless thermal printers, and rechargeable neck fans online. Experience high-end lifestyle products with express delivery across India.',
 };
 
 export const revalidate = 60;
@@ -40,8 +40,27 @@ export default async function HomePage() {
   const activeBanner = banners?.[0];
   const showCurated = settings?.curated_section_enabled ?? true;
 
+  const websiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Fyxen",
+    "url": "https://www.fyxen.in",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://www.fyxen.in/shop?search={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
+    }
+  };
+
   return (
     <div className="flex flex-col w-full bg-white dark:bg-black">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
 
       {/* 1. Category Nav Strip */}
       <CategoryNavStrip categories={categories} />
