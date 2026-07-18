@@ -13,6 +13,7 @@ const navLinks = [
   { href: '/shop', label: 'Shop All' },
   { href: '/category/new-arrivals', label: 'New Arrivals' },
   { href: '/category/best-sellers', label: 'Best Sellers' },
+  { href: '/about', label: 'About' },
 ];
 
 export default function Navbar({ cartCount = 0 }) {

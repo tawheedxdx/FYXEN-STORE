@@ -73,6 +73,7 @@ export default function Footer({ settings }) {
             <h4 className="text-xs font-bold uppercase tracking-[0.15em] text-primary-500 mb-5">Support</h4>
             <ul className="space-y-3">
               {[
+                { href: '/about', label: 'About Us' },
                 { href: '/contact', label: 'Contact Us' },
                 { href: '/faq', label: 'FAQs' },
                 { href: '/track-order', label: 'Track Order' },
