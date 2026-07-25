@@ -30,6 +30,8 @@ export default async function sitemap() {
     '/contact',
     '/faq',
     '/track-order',
+    '/careers',
+    '/press',
     '/privacy-policy',
     '/terms-and-conditions',
     '/shipping-policy',
@@ -38,7 +40,7 @@ export default async function sitemap() {
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: route === '' ? 'daily' : 'monthly',
-    priority: route === '' ? 1.0 : (route === '/about' ? 0.8 : 0.5),
+    priority: route === '' ? 1.0 : (route === '/about' || route === '/shop' ? 0.8 : 0.6),
   }));
 
   return [...staticPages, ...productEntries, ...categoryEntries];

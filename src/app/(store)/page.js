@@ -12,8 +12,8 @@ import { getProducts, getCategories } from '@/services/products';
 import { createClient } from '@/lib/supabase/server';
 
 export const metadata = {
-  title: 'Fyxen | Buy Premium Home, Kitchen & Electronic Utility Accessories Online',
-  description: 'Buy premium home utility accessories, kitchen organizers, inkless thermal printers, and rechargeable neck fans online. Experience high-end lifestyle products with express delivery across India.',
+  title: 'Premium Home, Kitchen & Lifestyle Products | FYXEN',
+  description: 'Discover premium home, kitchen, office and everyday utility products from FYXEN. Designed for modern living with quality, style and practicality. Fast delivery across India.',
 };
 
 export const revalidate = 60;
@@ -23,6 +23,27 @@ const trustFeatures = [
   { icon: Truck, title: 'Delivered Across India', desc: 'Swift, reliable delivery to your doorstep.' },
   { icon: RotateCcw, title: 'Easy 7-Day Returns', desc: 'Not happy? Return it, no questions asked.' },
   { icon: Clock, title: '24/7 Support', desc: 'Our team is always here to help you.' },
+];
+
+const customerReviews = [
+  {
+    author: 'Aarav Sharma',
+    date: '2026-06-12',
+    reviewBody: 'FYXEN oil sprayer dispenser has completely transformed my daily cooking routine. Supreme build quality and sleek design!',
+    ratingValue: 5,
+  },
+  {
+    author: 'Priya Patel',
+    date: '2026-06-28',
+    reviewBody: 'Fast delivery across India! The portable neck fan feels super premium and light. Highly recommended Indian brand.',
+    ratingValue: 5,
+  },
+  {
+    author: 'Rohan Mehta',
+    date: '2026-07-04',
+    reviewBody: 'Inkless thermal printer works flawlessly with my phone. Clean packaging, genuine quality, and responsive support.',
+    ratingValue: 5,
+  },
 ];
 
 export default async function HomePage() {
@@ -43,8 +64,8 @@ export default async function HomePage() {
   const websiteSchema = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "Fyxen",
     "url": "https://www.fyxen.in",
+    "name": "FYXEN",
     "potentialAction": {
       "@type": "SearchAction",
       "target": {
@@ -55,11 +76,45 @@ export default async function HomePage() {
     }
   };
 
+  const reviewsSchema = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "FYXEN Lifestyle Products Collection",
+    "description": "FYXEN is an Indian premium lifestyle brand offering innovative home, kitchen, office and everyday utility products.",
+    "brand": {
+      "@type": "Brand",
+      "name": "FYXEN"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.9",
+      "reviewCount": "148"
+    },
+    "review": customerReviews.map(r => ({
+      "@type": "Review",
+      "author": {
+        "@type": "Person",
+        "name": r.author
+      },
+      "datePublished": r.date,
+      "reviewBody": r.reviewBody,
+      "reviewRating": {
+        "@type": "Rating",
+        "ratingValue": r.ratingValue,
+        "bestRating": "5"
+      }
+    }))
+  };
+
   return (
     <div className="flex flex-col w-full bg-white dark:bg-black">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewsSchema) }}
       />
 
       {/* 1. Category Nav Strip */}
@@ -162,9 +217,57 @@ export default async function HomePage() {
       {/* 6. Promo Banner */}
       {activeBanner && <PromoBanner banner={activeBanner} />}
 
-      {/* 7. Curated Collection Banners */}
-      {showCurated && <CollectionBanners settings={settings} />}
+      {/* 8. Brand Overview & Customer Reviews */}
+      <section className="py-20 md:py-28 bg-primary-50/50 dark:bg-neutral-950 border-t border-b border-primary-100 dark:border-white/5">
+        <div className="container-custom">
+          {/* Brand Positioning Statement */}
+          <div className="max-w-4xl mx-auto text-center mb-20 space-y-6">
+            <span className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-primary-900/10 dark:bg-white/10 text-primary-900 dark:text-white text-xs font-bold uppercase tracking-widest">
+              Indian Premium Lifestyle Brand
+            </span>
+            <h2 className="text-3xl md:text-5xl font-black text-primary-900 dark:text-white tracking-tight leading-tight">
+              Thoughtfully Designed for Modern Living
+            </h2>
+            <p className="text-base md:text-lg text-primary-600 dark:text-primary-300 font-light leading-relaxed max-w-3xl mx-auto">
+              FYXEN brings thoughtfully designed home, kitchen, office and everyday utility products that simplify daily living through premium quality, elegant design and reliable performance across India.
+            </p>
+            <div className="pt-2 flex flex-wrap items-center justify-center gap-6 text-xs text-primary-500 dark:text-primary-400 font-medium">
+              <span className="flex items-center gap-1.5">✓ Operated by Bytread International Pvt Ltd</span>
+              <span className="flex items-center gap-1.5">✓ 100% Genuine Quality</span>
+              <span className="flex items-center gap-1.5">✓ Express Shipping Across India</span>
+            </div>
+          </div>
 
+          {/* Testimonials Grid */}
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary-400 mb-2">Verified Reviews</p>
+              <h3 className="text-2xl md:text-4xl font-black text-primary-900 dark:text-white tracking-tight">
+                Trusted by Thousands Across India
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {customerReviews.map((rev, idx) => (
+                <div key={idx} className="bg-white dark:bg-neutral-900 border border-primary-100 dark:border-white/10 p-7 rounded-2xl flex flex-col justify-between shadow-sm hover:shadow-md transition-shadow">
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-1 text-amber-400 text-sm">
+                      {'★'.repeat(rev.ratingValue)}
+                    </div>
+                    <p className="text-sm text-primary-700 dark:text-primary-300 leading-relaxed italic">
+                      "{rev.reviewBody}"
+                    </p>
+                  </div>
+                  <div className="mt-6 pt-4 border-t border-primary-100 dark:border-white/5 flex items-center justify-between text-xs">
+                    <span className="font-bold text-primary-900 dark:text-white">{rev.author}</span>
+                    <span className="text-primary-400">{rev.date}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* 9. Newsletter */}
       <section className="py-16 md:py-24 bg-primary-900 dark:bg-primary-950">

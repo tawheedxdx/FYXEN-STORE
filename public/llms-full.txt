@@ -1,12 +1,13 @@
 # FYXEN Complete Catalog & Product Directory
-> Comprehensive information database on FYXEN's products, specifications, and pricing for AI search engines, agents, and answer engines (Perplexity, ChatGPT, Gemini, etc.).
+> FYXEN is an Indian premium lifestyle brand offering thoughtfully designed home, kitchen, office and everyday utility products that simplify daily living through quality, elegant design and reliable performance. Operated by Bytread International Private Limited.
 
 ## Store Details
 - **Store Name**: FYXEN
-- **Operator**: Bytread International Pvt. Ltd.
+- **Legal Operator**: Bytread International Private Limited
 - **Website**: https://www.fyxen.in
 - **Support Email**: support@fyxen.in
-- **Policies**: 7-Day Returns, Secure Checkout, GST-compliant invoicing.
+- **Social Profiles**: Instagram (https://www.instagram.com/fyxen.in), Facebook, YouTube, LinkedIn
+- **Policies**: 7-Day Returns, Secure Checkout across India, GST-compliant invoicing.
 
 ## Detailed Product Profiles
 

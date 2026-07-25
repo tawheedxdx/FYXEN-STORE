@@ -31,8 +31,7 @@ export default function HeroSection() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-4xl sm:text-5xl md:text-6xl xl:text-7xl font-black tracking-tight text-neutral-900 dark:text-white leading-[1.05]"
           >
-            The <span className="italic font-light text-neutral-500 dark:text-neutral-400">Premium</span><br />
-            Standard.
+            Premium Home, Kitchen &amp; Lifestyle Products | <span className="italic font-light text-neutral-500 dark:text-neutral-400">FYXEN</span>
           </motion.h1>
           
           <motion.p

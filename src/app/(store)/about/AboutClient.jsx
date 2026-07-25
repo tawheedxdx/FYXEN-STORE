@@ -115,13 +115,13 @@ export default function AboutClient({ productCount, parentCompany, gstNumber }) 
             initial={{ y: 25, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="space-y-4 max-w-xl mx-auto"
+            className="space-y-4 max-w-2xl mx-auto"
           >
             <p className="text-xl md:text-2xl text-[#A8A8A8] font-light leading-relaxed">
               We believe shopping should be simple, premium, and trustworthy.
             </p>
-            <p className="text-sm md:text-base text-[#888888] font-medium tracking-wide leading-relaxed">
-              A carefully curated collection of products designed to make everyday life better.
+            <p className="text-sm md:text-base text-[#CCCCCC] font-medium tracking-wide leading-relaxed">
+              FYXEN is an Indian premium lifestyle brand offering innovative home, kitchen, office and everyday utility products designed with modern aesthetics, quality and practicality.
             </p>
           </motion.div>
         </div>
@@ -150,17 +150,17 @@ export default function AboutClient({ productCount, parentCompany, gstNumber }) 
           <div className="space-y-8 text-lg md:text-xl text-[#A8A8A8] leading-relaxed font-light">
             <FadeIn delay={0.1}>
               <p>
-                FYXEN was created with one simple goal: to build an online shopping experience that values quality, transparency, and customer satisfaction above everything else.
+                FYXEN brings thoughtfully designed home and lifestyle products that simplify everyday living through premium quality, elegant design and reliable performance.
               </p>
             </FadeIn>
             <FadeIn delay={0.2}>
               <p>
-                Instead of overwhelming customers with countless choices, we carefully select products that are practical, reliable, and worth owning.
+                Created with a focus on value, transparency, and customer satisfaction, FYXEN carefully selects products that are practical, durable, and worth owning rather than overwhelming customers with endless generic choices.
               </p>
             </FadeIn>
             <FadeIn delay={0.3}>
               <p>
-                Every product listed on FYXEN is chosen with attention to quality, usability, and value, helping customers shop with confidence.
+                Operated by <strong className="text-white font-semibold">Bytread International Private Limited</strong>, every product listed on FYXEN undergoes stringent quality checks to ensure high performance and reliable customer satisfaction across India.
               </p>
             </FadeIn>
           </div>

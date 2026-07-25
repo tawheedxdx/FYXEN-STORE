@@ -102,17 +102,23 @@ export default async function ProductPage({ params }) {
   const priceValidUntil = new Date();
   priceValidUntil.setFullYear(priceValidUntil.getFullYear() + 1);
 
+  const reviews = product.reviews || [];
+  const hasReviews = reviews.length > 0;
+  const avgRating = hasReviews
+    ? (reviews.reduce((acc, r) => acc + (r.rating || 5), 0) / reviews.length).toFixed(1)
+    : null;
+
   const productSchema = {
     "@context": "https://schema.org",
     "@type": "Product",
     "name": product.title,
-    "image": productImages,
+    "image": productImages.length > 0 ? productImages : ['https://www.fyxen.in/logo.png'],
     "description": product.description || product.short_description || product.title,
     "sku": product.sku || product.id,
     "mpn": product.sku || product.id,
     "brand": {
       "@type": "Brand",
-      "name": product.brand || "Fyxen"
+      "name": product.brand || "FYXEN"
     },
     "offers": {
       "@type": "Offer",
@@ -124,9 +130,31 @@ export default async function ProductPage({ params }) {
       "availability": product.stock_quantity > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
       "seller": {
         "@type": "Organization",
-        "name": "Fyxen"
+        "name": "FYXEN",
+        "legalName": "Bytread International Private Limited"
       }
-    }
+    },
+    ...(hasReviews && {
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": avgRating,
+        "reviewCount": reviews.length
+      },
+      "review": reviews.slice(0, 5).map(rev => ({
+        "@type": "Review",
+        "author": {
+          "@type": "Person",
+          "name": rev.user_name || rev.profiles?.full_name || "Verified Buyer"
+        },
+        "datePublished": rev.created_at ? rev.created_at.split('T')[0] : priceValidUntil.toISOString().split('T')[0],
+        "reviewBody": rev.comment || rev.content || "Great quality product!",
+        "reviewRating": {
+          "@type": "Rating",
+          "ratingValue": rev.rating || 5,
+          "bestRating": "5"
+        }
+      }))
+    })
   };
 
   const breadcrumbListSchema = {

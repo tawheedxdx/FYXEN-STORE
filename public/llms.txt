@@ -1,12 +1,14 @@
-# FYXEN - Modern Premium Essentials Store
-> FYXEN is a curated, high-end, and minimalist e-commerce store offering premium manufacturing, lifestyle, and household essentials. We build shopping experiences that prioritize absolute quality, complete transparency, and customer satisfaction.
+# FYXEN - Indian Premium Lifestyle Brand
+> FYXEN is an Indian premium lifestyle brand offering thoughtfully designed home, kitchen, office and everyday utility products that simplify daily living through quality, elegant design and reliable performance. Operated by Bytread International Private Limited.
 
 ## Main Sections
-- `Home -> https://www.fyxen.in`: Featured collections, trust badges, and navigation.
+- `Home -> https://www.fyxen.in`: Featured collections, trust badges, customer reviews, and search.
 - `Shop -> https://www.fyxen.in/shop`: Full product catalog with categories, filtering, and search.
 - `About Us -> https://www.fyxen.in/about`: Our brand vision, operational details (Bytread International Pvt. Ltd.), and core values.
 - `FAQ -> https://www.fyxen.in/faq`: Answers to frequently asked questions about shipping, returns, and support.
 - `Contact -> https://www.fyxen.in/contact`: Customer support and correspondence center.
+- `Careers -> https://www.fyxen.in/careers`: Company culture, talent pool, and career inquiries.
+- `Press & Media -> https://www.fyxen.in/press`: Official news releases, media kit, and press contacts.
 - `Track Order -> https://www.fyxen.in/track-order`: Order status tracking interface.
 
 ## Product Categories

@@ -7,13 +7,13 @@ import Script from "next/script";
 export const metadata = {
   metadataBase: new URL('https://www.fyxen.in'),
   title: {
-    template: "%s | Fyxen",
-    default: "Fyxen | Buy Premium Home, Kitchen & Electronic Utility Accessories Online",
+    template: "%s | FYXEN",
+    default: "FYXEN | Premium Home, Kitchen & Lifestyle Products",
   },
-  description: "Fyxen offers a curated selection of premium home utility products, kitchen organizers, inkless thermal printers, and rechargeable neck fans. High-end lifestyle essentials crafted for quality and simplicity.",
-  keywords: ["kitchen accessories", "home utility gadgets", "inkless bluetooth printer", "mosquito killer lamp", "portable neck fan", "double head usb desktop fan", "bpa free kids water bottle", "cooking oil sprayer dispenser", "wiper strip mop", "premium lifestyle essentials", "online shopping India", "Fyxen", "Bytread"],
+  description: "Discover premium home, kitchen, office and everyday utility products from FYXEN. Designed for modern living with quality, style and practicality. Fast delivery across India.",
+  keywords: ["premium lifestyle brand", "home utility products", "kitchen organizers", "office accessories", "inkless bluetooth printer", "mosquito killer lamp", "rechargeable neck fan", "bpa free water bottle", "cooking oil sprayer dispenser", "online shopping India", "FYXEN", "Bytread International"],
   authors: [{ name: "Bytread International Private Limited" }],
-  creator: "Fyxen Team",
+  creator: "FYXEN Team",
   publisher: "Bytread International Private Limited",
   formatDetection: {
     email: false,
@@ -21,16 +21,16 @@ export const metadata = {
     telephone: false,
   },
   openGraph: {
-    title: 'Fyxen | Buy Premium Home, Kitchen & Electronic Utility Accessories Online',
-    description: 'Explore our curated selection of premium home utility products, kitchen organizers, and high-end lifestyle essentials.',
+    title: 'FYXEN | Premium Home, Kitchen & Lifestyle Products',
+    description: 'Discover premium home, kitchen, office and everyday utility products from FYXEN. Designed for modern living with quality, style and practicality. Fast delivery across India.',
     url: 'https://www.fyxen.in',
-    siteName: 'Fyxen',
+    siteName: 'FYXEN',
     images: [
       {
-        url: 'https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/brand-assets/og-image.png',
+        url: 'https://www.fyxen.in/logo.png',
         width: 1200,
         height: 630,
-        alt: 'Fyxen Premium Essentials',
+        alt: 'FYXEN Premium Lifestyle Brand',
       },
     ],
     locale: 'en_IN',
@@ -38,9 +38,9 @@ export const metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Fyxen | Buy Premium Home, Kitchen & Electronic Utility Accessories Online',
-    description: 'Explore our curated selection of premium home utility products, kitchen organizers, and high-end lifestyle essentials.',
-    images: ['https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/brand-assets/og-image.png'],
+    title: 'FYXEN | Premium Home, Kitchen & Lifestyle Products',
+    description: 'Discover premium home, kitchen, office and everyday utility products from FYXEN. Designed for modern living with quality, style and practicality.',
+    images: ['https://www.fyxen.in/logo.png'],
   },
   robots: {
     index: true,
@@ -73,20 +73,28 @@ export default function RootLayout({ children }) {
   const orgSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": "Fyxen",
+    "name": "FYXEN",
+    "legalName": "Bytread International Private Limited",
     "alternateName": "FYXEN Store",
     "url": "https://www.fyxen.in",
     "logo": "https://www.fyxen.in/logo.png",
+    "description": "FYXEN is an Indian premium lifestyle brand offering thoughtfully designed home, kitchen, office and everyday utility products that simplify daily living through quality, elegant design and reliable performance.",
+    "foundingLocation": "India",
     "sameAs": [
-      "https://www.instagram.com/fyxen.in"
+      "https://www.instagram.com/fyxen.in",
+      "https://www.facebook.com/fyxen.in",
+      "https://www.youtube.com/@fyxen.india",
+      "https://www.linkedin.com/company/fyxen",
+      "https://x.com/fyxen_in",
+      "https://www.pinterest.com/fyxen_in"
     ],
     "contactPoint": {
       "@type": "ContactPoint",
       "telephone": "+91 98765 43210",
       "contactType": "customer service",
-      "email": "support@fyxen.com",
+      "email": "support@fyxen.in",
       "areaServed": "IN",
-      "availableLanguage": "en"
+      "availableLanguage": ["en", "hi"]
     }
   };
 
