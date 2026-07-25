@@ -17,9 +17,27 @@ export async function generateMetadata({ params }) {
   const category = categories.find(c => c.slug === slug);
   const special = specialMeta[slug];
   const name = special?.name || category?.name || slug.replace(/-/g, ' ');
+  const title = `${name} | FYXEN — Premium Essentials`;
+  const description = special?.tagline || category?.description || `Explore our ${name} collection at FYXEN. Fast delivery across India.`;
+
   return {
-    title: `${name} | Fyxen`,
-    description: special?.tagline || category?.description || `Explore our ${name} collection at Fyxen.`,
+    title,
+    description,
+    alternates: {
+      canonical: `/category/${slug}`,
+    },
+    openGraph: {
+      title,
+      description,
+      url: `/category/${slug}`,
+      siteName: 'FYXEN',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+    },
   };
 }
 
@@ -60,8 +78,30 @@ export default async function CategoryPage({ params }) {
     ? categories.filter(c => c.parent_id === currentCategory.id)
     : [];
 
+  const collectionSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": displayName,
+    "description": displayDesc || `Explore our ${displayName} collection at FYXEN.`,
+    "url": `https://www.fyxen.in/category/${slug}`,
+    "mainEntity": {
+      "@type": "ItemList",
+      "numberOfItems": products.length,
+      "itemListElement": products.map((p, idx) => ({
+        "@type": "ListItem",
+        "position": idx + 1,
+        "url": `https://www.fyxen.in/product/${p.slug}`,
+        "name": p.title
+      }))
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white dark:bg-black">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionSchema) }}
+      />
       {/* Page Header */}
       <div className="border-b border-primary-100 dark:border-white/5 py-12 md:py-16">
         <div className="container-custom">

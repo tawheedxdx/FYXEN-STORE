@@ -54,8 +54,14 @@ export const metadata = {
     },
   },
   icons: {
-    icon: '/logo.png',
-    apple: '/logo.png',
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/logo.png', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: '/logo.png' }
+    ],
   },
 };
 
@@ -77,7 +83,12 @@ export default function RootLayout({ children }) {
     "legalName": "Bytread International Private Limited",
     "alternateName": "FYXEN Store",
     "url": "https://www.fyxen.in",
-    "logo": "https://www.fyxen.in/logo.png",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.fyxen.in/logo.png",
+      "width": "512",
+      "height": "512"
+    },
     "description": "FYXEN is an Indian premium lifestyle brand offering thoughtfully designed home, kitchen, office and everyday utility products that simplify daily living through quality, elegant design and reliable performance.",
     "foundingLocation": "India",
     "sameAs": [
@@ -101,6 +112,8 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className="h-full antialiased">
       <head>
+        <link rel="icon" href="/favicon.ico" sizes="any" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}

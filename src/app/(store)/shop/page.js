@@ -5,8 +5,23 @@ import Link from 'next/link';
 import { SlidersHorizontal, X, PackageSearch } from 'lucide-react';
 
 export const metadata = {
-  title: 'Shop All Products | Fyxen',
-  description: 'Explore Fyxen\'s full range of premium essentials.',
+  title: 'Shop All Products | FYXEN — Premium Essentials',
+  description: 'Explore FYXEN\'s full range of premium home, kitchen, office and everyday utility products. Fast delivery across India.',
+  alternates: {
+    canonical: '/shop',
+  },
+  openGraph: {
+    title: 'Shop All Products | FYXEN — Premium Essentials',
+    description: 'Explore FYXEN\'s full range of premium home, kitchen, office and everyday utility products. Fast delivery across India.',
+    url: 'https://www.fyxen.in/shop',
+    siteName: 'FYXEN',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Shop All Products | FYXEN — Premium Essentials',
+    description: 'Explore FYXEN\'s full range of premium home, kitchen, office and everyday utility products.',
+  },
 };
 
 export const revalidate = 60;
@@ -33,8 +48,30 @@ export default async function ShopPage({ searchParams }) {
   if (minPrice || maxPrice) activeChips.push({ label: `₹${minPrice || '0'} – ₹${maxPrice || '∞'}`, param: 'price' });
   if (sort) activeChips.push({ label: sort.replace(/_/g, ' '), param: 'sort' });
 
+  const shopSchema = {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Shop All Products | FYXEN",
+    "description": "Explore FYXEN's full range of premium essentials.",
+    "url": "https://www.fyxen.in/shop",
+    "mainEntity": {
+      "@type": "ItemList",
+      "numberOfItems": products.length,
+      "itemListElement": products.map((p, idx) => ({
+        "@type": "ListItem",
+        "position": idx + 1,
+        "url": `https://www.fyxen.in/product/${p.slug}`,
+        "name": p.title
+      }))
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white dark:bg-black">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(shopSchema) }}
+      />
       {/* Page Header */}
       <div className="border-b border-primary-100 dark:border-white/5 py-12 md:py-16 bg-white dark:bg-black">
         <div className="container-custom">
