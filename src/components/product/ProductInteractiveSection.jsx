@@ -10,6 +10,7 @@ import { ShieldCheck, Truck, RotateCcw, CheckCircle2 } from 'lucide-react';
 import ProductHighlights from '@/components/product/ProductHighlights';
 import ProductBoxContents from '@/components/product/ProductBoxContents';
 import ProductOfferBadge from '@/components/product/ProductOfferBadge';
+import UrgencyBadges from '@/components/product/UrgencyBadges';
 
 export default function ProductInteractiveSection({ product, offers = [] }) {
   // Parse available options and values
@@ -179,6 +180,8 @@ export default function ProductInteractiveSection({ product, offers = [] }) {
 
           <ProductOfferBadge offers={offers} />
         </div>
+
+        <UrgencyBadges stockQuantity={activeStock} productId={product.id} />
 
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
