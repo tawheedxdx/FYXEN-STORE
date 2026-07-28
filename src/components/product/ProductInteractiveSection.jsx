@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import ImageGallery from '@/components/product/ImageGallery';
 import AddToCartButton from '@/components/cart/AddToCartButton';
 import BuyNowButton from '@/components/cart/BuyNowButton';
@@ -10,7 +11,6 @@ import { ShieldCheck, Truck, RotateCcw, CheckCircle2 } from 'lucide-react';
 import ProductHighlights from '@/components/product/ProductHighlights';
 import ProductBoxContents from '@/components/product/ProductBoxContents';
 import ProductOfferBadge from '@/components/product/ProductOfferBadge';
-import UrgencyBadges from '@/components/product/UrgencyBadges';
 
 export default function ProductInteractiveSection({ product, offers = [] }) {
   // Parse available options and values
@@ -36,6 +36,24 @@ export default function ProductInteractiveSection({ product, offers = [] }) {
     }
     return {};
   });
+
+  const mainCtaRef = useRef(null);
+  const [showStickyBar, setShowStickyBar] = useState(false);
+
+  useEffect(() => {
+    const target = mainCtaRef.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setShowStickyBar(!entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, []);
 
   // Find currently active variant matching all selected options
   const selectedVariant = product.product_variants?.find(v => {
@@ -81,7 +99,7 @@ export default function ProductInteractiveSection({ product, offers = [] }) {
     : product.product_images;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 relative">
       {/* Left: Product Images */}
       <ImageGallery
         key={selectedVariant?.id || 'base'}
@@ -181,8 +199,6 @@ export default function ProductInteractiveSection({ product, offers = [] }) {
           <ProductOfferBadge offers={offers} />
         </div>
 
-        <UrgencyBadges stockQuantity={activeStock} productId={product.id} />
-
         <div className="mb-8">
           <div className="flex items-center justify-between mb-6">
             <span className="font-medium text-primary-900 dark:text-white">Availability:</span>
@@ -231,7 +247,7 @@ export default function ProductInteractiveSection({ product, offers = [] }) {
 
           <RazorpayAffordabilityWidget price={activePrice} />
 
-          <div className="flex flex-col sm:flex-row gap-3 mt-6">
+          <div ref={mainCtaRef} className="flex flex-col sm:flex-row gap-3 mt-6">
             <AddToCartButton product={product} selectedVariant={selectedVariant} />
             <BuyNowButton product={product} selectedVariant={selectedVariant} />
           </div>
@@ -267,6 +283,33 @@ export default function ProductInteractiveSection({ product, offers = [] }) {
           </div>
         </div>
       </div>
+
+      {/* Sticky Mobile Bottom Bar */}
+      <AnimatePresence>
+        {showStickyBar && (
+          <motion.div
+            initial={{ y: 100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: 100, opacity: 0 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="fixed bottom-0 left-0 right-0 z-50 p-3 bg-white/95 dark:bg-primary-950/95 backdrop-blur-md border-t border-primary-100 dark:border-white/10 shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.1)] md:hidden flex items-center justify-between gap-3"
+          >
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-semibold text-primary-700 dark:text-primary-300 truncate">
+                {product.title}
+              </span>
+              <span className="text-base font-black text-primary-900 dark:text-white">
+                ₹{activePrice}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <AddToCartButton product={product} selectedVariant={selectedVariant} />
+              <BuyNowButton product={product} selectedVariant={selectedVariant} />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
+

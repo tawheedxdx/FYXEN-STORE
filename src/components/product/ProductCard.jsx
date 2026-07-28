@@ -23,19 +23,16 @@ export default function ProductCard({ product, offers = [] }) {
       {/* Image Container */}
       <Link href={`/product/${product.slug}`} className="block">
         <div className="relative aspect-[3/4] w-full bg-primary-100 dark:bg-primary-900 rounded-xl overflow-hidden mb-3">
-          {/* Offer & Stock Badges */}
-          <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1">
-            {productOffers.length > 0 && productOffers.slice(0, 1).map(o => (
-              <span key={o.id} className="inline-flex items-center gap-1 bg-accent text-white px-2 py-1 text-[9px] font-bold uppercase rounded-md tracking-wider shadow-md">
-                <Gift className="w-3.5 h-3.5" /> Offer
-              </span>
-            ))}
-            {product.stock_quantity > 0 && product.stock_quantity <= 5 && (
-              <span className="inline-flex items-center gap-1 bg-amber-600 text-white px-2 py-1 text-[9px] font-bold uppercase rounded-md tracking-wider shadow-md">
-                ⚡ Only {product.stock_quantity} Left
-              </span>
-            )}
-          </div>
+          {/* Offer Badges */}
+          {productOffers.length > 0 && (
+            <div className="absolute top-2.5 left-2.5 z-10 flex flex-col gap-1">
+              {productOffers.slice(0, 1).map(o => (
+                <span key={o.id} className="inline-flex items-center gap-1 bg-accent text-white px-2 py-1 text-[9px] font-bold uppercase rounded-md tracking-wider shadow-md">
+                  <Gift className="w-3.5 h-3.5" /> Offer
+                </span>
+              ))}
+            </div>
+          )}
 
           {primaryImage ? (
             <Image
