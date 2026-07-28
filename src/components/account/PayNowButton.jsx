@@ -41,8 +41,12 @@ export default function PayNowButton({ order, className = "" }) {
       currency: 'INR',
       name: 'Fyxen',
       description: `Payment for Order ${order.order_number}`,
-      image: 'https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/brand-assets/logo.png',
+      image: 'https://www.fyxen.in/logo-1024.png',
       order_id: res.rzpOrderId,
+      retry: {
+        enabled: true,
+        max_count: 3,
+      },
       handler: async function (response) {
         setIsLoading(true);
         const verifyRes = await verifyPayment({

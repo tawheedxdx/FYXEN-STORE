@@ -192,8 +192,12 @@ export default function CheckoutForm({ subtotal, shipping, tax = 0, grandTotal: 
       currency: 'INR',
       name: 'Fyxen',
       description: 'Premium Lifestyle Products',
-      image: '/logo.png', 
+      image: 'https://www.fyxen.in/logo-1024.png', 
       order_id: res.rzpOrderId,
+      retry: {
+        enabled: true,
+        max_count: 3,
+      },
       handler: async function (response) {
         paymentStatusRef.current = 'success';
         setIsLoading(true);
