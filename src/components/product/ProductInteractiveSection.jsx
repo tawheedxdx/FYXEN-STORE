@@ -302,8 +302,8 @@ export default function ProductInteractiveSection({ product, offers = [] }) {
                 ₹{activePrice}
               </span>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <AddToCartButton product={product} selectedVariant={selectedVariant} />
+            <div className="flex items-center gap-2 shrink-0 flex-1 max-w-[240px]">
+              <AddToCartButton product={product} selectedVariant={selectedVariant} showQuantity={false} />
               <BuyNowButton product={product} selectedVariant={selectedVariant} />
             </div>
           </motion.div>

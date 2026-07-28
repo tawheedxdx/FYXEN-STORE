@@ -5,7 +5,7 @@ import { ShoppingBag, Minus, Plus } from 'lucide-react';
 import { addToCart } from '@/app/(store)/cart/actions';
 import { useRouter } from 'next/navigation';
 
-export default function AddToCartButton({ product, selectedVariant = null }) {
+export default function AddToCartButton({ product, selectedVariant = null, showQuantity = true }) {
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
@@ -43,26 +43,28 @@ export default function AddToCartButton({ product, selectedVariant = null }) {
   const requiresSelection = product.product_variants?.length > 0 && !selectedVariant;
 
   return (
-    <div className="flex flex-col gap-2 flex-[1.2]">
+    <div className={`flex flex-col gap-2 ${showQuantity ? 'flex-[1.2]' : 'flex-1'}`}>
       {error && <p className="text-red-500 text-[10px] absolute -top-4">{error}</p>}
       <div className="flex gap-2">
-        <div className="flex items-center border border-primary-200 dark:border-white/20 rounded-lg h-12 w-24 shrink-0 overflow-hidden">
-          <button 
-            onClick={handleDecrease}
-            disabled={isOutOfStock || requiresSelection}
-            className="flex-1 h-full flex items-center justify-center text-primary-500 hover:bg-primary-50 transition-colors"
-          >
-            <Minus className="w-3.5 h-3.5" />
-          </button>
-          <span className="w-8 text-center font-bold text-sm">{quantity}</span>
-          <button 
-            onClick={handleIncrease}
-            disabled={isOutOfStock || requiresSelection || quantity >= currentStock}
-            className="flex-1 h-full flex items-center justify-center text-primary-500 hover:bg-primary-50 transition-colors"
-          >
-            <Plus className="w-3.5 h-3.5" />
-          </button>
-        </div>
+        {showQuantity && (
+          <div className="flex items-center border border-primary-200 dark:border-white/20 rounded-lg h-12 w-24 shrink-0 overflow-hidden">
+            <button 
+              onClick={handleDecrease}
+              disabled={isOutOfStock || requiresSelection}
+              className="flex-1 h-full flex items-center justify-center text-primary-500 hover:bg-primary-50 transition-colors"
+            >
+              <Minus className="w-3.5 h-3.5" />
+            </button>
+            <span className="w-8 text-center font-bold text-sm">{quantity}</span>
+            <button 
+              onClick={handleIncrease}
+              disabled={isOutOfStock || requiresSelection || quantity >= currentStock}
+              className="flex-1 h-full flex items-center justify-center text-primary-500 hover:bg-primary-50 transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
         
         <button 
           onClick={handleAddToCart}
@@ -80,3 +82,4 @@ export default function AddToCartButton({ product, selectedVariant = null }) {
     </div>
   );
 }
+
