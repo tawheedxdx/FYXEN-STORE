@@ -63,6 +63,9 @@ export const metadata = {
       { url: '/logo.png' }
     ],
   },
+  other: {
+    'google-play-app': 'app-id=app.fyxen.android',
+  },
 };
 
 export const viewport = {
@@ -92,6 +95,7 @@ export default function RootLayout({ children }) {
     "description": "FYXEN is an Indian premium lifestyle brand offering thoughtfully designed home, kitchen, office and everyday utility products that simplify daily living through quality, elegant design and reliable performance.",
     "foundingLocation": "India",
     "sameAs": [
+      "https://play.google.com/store/apps/details?id=app.fyxen.android",
       "https://www.instagram.com/fyxen.in",
       "https://www.facebook.com/fyxen.in",
       "https://www.youtube.com/@fyxen.india",
@@ -109,6 +113,25 @@ export default function RootLayout({ children }) {
     }
   };
 
+  const mobileAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "MobileApplication",
+    "name": "FYXEN - Online Shopping",
+    "operatingSystem": "ANDROID",
+    "applicationCategory": "ShoppingApplication",
+    "url": "https://www.fyxen.in",
+    "installUrl": "https://play.google.com/store/apps/details?id=app.fyxen.android",
+    "author": {
+      "@type": "Organization",
+      "name": "FYXEN"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "INR"
+    }
+  };
+
   return (
     <html lang="en" className="h-full antialiased">
       <head>
@@ -117,6 +140,10 @@ export default function RootLayout({ children }) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(mobileAppSchema) }}
         />
         {/* Google Fonts — Outfit */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />

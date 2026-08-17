@@ -6,18 +6,11 @@ import { motion } from "framer-motion";
 import { Home, ShoppingBag, ArrowLeft } from "lucide-react";
 
 export default function NotFound() {
-  const storeUrl = typeof window !== 'undefined' && window.location.hostname.endsWith('fyxen.in')
-    ? 'https://www.fyxen.in'
-    : '/';
-  const shopUrl = typeof window !== 'undefined' && window.location.hostname.endsWith('fyxen.in')
-    ? 'https://www.fyxen.in/shop'
-    : '/shop';
-
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300">
       {/* Simplified Branding Header */}
       <header className="w-full py-6 px-6 md:px-12 flex justify-between items-center border-b border-neutral-100 dark:border-neutral-900 bg-background/80 backdrop-blur-md">
-        <a href={storeUrl} className="flex items-center gap-2 group">
+        <Link href="/" className="flex items-center gap-2 group">
           <Image
             src="/logo.png"
             alt="FYXEN Logo"
@@ -28,14 +21,14 @@ export default function NotFound() {
           <span className="font-bold text-xl tracking-wider font-sans group-hover:text-neutral-600 dark:group-hover:text-neutral-300 transition-colors">
             FYXEN
           </span>
-        </a>
-        <a 
-          href={storeUrl} 
+        </Link>
+        <Link 
+          href="/" 
           className="text-sm font-medium text-neutral-500 hover:text-neutral-950 dark:text-neutral-400 dark:hover:text-white flex items-center gap-1 transition-colors font-sans"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to Store
-        </a>
+        </Link>
       </header>
 
       {/* Main 404 Section */}
@@ -85,25 +78,27 @@ export default function NotFound() {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <motion.a
-              href={storeUrl}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.98 }}
-              className="inline-flex items-center gap-2 w-full sm:w-auto justify-center px-8 py-3.5 text-sm font-medium rounded-full bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-neutral-50 dark:text-neutral-900 dark:hover:bg-neutral-100 transition-colors duration-200 shadow-md cursor-pointer font-sans"
-            >
-              <Home className="w-4 h-4" />
-              Go Back Home
-            </motion.a>
+            <Link href="/" passHref legacyBehavior>
+              <motion.a
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                className="inline-flex items-center gap-2 w-full sm:w-auto justify-center px-8 py-3.5 text-sm font-medium rounded-full bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-neutral-50 dark:text-neutral-900 dark:hover:bg-neutral-100 transition-colors duration-200 shadow-md cursor-pointer font-sans"
+              >
+                <Home className="w-4 h-4" />
+                Go Back Home
+              </motion.a>
+            </Link>
 
-            <motion.a
-              href={shopUrl}
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.98 }}
-              className="inline-flex items-center gap-2 w-full sm:w-auto justify-center px-8 py-3.5 text-sm font-medium rounded-full border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 bg-transparent hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors duration-200 cursor-pointer font-sans"
-            >
-              <ShoppingBag className="w-4 h-4" />
-              Browse Catalog
-            </motion.a>
+            <Link href="/shop" passHref legacyBehavior>
+              <motion.a
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                className="inline-flex items-center gap-2 w-full sm:w-auto justify-center px-8 py-3.5 text-sm font-medium rounded-full border border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 bg-transparent hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors duration-200 cursor-pointer font-sans"
+              >
+                <ShoppingBag className="w-4 h-4" />
+                Browse Catalog
+              </motion.a>
+            </Link>
           </div>
         </motion.div>
       </main>

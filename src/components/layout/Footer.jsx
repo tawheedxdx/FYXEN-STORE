@@ -66,6 +66,29 @@ export default function Footer({ settings }) {
                 </a>
               )}
             </div>
+
+            {/* Google Play Store Badge */}
+            <div className="pt-3">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-primary-400 mb-2">Get the FYXEN App</p>
+              <a
+                href="https://play.google.com/store/apps/details?id=app.fyxen.android"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Download FYXEN on Google Play"
+                className="inline-flex items-center gap-3 px-3.5 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 transition-all text-white group shadow-sm"
+              >
+                <svg className="w-5 h-5 shrink-0" viewBox="0 0 512 512">
+                  <path fill="#4285F4" d="M47.1 27.8C42.8 33.2 40 41.5 40 52.2v407.6c0 10.7 2.8 19 7.1 24.4l2.1 1.9L271 264.3v-5.6L49.2 25.9l-2.1 1.9z" />
+                  <path fill="#FBBC04" d="M344.8 338.4l-73.8-74.1v-5.6l73.8-74.1 2.3 1.3 87.5 49.7c25 14.2 25 37.6 0 51.9l-87.5 49.6-2.3 1.3z" />
+                  <path fill="#EA4335" d="M347.1 337.1L271 261 47.1 484.9c8.3 8.8 22 9.9 37.6 1l262.4-148.8z" />
+                  <path fill="#34A853" d="M347.1 174.9L84.7 26.1c-15.6-8.9-29.3-7.8-37.6 1L271 251l76.1-76.1z" />
+                </svg>
+                <div className="text-left">
+                  <div className="text-[8px] uppercase font-bold tracking-wider text-primary-400 leading-none">GET IT ON</div>
+                  <div className="text-xs font-bold text-white leading-tight">Google Play</div>
+                </div>
+              </a>
+            </div>
           </div>
 
           {/* Shop */}

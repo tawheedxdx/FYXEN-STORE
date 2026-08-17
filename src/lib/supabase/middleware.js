@@ -2,26 +2,13 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 
 export async function updateSession(request) {
-  const rawHost = request.headers.get('x-forwarded-host') || request.headers.get('host') || ''
-  const host = rawHost.split(':')[0].toLowerCase()
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host') || ''
+  const isAdminSubdomain = host.startsWith('admin.')
+  const isCheckoutSubdomain = host.startsWith('securecheckout.')
   const url = request.nextUrl.clone()
   const isProd = process.env.NODE_ENV === 'production' && !host.includes('localhost')
 
-  // Identify valid subdomains & domains
-  const isAdminSubdomain = host === 'admin.fyxen.in' || host === 'admin.localhost'
-  const isCheckoutSubdomain = host === 'securecheckout.fyxen.in' || host === 'securecheckout.localhost'
-  const isMainStoreDomain = host === 'fyxen.in' || host === 'www.fyxen.in' || host === 'localhost' || host === '127.0.0.1' || host.endsWith('.vercel.app')
-
   let rewriteUrl = null
-
-  // Check for unknown or typo subdomains (e.g. seccurecheckout.fyxen.in, app.fyxen.in, etc.)
-  const isFyxenDomain = host.endsWith('fyxen.in')
-  const isLocalhost = host.endsWith('localhost')
-
-  if ((isFyxenDomain || isLocalhost) && !isAdminSubdomain && !isCheckoutSubdomain && !isMainStoreDomain) {
-    url.pathname = '/_not-found'
-    return NextResponse.rewrite(url, { status: 404 })
-  }
 
   if (isAdminSubdomain) {
     // If accessed via admin subdomain and path does not start with /admin, rewrite internally
@@ -57,7 +44,6 @@ export async function updateSession(request) {
       return NextResponse.redirect(new URL('/' + url.search, 'https://securecheckout.fyxen.in'))
     }
   }
-
 
   let supabaseResponse = rewriteUrl
     ? NextResponse.rewrite(rewriteUrl, { request })
