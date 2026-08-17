@@ -29,12 +29,7 @@ export default function WalletClient({ profile, transactions }) {
       currency: 'INR',
       name: 'Fyxen Store',
       description: 'Wallet Recharge',
-      image: 'https://www.fyxen.in/logo-1024.png',
       order_id: res.rzpOrderId,
-      retry: {
-        enabled: true,
-        max_count: 3,
-      },
       prefill: { email: res.userEmail },
       theme: { color: '#000000' },
       handler: async (response) => {

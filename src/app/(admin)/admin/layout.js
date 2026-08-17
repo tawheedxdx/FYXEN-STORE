@@ -53,9 +53,9 @@ export default async function AdminLayout({ children }) {
         </nav>
 
         <div className="p-4 border-t border-primary-800">
-          <Link href="/" className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary-800 transition-colors text-primary-400 text-sm mb-1">
+          <a href={process.env.NODE_ENV === 'production' ? 'https://www.fyxen.in' : '/'} className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-primary-800 transition-colors text-primary-400 text-sm mb-1">
             ← View Storefront
-          </Link>
+          </a>
           <form action={logout}>
             <button type="submit" className="flex items-center gap-3 px-4 py-3 w-full rounded-lg hover:bg-red-900/40 text-red-400 hover:text-red-300 transition-colors text-sm">
               <LogOut className="w-5 h-5" /> Sign Out
