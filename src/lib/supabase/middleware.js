@@ -11,8 +11,14 @@ export async function updateSession(request) {
   let rewriteUrl = null
 
   if (isAdminSubdomain) {
-    // If accessed via admin subdomain and path does not start with /admin, rewrite internally
-    if (!url.pathname.startsWith('/admin')) {
+    // If accessing an invoice directly or via /admin/invoice on admin subdomain, handle without breaking
+    if (url.pathname.startsWith('/invoice/')) {
+      // Do not rewrite; keep original /invoice/[invoiceNumber]
+    } else if (url.pathname.startsWith('/admin/invoice/')) {
+      url.pathname = url.pathname.replace(/^\/admin/, '')
+      rewriteUrl = url
+    } else if (!url.pathname.startsWith('/admin')) {
+      // If accessed via admin subdomain and path does not start with /admin, rewrite internally
       url.pathname = `/admin${url.pathname === '/' ? '' : url.pathname}`
       rewriteUrl = url
     }

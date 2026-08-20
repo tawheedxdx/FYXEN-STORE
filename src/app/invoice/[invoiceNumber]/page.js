@@ -18,7 +18,7 @@ export default async function InvoicePage({ params }) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Fetch invoice
+  // Fetch invoice using admin client
   const { data: invoice, error } = await adminSupabase
     .from('invoices')
     .select('*')
