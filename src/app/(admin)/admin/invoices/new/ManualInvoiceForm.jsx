@@ -31,6 +31,8 @@ export default function ManualInvoiceForm({ catalogProducts = [], settings }) {
   const [city, setCity] = useState('Jangipur');
   const [state, setState] = useState('West Bengal');
   const [postalCode, setPostalCode] = useState('742213');
+  const [isPinLoading, setIsPinLoading] = useState(false);
+  const [pinLookupMsg, setPinLookupMsg] = useState(null);
 
   const [paymentMethod, setPaymentMethod] = useState('CASH');
   const [transactionRef, setTransactionRef] = useState('');
@@ -42,7 +44,7 @@ export default function ManualInvoiceForm({ catalogProducts = [], settings }) {
       productId: '',
       title: '',
       sku: '',
-      hsn: '9617',
+      hsn: '',
       quantity: 1,
       unitPriceInclusive: '',
       taxRate: defaultGstRate
@@ -57,6 +59,48 @@ export default function ManualInvoiceForm({ catalogProducts = [], settings }) {
     return isWestBengalState(state, postalCode, city);
   }, [state, postalCode, city]);
 
+  // Handle Postal Pincode Auto-Lookup
+  const handlePostalCodeChange = async (e) => {
+    const rawVal = e.target.value;
+    const value = rawVal.replace(/\D/g, '').slice(0, 6);
+    setPostalCode(value);
+    setPinLookupMsg(null);
+
+    if (value.length === 6) {
+      setIsPinLoading(true);
+      try {
+        const response = await fetch(`https://api.postalpincode.in/pincode/${value}`);
+        const data = await response.json();
+
+        if (data && data[0] && data[0].Status === 'Success' && data[0].PostOffice?.length > 0) {
+          const firstOffice = data[0].PostOffice[0];
+          const fetchedDistrict = firstOffice.District || firstOffice.Block || firstOffice.Name || '';
+          const fetchedState = firstOffice.State || '';
+
+          if (fetchedDistrict) setCity(fetchedDistrict);
+          if (fetchedState) setState(fetchedState);
+
+          const isWB = isWestBengalState(fetchedState, value, fetchedDistrict);
+          setPinLookupMsg({
+            isWB,
+            text: isWB 
+              ? `✓ Detected: ${fetchedDistrict}, ${fetchedState} (Intra-State: CGST & SGST Applicable)`
+              : `✓ Detected: ${fetchedDistrict}, ${fetchedState} (Inter-State: IGST Applicable)`
+          });
+        } else {
+          setPinLookupMsg({
+            isWB: false,
+            text: 'Could not fetch area details. Please fill City & State manually.'
+          });
+        }
+      } catch (err) {
+        console.error('Postal PIN lookup failed:', err);
+      } finally {
+        setIsPinLoading(false);
+      }
+    }
+  };
+
   // Handle line items
   const handleAddItem = () => {
     setItems(prev => [
@@ -66,7 +110,7 @@ export default function ManualInvoiceForm({ catalogProducts = [], settings }) {
         productId: '',
         title: '',
         sku: '',
-        hsn: '9617',
+        hsn: '',
         quantity: 1,
         unitPriceInclusive: '',
         taxRate: defaultGstRate
@@ -91,7 +135,7 @@ export default function ManualInvoiceForm({ catalogProducts = [], settings }) {
         if (prod) {
           updated.title = prod.title;
           updated.sku = prod.sku || '';
-          updated.hsn = prod.hsn_code || '9617';
+          updated.hsn = prod.hsn_code || '';
           updated.unitPriceInclusive = prod.price || '';
           updated.taxRate = Number(prod.tax_rate) > 0 ? Number(prod.tax_rate) : defaultGstRate;
         }
@@ -288,15 +332,45 @@ export default function ManualInvoiceForm({ catalogProducts = [], settings }) {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider mb-1.5">City *</label>
+            <label className="block text-xs font-bold uppercase tracking-wider mb-1.5 flex items-center justify-between">
+              <span>PIN Code *</span>
+              {isPinLoading && <span className="text-[10px] text-[#c6a87c] font-normal flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Fetching Area...</span>}
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                required
+                maxLength={6}
+                value={postalCode}
+                onChange={handlePostalCodeChange}
+                placeholder="e.g. 742213 or 110001"
+                className="input-field text-xs font-mono pr-8"
+              />
+              {isPinLoading && (
+                <div className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-[#c6a87c]">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                </div>
+              )}
+            </div>
+            {pinLookupMsg && (
+              <p className={`text-[10px] font-semibold mt-1 ${pinLookupMsg.isWB ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'}`}>
+                {pinLookupMsg.text}
+              </p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider mb-1.5">City / District *</label>
             <input
               type="text"
               required
               value={city}
               onChange={(e) => setCity(e.target.value)}
+              placeholder="e.g. Murshidabad or Kolkata"
               className="input-field text-xs"
             />
           </div>
+
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider mb-1.5">State *</label>
             <input
@@ -304,18 +378,22 @@ export default function ManualInvoiceForm({ catalogProducts = [], settings }) {
               required
               value={state}
               onChange={(e) => setState(e.target.value)}
+              placeholder="e.g. West Bengal"
               className="input-field text-xs"
             />
           </div>
-          <div>
-            <label className="block text-xs font-bold uppercase tracking-wider mb-1.5">PIN Code *</label>
-            <input
-              type="text"
-              required
-              value={postalCode}
-              onChange={(e) => setPostalCode(e.target.value)}
-              className="input-field text-xs font-mono"
-            />
+        </div>
+
+        {/* Live Tax Mode Badge */}
+        <div className="pt-2 border-t border-primary-50 dark:border-neutral-800 flex items-center justify-between flex-wrap gap-2 text-xs">
+          <span className="text-neutral-500 font-medium">Detected Place of Supply:</span>
+          <div className={`px-3 py-1 rounded-full font-bold uppercase text-[10px] flex items-center gap-1.5 ${
+            isIntraState
+              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800'
+              : 'bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300 border border-blue-300 dark:border-blue-800'
+          }`}>
+            <span className="w-2 h-2 rounded-full bg-current"></span>
+            {isIntraState ? 'West Bengal (Intra-State: CGST + SGST)' : `${state || 'Inter-State'} (IGST Applicable)`}
           </div>
         </div>
       </div>

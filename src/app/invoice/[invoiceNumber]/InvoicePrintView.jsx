@@ -205,7 +205,7 @@ export default function InvoicePrintView({ invoice, backUrl = '/admin/orders' })
                   <p className="font-semibold text-neutral-900">{item.title}</p>
                   {item.sku && <p className="text-[9px] font-mono text-neutral-500">SKU: {item.sku}</p>}
                 </td>
-                <td className="border border-black p-1.5 text-center font-mono">{item.hsn || '9617'}</td>
+                <td className="border border-black p-1.5 text-center font-mono">{item.hsn?.trim() ? item.hsn.trim() : '—'}</td>
                 <td className="border border-black p-1.5 text-center font-bold">{item.quantity}</td>
                 <td className="border border-black p-1.5 text-right font-mono">₹{Number(item.unit_price).toFixed(2)}</td>
                 <td className="border border-black p-1.5 text-right font-mono">₹{Number(item.taxable_amount).toFixed(2)}</td>

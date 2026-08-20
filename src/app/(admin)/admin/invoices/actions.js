@@ -92,7 +92,7 @@ export async function generateInvoiceForOrder(orderId) {
 
   const invoiceItems = (order.order_items || []).map((item, index) => {
     const product = item.products || {};
-    const hsn = product.hsn_code || '9617';
+    const hsn = product.hsn_code ? product.hsn_code.trim() : '';
     const rate = Number(product.tax_rate) > 0 ? Number(product.tax_rate) : defaultGstRate;
     const unitPrice = Number(item.unit_price) || 0;
     const quantity = Number(item.quantity) || 1;
@@ -336,7 +336,7 @@ export async function createManualInvoice(payload) {
     const qty = Math.max(1, Number(item.quantity) || 1);
     const unitPrice = Number(item.unitPriceInclusive) || 0;
     const rate = Number(item.taxRate) > 0 ? Number(item.taxRate) : defaultGstRate;
-    const hsn = item.hsn || '9617';
+    const hsn = item.hsn ? item.hsn.trim() : '';
 
     const calc = calculateTaxInclusiveItem({
       quantity: qty,
