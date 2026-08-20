@@ -83,7 +83,7 @@ export default function AdminSettingsForm({ settings }) {
                   Hand Delivered By Founder
                 </label>
                 <span className="text-xs text-neutral-500">
-                  Exclusive luxury delivery option (Strictly Kolkata only & Prepaid only).
+                  Exclusive luxury delivery option (All districts &amp; cities across West Bengal, Prepaid only).
                 </span>
               </div>
             </div>

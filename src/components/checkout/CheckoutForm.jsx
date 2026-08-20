@@ -76,19 +76,43 @@ export default function CheckoutForm({
     });
   }, [offers, items]);
 
-  // Determine if location is in Kolkata
-  const isKolkataLocation = useMemo(() => {
+  // Determine if location is in West Bengal (all districts & cities including Kolkata)
+  const isWestBengalLocation = useMemo(() => {
     const c = (city || '').toLowerCase().trim();
     const s = (state || '').toLowerCase().trim();
     const p = (pinCode || '').trim();
-    if (!c && !p) return false;
-    return (
-      c.includes('kolkata') ||
-      c.includes('calcutta') ||
-      (s.includes('west bengal') && (c.includes('howrah') || c.includes('salt lake') || c.includes('new town') || c.includes('bidhannagar'))) ||
-      p.startsWith('700') ||
-      p.startsWith('711')
-    );
+    if (!c && !p && !s) return false;
+
+    // PIN code check (West Bengal PIN codes begin with 70, 71, 72, 73, 74)
+    if (p.length >= 2) {
+      const pinPrefix = p.slice(0, 2);
+      if (['70', '71', '72', '73', '74'].includes(pinPrefix)) {
+        return true;
+      }
+    }
+
+    // State check
+    if (
+      s.includes('west bengal') ||
+      s.includes('bengal') ||
+      s.includes('paschim banga') ||
+      s.includes('wb') ||
+      s.includes('w.b.')
+    ) {
+      return true;
+    }
+
+    // District / City check
+    const wbKeywords = [
+      'kolkata', 'calcutta', 'howrah', 'hooghly', 'north 24', 'south 24', 'parganas',
+      'darjeeling', 'siliguri', 'asansol', 'durgapur', 'nadia', 'burdwan', 'bardhaman',
+      'bankura', 'birbhum', 'purulia', 'murshidabad', 'malda', 'jalpaiguri', 'alipurduar',
+      'cooch behar', 'dinajpur', 'jhargram', 'medinipur', 'midnapore', 'kalimpong',
+      'kharagpur', 'haldia', 'bolpur', 'santiniketan', 'baharampur', 'krishnanagar',
+      'raiganj', 'balurghat', 'barasat', 'barrackpore', 'bidhannagar', 'salt lake', 'new town'
+    ];
+
+    return wbKeywords.some((kw) => c.includes(kw));
   }, [city, state, pinCode]);
 
   // Delivery Fee Calculation
@@ -243,8 +267,8 @@ export default function CheckoutForm({
     }
 
     if (deliveryType === 'founder') {
-      if (!isKolkataLocation) {
-        setError('Hand Delivered By Founder is strictly available for Kolkata delivery addresses only. Please choose Standard / Express Delivery or enter a Kolkata address.');
+      if (!isWestBengalLocation) {
+        setError('Hand Delivered By Founder is strictly available across West Bengal only (all districts & cities). Please choose Standard / Express Delivery or enter a West Bengal address.');
         return null;
       }
       if (paymentMethod === 'COD') {
@@ -680,7 +704,7 @@ export default function CheckoutForm({
                           <UserCheck className="w-4 h-4 text-[#c6a87c]" /> Hand Delivered By Founder
                         </span>
                         <span className="text-[10px] font-bold text-[#c6a87c] bg-[#c6a87c]/15 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                          Applicable in Kolkata Only
+                          Applicable in West Bengal Only
                         </span>
                       </div>
                       <span className="text-sm font-black text-[#c6a87c]">
@@ -688,7 +712,7 @@ export default function CheckoutForm({
                       </span>
                     </div>
                     <p className="text-xs text-neutral-600 dark:text-neutral-300 mt-1.5 leading-relaxed">
-                      Exclusive in-hand VIP delivery and product consultation directly by the FYXEN Founder in Kolkata. (Requires Prepaid Online Payment).
+                      Exclusive in-hand VIP delivery and product consultation directly by the FYXEN Founder across all districts &amp; cities in West Bengal (Prepaid Online Payment).
                     </p>
                   </div>
                 </label>
@@ -696,23 +720,23 @@ export default function CheckoutForm({
                 {/* Location Guard for Founder Delivery */}
                 {deliveryType === 'founder' && (
                   <div className="mt-2.5">
-                    {city || pinCode ? (
-                      isKolkataLocation ? (
+                    {city || pinCode || state ? (
+                      isWestBengalLocation ? (
                         <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
                           <CheckCircle2 className="w-4 h-4 shrink-0" />
-                          <span>Kolkata location verified for Founder In-Hand Delivery.</span>
+                          <span>West Bengal location verified for Founder In-Hand Delivery.</span>
                         </div>
                       ) : (
                         <div className="p-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 rounded-xl text-xs text-rose-600 dark:text-rose-400 flex items-center gap-2">
                           <AlertTriangle className="w-4 h-4 shrink-0 text-rose-500" />
                           <span>
-                            <strong>Outside Kolkata:</strong> Hand Delivered By Founder is strictly available for Kolkata only. Please switch to Standard or Express Delivery.
+                            <strong>Outside West Bengal:</strong> Hand Delivered By Founder is available across West Bengal only. Please select Standard or Express Delivery.
                           </span>
                         </div>
                       )
                     ) : (
                       <div className="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-xl text-[11px] text-amber-700 dark:text-amber-400">
-                        Please enter your Kolkata PIN code or address above to verify eligibility.
+                        Please enter your West Bengal address or PIN code above to verify eligibility.
                       </div>
                     )}
                   </div>

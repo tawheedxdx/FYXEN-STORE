@@ -140,21 +140,29 @@ export async function createCheckoutSession(formData) {
       return { error: 'Hand Delivered By Founder is currently unavailable. Please choose Standard or Express Delivery.' };
     }
 
-    // Kolkata check: city or PIN code
+    // West Bengal check: state, PIN code (70-74), or WB districts/cities
     const cityStr = (shippingInfo.city || '').toLowerCase().trim();
     const stateStr = (shippingInfo.state || '').toLowerCase().trim();
     const pinStr = (shippingInfo.postal_code || '').trim();
 
-    const isKolkata = 
-      cityStr.includes('kolkata') || 
-      cityStr.includes('calcutta') || 
-      (stateStr.includes('west bengal') && (cityStr.includes('howrah') || cityStr.includes('salt lake') || cityStr.includes('new town') || cityStr.includes('bidhannagar'))) ||
-      pinStr.startsWith('700') ||
-      pinStr.startsWith('711');
+    const isPinInWB = pinStr.length >= 2 && ['70', '71', '72', '73', '74'].includes(pinStr.slice(0, 2));
+    const isStateWB = stateStr.includes('west bengal') || stateStr.includes('bengal') || stateStr.includes('paschim banga') || stateStr.includes('wb');
 
-    if (!isKolkata) {
+    const wbKeywords = [
+      'kolkata', 'calcutta', 'howrah', 'hooghly', 'north 24', 'south 24', 'parganas',
+      'darjeeling', 'siliguri', 'asansol', 'durgapur', 'nadia', 'burdwan', 'bardhaman',
+      'bankura', 'birbhum', 'purulia', 'murshidabad', 'malda', 'jalpaiguri', 'alipurduar',
+      'cooch behar', 'dinajpur', 'jhargram', 'medinipur', 'midnapore', 'kalimpong',
+      'kharagpur', 'haldia', 'bolpur', 'santiniketan', 'baharampur', 'krishnanagar',
+      'raiganj', 'balurghat', 'barasat', 'barrackpore', 'bidhannagar', 'salt lake', 'new town'
+    ];
+    const isCityInWB = wbKeywords.some((kw) => cityStr.includes(kw));
+
+    const isWestBengal = isPinInWB || isStateWB || isCityInWB;
+
+    if (!isWestBengal) {
       return { 
-        error: 'Hand Delivered By Founder is strictly available for Kolkata delivery addresses only. Please select Standard/Express Delivery or provide a Kolkata address.' 
+        error: 'Hand Delivered By Founder is strictly available across West Bengal only (including all districts & cities). Please select Standard/Express Delivery or provide a West Bengal delivery address.' 
       };
     }
 
