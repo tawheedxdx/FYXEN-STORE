@@ -26,9 +26,11 @@ export default function Navbar({ cartCount: initialCartCount = 0 }) {
   
   const displayCartCount = contextCartCount !== undefined ? contextCartCount : initialCartCount;
 
-  useEffect(() => {
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
     setMobileMenuOpen(false);
-  }, [pathname]);
+  }
 
   useEffect(() => {
     if (mobileMenuOpen) document.body.style.overflow = 'hidden';

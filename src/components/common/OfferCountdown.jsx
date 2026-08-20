@@ -3,34 +3,32 @@
 import { useEffect, useState } from 'react';
 import { Clock } from 'lucide-react';
 
+function calculateTimeLeft(endsAt) {
+  if (!endsAt) return null;
+  const difference = new Date(endsAt) - new Date();
+  if (difference <= 0) {
+    return null;
+  }
+
+  const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
+  const minutes = Math.floor((difference / 1000 / 60) % 60);
+
+  return {
+    days: String(days).padStart(2, '0'),
+    hours: String(hours).padStart(2, '0'),
+    minutes: String(minutes).padStart(2, '0'),
+  };
+}
+
 export default function OfferCountdown({ endsAt }) {
-  const [timeLeft, setTimeLeft] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(() => calculateTimeLeft(endsAt));
 
   useEffect(() => {
     if (!endsAt) return;
 
-    function calculateTimeLeft() {
-      const difference = new Date(endsAt) - new Date();
-      if (difference <= 0) {
-        return null;
-      }
-
-      const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((difference / (1000 * 60 * 60)) % 24);
-      const minutes = Math.floor((difference / 1000 / 60) % 60);
-
-      return {
-        days: String(days).padStart(2, '0'),
-        hours: String(hours).padStart(2, '0'),
-        minutes: String(minutes).padStart(2, '0'),
-      };
-    }
-
-    setTimeLeft(calculateTimeLeft());
-
-    // Update every minute (60000ms) since we don't display seconds
     const timer = setInterval(() => {
-      const updated = calculateTimeLeft();
+      const updated = calculateTimeLeft(endsAt);
       setTimeLeft(updated);
       if (!updated) {
         clearInterval(timer);

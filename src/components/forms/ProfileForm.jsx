@@ -44,7 +44,7 @@ export default function ProfileForm({ profile, user }) {
           </div>
           <div className="mt-6 pt-6 border-t border-white/10">
             <p className="text-xs text-primary-200 leading-relaxed italic">
-              "Earn ₹2 cashback for every ₹100 spent on all orders! Cashback is credited automatically upon delivery."
+              &ldquo;Earn ₹2 cashback for every ₹100 spent on all orders! Cashback is credited automatically upon delivery.&rdquo;
             </p>
           </div>
         </div>

@@ -3,23 +3,19 @@
 import { useState, useEffect, useSyncExternalStore } from 'react';
 import { Sun, Moon } from 'lucide-react';
 
-const emptySubscribe = () => () => {};
+const subscribe = () => () => {};
+const getSnapshot = () => true;
+const getServerSnapshot = () => false;
 
 export default function ThemeToggle() {
-  const [mounted, setMounted] = useState(false);
+  const isMounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
     const isDarkClass = document.documentElement.classList.contains('dark');
     const savedTheme = localStorage.getItem('theme');
     const activeDark = savedTheme === 'dark' || (!savedTheme && isDarkClass);
     setIsDark(activeDark);
-    if (activeDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
   }, []);
 
   const toggleTheme = () => {
@@ -34,10 +30,8 @@ export default function ThemeToggle() {
     }
   };
 
-  if (!mounted) {
-    return (
-      <div className="w-9 h-9 p-2" aria-hidden="true" />
-    );
+  if (!isMounted) {
+    return <div className="w-9 h-9 p-2" aria-hidden="true" />;
   }
 
   return (

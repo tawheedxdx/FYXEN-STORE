@@ -29,12 +29,9 @@ export default function HeroSection({ featuredProduct }) {
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 text-[11px] font-black uppercase tracking-widest">
                 <Sparkles className="w-3 h-3 text-[#c6a87c]" /> Season {currentYear}
               </span>
-              <div className="flex items-center gap-1 text-[11px] font-semibold text-neutral-600 dark:text-neutral-400 bg-neutral-100/80 dark:bg-neutral-900/80 px-3 py-1 rounded-full border border-black/5 dark:border-white/5">
-                <div className="flex text-amber-400">
-                  {'★'.repeat(5)}
-                </div>
-                <span>4.9 / 5</span>
-                <span className="text-neutral-400">&bull; 2,500+ Indian Homes</span>
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold text-neutral-600 dark:text-neutral-400 bg-neutral-100/80 dark:bg-neutral-900/80 px-3 py-1 rounded-full border border-black/5 dark:border-white/5">
+                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>100% Genuine Direct-to-Consumer Brand</span>
               </div>
             </motion.div>
 

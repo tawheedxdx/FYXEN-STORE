@@ -20,6 +20,13 @@ export default function ProductCard({ product, offers = [] }) {
     return isSiteWide || offer.eligible_product_ids.includes(product.id);
   });
 
+  // Calculate real review average if reviews exist
+  const reviews = product.reviews || [];
+  const hasReviews = reviews.length > 0;
+  const cardAvgRating = hasReviews
+    ? (reviews.reduce((acc, r) => acc + (r.rating || 5), 0) / reviews.length).toFixed(1)
+    : null;
+
   return (
     <div className="group flex flex-col w-full bg-white dark:bg-neutral-900/40 rounded-2xl border border-neutral-200/70 dark:border-neutral-800/80 p-3 sm:p-3.5 transition-all duration-300 hover:shadow-xl hover:border-neutral-300 dark:hover:border-neutral-700">
       {/* Image Container with 4:5 Aspect Ratio */}
@@ -90,10 +97,14 @@ export default function ProductCard({ product, offers = [] }) {
             <span className="font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest text-[10px]">
               {product.brand || 'FYXEN'}
             </span>
-            <div className="flex items-center gap-1 text-amber-500 font-bold">
-              <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-              <span>4.9</span>
-            </div>
+            {cardAvgRating ? (
+              <div className="flex items-center gap-1 text-amber-500 font-bold">
+                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                <span>{cardAvgRating}</span>
+              </div>
+            ) : (
+              <span className="text-[10px] text-neutral-400 font-medium">Genuine Quality</span>
+            )}
           </div>
 
           {/* Title */}

@@ -15,36 +15,22 @@ export const metadata = {
 
 export const revalidate = 60;
 
-const customerReviews = [
-  {
-    author: 'Aarav Sharma',
-    date: '2026-06-12',
-    reviewBody: 'FYXEN oil sprayer dispenser has completely transformed my daily cooking routine. Supreme build quality and sleek design!',
-    ratingValue: 5,
-  },
-  {
-    author: 'Priya Patel',
-    date: '2026-06-28',
-    reviewBody: 'Fast delivery across India! The portable neck fan feels super premium and light. Highly recommended Indian brand.',
-    ratingValue: 5,
-  },
-  {
-    author: 'Rohan Mehta',
-    date: '2026-07-04',
-    reviewBody: 'Inkless thermal printer works flawlessly with my phone. Clean packaging, genuine quality, and responsive support.',
-    ratingValue: 5,
-  },
-];
-
 export default async function HomePage() {
   const supabase = await createClient();
   const now = new Date().toISOString();
 
-  const [featuredProducts, bestSellers, categories, { data: offers }] = await Promise.all([
+  const [
+    featuredProducts,
+    bestSellers,
+    categories,
+    { data: offers },
+    { data: realReviews }
+  ] = await Promise.all([
     getProducts({ featured: true }),
     getProducts({ bestSeller: true }),
     getCategories(),
     supabase.from('offers').select('*').eq('active', true).lte('starts_at', now).gte('ends_at', now).order('created_at', { ascending: false }),
+    supabase.from('reviews').select('*, products(id, title, slug), profiles(full_name)').order('created_at', { ascending: false }).limit(8),
   ]);
 
   const websiteSchema = {
@@ -62,7 +48,12 @@ export default async function HomePage() {
     }
   };
 
-  const reviewsSchema = {
+  const hasReviews = realReviews && realReviews.length > 0;
+  const avgRating = hasReviews
+    ? (realReviews.reduce((acc, r) => acc + (r.rating || 5), 0) / realReviews.length).toFixed(1)
+    : null;
+
+  const reviewsSchema = hasReviews ? {
     "@context": "https://schema.org",
     "@type": "Product",
     "name": "FYXEN Lifestyle Products Collection",
@@ -73,24 +64,24 @@ export default async function HomePage() {
     },
     "aggregateRating": {
       "@type": "AggregateRating",
-      "ratingValue": "4.9",
-      "reviewCount": "148"
+      "ratingValue": avgRating,
+      "reviewCount": realReviews.length
     },
-    "review": customerReviews.map(r => ({
+    "review": realReviews.map(r => ({
       "@type": "Review",
       "author": {
         "@type": "Person",
-        "name": r.author
+        "name": r.author_name || r.profiles?.full_name || 'Verified Buyer'
       },
-      "datePublished": r.date,
-      "reviewBody": r.reviewBody,
+      "datePublished": r.created_at ? r.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+      "reviewBody": r.comment,
       "reviewRating": {
         "@type": "Rating",
-        "ratingValue": r.ratingValue,
+        "ratingValue": r.rating || 5,
         "bestRating": "5"
       }
     }))
-  };
+  } : null;
 
   return (
     <div className="flex flex-col w-full bg-white dark:bg-[#09090b]">
@@ -98,10 +89,12 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
       />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewsSchema) }}
-      />
+      {reviewsSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(reviewsSchema) }}
+        />
+      )}
 
       {/* 1. Above-the-fold Crown Jewel Hero */}
       <HeroSection featuredProduct={featuredProducts?.[0]} />
@@ -122,8 +115,8 @@ export default async function HomePage() {
       {/* 5. Active Offers & Flash Drop Events */}
       <ActiveOffersGrid offers={offers || []} />
 
-      {/* 6. Customer Love & Regional Social Proof Wall */}
-      <HomeReviewsWall />
+      {/* 6. Customer Love & Regional Social Proof Wall (Real DB Reviews Only) */}
+      <HomeReviewsWall reviews={realReviews || []} />
 
       {/* 7. VIP Inner Circle Newsletter */}
       <section className="py-20 md:py-28 bg-neutral-950 text-white relative overflow-hidden border-t border-neutral-850">

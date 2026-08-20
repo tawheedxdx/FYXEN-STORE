@@ -19,8 +19,8 @@ export async function generateMetadata({ params }) {
   if (!product) return { title: 'Product Not Found' };
   
   const categoryName = product.categories?.name ? ` | ${product.categories.name}` : '';
-  const title = product.seo_title || `${product.title}${categoryName} | Fyxen`;
-  const description = product.seo_description || product.short_description || `Purchase ${product.title} at Fyxen. Premium quality and express shipping.`;
+  const title = product.seo_title || `${product.title}${categoryName} | FYXEN`;
+  const description = product.seo_description || product.short_description || `Purchase ${product.title} at FYXEN. Premium quality and express shipping.`;
   const image = product.product_images?.[0]?.image_url || 'https://zwqrkassfbesjfakiybh.supabase.co/storage/v1/object/public/brand-assets/og-image.png';
 
   return {
@@ -81,9 +81,34 @@ export default async function ProductPage({ params }) {
     }
   }
 
-  const discount = product.compare_at_price > product.price
-    ? Math.round(((product.compare_at_price - product.price) / product.compare_at_price) * 100)
-    : 0;
+  // Check Verified Buyer status for review authorization
+  let canReview = false;
+  let hasReviewed = false;
+  let userReview = null;
+
+  if (user) {
+    const [{ data: purchase }, { data: existingReview }] = await Promise.all([
+      supabase
+        .from('order_items')
+        .select('id, orders!inner(id, user_id, order_status, payment_status)')
+        .eq('product_id', product.id)
+        .eq('orders.user_id', user.id)
+        .in('orders.payment_status', ['paid', 'pending'])
+        .not('orders.order_status', 'in', '("cancelled","refunded")')
+        .limit(1)
+        .maybeSingle(),
+      supabase
+        .from('reviews')
+        .select('*')
+        .eq('product_id', product.id)
+        .eq('user_id', user.id)
+        .maybeSingle(),
+    ]);
+
+    canReview = Boolean(purchase);
+    hasReviewed = Boolean(existingReview);
+    userReview = existingReview || null;
+  }
 
   const now = new Date().toISOString();
   const [fbt, related, { data: offers }] = await Promise.all([
@@ -144,10 +169,10 @@ export default async function ProductPage({ params }) {
         "@type": "Review",
         "author": {
           "@type": "Person",
-          "name": rev.user_name || rev.profiles?.full_name || "Verified Buyer"
+          "name": rev.author_name || rev.profiles?.full_name || "Verified Buyer"
         },
         "datePublished": rev.created_at ? rev.created_at.split('T')[0] : priceValidUntil.toISOString().split('T')[0],
-        "reviewBody": rev.comment || rev.content || "Great quality product!",
+        "reviewBody": rev.comment || "Verified product review",
         "reviewRating": {
           "@type": "Rating",
           "ratingValue": rev.rating || 5,
@@ -183,7 +208,7 @@ export default async function ProductPage({ params }) {
   };
 
   return (
-    <div className="bg-white dark:bg-black min-h-screen">
+    <div className="bg-white dark:bg-[#09090b] min-h-screen">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
@@ -194,22 +219,22 @@ export default async function ProductPage({ params }) {
       />
       <div className="container-custom py-8 md:py-12">
         {/* Breadcrumbs */}
-        <nav className="flex items-center space-x-2 text-xs md:text-sm text-primary-400 dark:text-primary-500 mb-6 overflow-x-auto whitespace-nowrap scrollbar-none py-1">
-          <Link href="/" className="hover:text-primary-900 dark:hover:text-white flex items-center gap-1 transition-colors">
+        <nav className="flex items-center space-x-2 text-xs md:text-sm text-neutral-400 dark:text-neutral-500 mb-6 overflow-x-auto whitespace-nowrap scrollbar-none py-1">
+          <Link href="/" className="hover:text-neutral-950 dark:hover:text-white flex items-center gap-1 transition-colors">
             <Home className="w-3.5 h-3.5" />
             <span>Home</span>
           </Link>
           {breadcrumbs.map((crumb, idx) => (
             <span key={idx} className="flex items-center space-x-2">
-              <ChevronRight className="w-3.5 h-3.5 text-primary-300 dark:text-white/10" />
-              <Link href={crumb.url} className="hover:text-primary-900 dark:hover:text-white transition-colors">
+              <ChevronRight className="w-3.5 h-3.5 text-neutral-300 dark:text-neutral-700" />
+              <Link href={crumb.url} className="hover:text-neutral-950 dark:hover:text-white transition-colors">
                 {crumb.name}
               </Link>
             </span>
           ))}
           <span className="flex items-center space-x-2">
-            <ChevronRight className="w-3.5 h-3.5 text-primary-300 dark:text-white/10" />
-            <span className="text-primary-850 dark:text-white font-medium truncate max-w-[200px]" title={product.title}>
+            <ChevronRight className="w-3.5 h-3.5 text-neutral-300 dark:text-neutral-700" />
+            <span className="text-neutral-900 dark:text-white font-medium truncate max-w-[200px]" title={product.title}>
               {product.title}
             </span>
           </span>
@@ -226,8 +251,16 @@ export default async function ProductPage({ params }) {
         {/* Related Products Section */}
         <RecommendationCarousel products={related} title="You May Also Like" />
 
-        {/* Reviews System */}
-        <ProductReviews productId={product.id} reviews={product.reviews || []} user={user} />
+        {/* Real Verified Reviews System */}
+        <ProductReviews
+          productId={product.id}
+          slug={product.slug}
+          reviews={reviews}
+          user={user}
+          canReview={canReview}
+          hasReviewed={hasReviewed}
+          userReview={userReview}
+        />
       </div>
     </div>
   );

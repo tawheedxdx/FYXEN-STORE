@@ -155,11 +155,18 @@ export default function ProductInteractiveSection({ product, offers = [] }) {
                 New
               </span>
             )}
-            <div className="flex items-center gap-1 text-[11px] font-bold text-amber-500 ml-auto">
-              <Star className="w-3.5 h-3.5 fill-current" />
-              <span>4.9 / 5</span>
-              <span className="text-neutral-400 font-normal">(148 Reviews)</span>
-            </div>
+            {product.reviews && product.reviews.length > 0 ? (
+              <div className="flex items-center gap-1 text-[11px] font-bold text-amber-500 ml-auto">
+                <Star className="w-3.5 h-3.5 fill-current" />
+                <span>{(product.reviews.reduce((acc, r) => acc + (r.rating || 5), 0) / product.reviews.length).toFixed(1)} / 5</span>
+                <span className="text-neutral-400 font-normal">({product.reviews.length} Review{product.reviews.length !== 1 ? 's' : ''})</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 ml-auto">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>100% Genuine</span>
+              </div>
+            )}
           </div>
 
           <span className="text-xs font-bold tracking-widest uppercase text-[#c6a87c] mb-1.5 block">
