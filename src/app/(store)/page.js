@@ -118,28 +118,73 @@ export default async function HomePage() {
       {/* 6. Customer Love & Regional Social Proof Wall (Admin Curated Reviews Only) */}
       <HomeReviewsWall reviews={realReviews || []} />
 
-      {/* 7. VIP Inner Circle Newsletter */}
-      <section className="py-20 md:py-28 bg-neutral-950 text-white relative overflow-hidden border-t border-neutral-850">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(198,168,124,0.08)_0%,transparent_70%)] pointer-events-none" />
-        
-        <div className="container-custom relative z-10 text-center space-y-6 max-w-2xl mx-auto">
-          <span className="text-xs font-black uppercase tracking-[0.3em] text-[#c6a87c] block">
-            FYXEN VIP Club
-          </span>
-          <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
-            Unlock 10% Off Your First Order
-          </h2>
-          <p className="text-neutral-400 text-sm md:text-base font-light leading-relaxed">
-            Join our inner circle for exclusive product drop announcements, VIP member discounts, and curated lifestyle recommendations.
-          </p>
+      {/* 7. VIP Inner Circle Newsletter with Curved Opening & Ending */}
+      <section className="relative overflow-hidden w-full bg-white dark:bg-[#09090b]">
+        {/* Top Curve (Opening) */}
+        <div className="w-full overflow-hidden leading-none -mb-px">
+          <svg 
+            viewBox="0 0 1440 60" 
+            fill="none" 
+            preserveAspectRatio="none" 
+            className="w-full h-8 sm:h-11 md:h-16 block text-neutral-950"
+          >
+            <path 
+              d="M0,0 C480,60 960,60 1440,0 L1440,60 L0,60 Z" 
+              fill="currentColor" 
+            />
+            <path 
+              d="M0,0 C480,60 960,60 1440,0" 
+              fill="none" 
+              stroke="rgba(198,168,124,0.35)" 
+              strokeWidth="1.5" 
+            />
+          </svg>
+        </div>
 
-          <div className="pt-4">
-            <NewsletterForm />
+        {/* Section Body */}
+        <div className="py-14 md:py-20 bg-neutral-950 text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(198,168,124,0.08)_0%,transparent_70%)] pointer-events-none" />
+          
+          <div className="container-custom relative z-10 text-center space-y-6 max-w-2xl mx-auto">
+            <span className="text-xs font-black uppercase tracking-[0.3em] text-[#c6a87c] block">
+              FYXEN VIP Club
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
+              Unlock 10% Off Your First Order
+            </h2>
+            <p className="text-neutral-400 text-sm md:text-base font-light leading-relaxed">
+              Join our inner circle for exclusive product drop announcements, VIP member discounts, and curated lifestyle recommendations.
+            </p>
+
+            <div className="pt-4">
+              <NewsletterForm />
+            </div>
+
+            <p className="text-neutral-500 text-xs pt-2">
+              No spam, ever. Unsubscribe with a single click anytime.
+            </p>
           </div>
+        </div>
 
-          <p className="text-neutral-500 text-xs pt-2">
-            No spam, ever. Unsubscribe with a single click anytime.
-          </p>
+        {/* Bottom Curve (Ending) */}
+        <div className="w-full overflow-hidden leading-none -mt-px">
+          <svg 
+            viewBox="0 0 1440 60" 
+            fill="none" 
+            preserveAspectRatio="none" 
+            className="w-full h-8 sm:h-11 md:h-16 block text-neutral-950"
+          >
+            <path 
+              d="M0,0 L1440,0 C960,60 480,60 0,0 Z" 
+              fill="currentColor" 
+            />
+            <path 
+              d="M1440,0 C960,60 480,60 0,0" 
+              fill="none" 
+              stroke="rgba(198,168,124,0.35)" 
+              strokeWidth="1.5" 
+            />
+          </svg>
         </div>
       </section>
     </div>
