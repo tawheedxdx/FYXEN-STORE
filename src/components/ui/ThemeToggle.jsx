@@ -1,26 +1,31 @@
 'use client';
 
-import { useState, useEffect, useSyncExternalStore } from 'react';
+import { useSyncExternalStore } from 'react';
 import { Sun, Moon } from 'lucide-react';
 
-const subscribe = () => () => {};
-const getSnapshot = () => true;
-const getServerSnapshot = () => false;
+function subscribe(callback) {
+  window.addEventListener('storage', callback);
+  const observer = new MutationObserver(callback);
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+  return () => {
+    window.removeEventListener('storage', callback);
+    observer.disconnect();
+  };
+}
+
+function getSnapshot() {
+  return document.documentElement.classList.contains('dark');
+}
+
+function getServerSnapshot() {
+  return false;
+}
 
 export default function ThemeToggle() {
-  const isMounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    const isDarkClass = document.documentElement.classList.contains('dark');
-    const savedTheme = localStorage.getItem('theme');
-    const activeDark = savedTheme === 'dark' || (!savedTheme && isDarkClass);
-    setIsDark(activeDark);
-  }, []);
+  const isDark = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   const toggleTheme = () => {
     const nextDark = !isDark;
-    setIsDark(nextDark);
     if (nextDark) {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
@@ -29,10 +34,6 @@ export default function ThemeToggle() {
       localStorage.setItem('theme', 'light');
     }
   };
-
-  if (!isMounted) {
-    return <div className="w-9 h-9 p-2" aria-hidden="true" />;
-  }
 
   return (
     <button 
