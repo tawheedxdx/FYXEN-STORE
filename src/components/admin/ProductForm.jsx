@@ -829,15 +829,20 @@ export default function ProductForm({ categories, product }) {
               <p className="text-[10px] text-primary-400 mt-1">Enter 0 for "Zero Shipping Charges".</p>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-2">Tax / GST (%)</label>
-              <input name="taxRate" type="number" step="0.01" min="0" className="input-field" placeholder="0" defaultValue={product?.tax_rate ?? 0} />
-              <p className="text-[10px] text-primary-400 mt-1">Percentage of tax to apply (e.g. 18 for 18% GST).</p>
+              <label className="block text-sm font-medium mb-2">Tax / GST (%) (Inclusive)</label>
+              <input name="taxRate" type="number" step="0.01" min="0" className="input-field" placeholder="18" defaultValue={product?.tax_rate ?? ''} />
+              <p className="text-[10px] text-primary-400 mt-1">Product GST rate. Leave blank or 0 to use store default GST rate (18%) from Settings.</p>
             </div>
           </div>
 
-          {/* Inventory */}
+          {/* Inventory & GST */}
           <div className="bg-white p-6 rounded-xl border border-primary-100 shadow-sm space-y-5">
-            <h2 className="font-bold text-lg border-b border-primary-100 pb-3">Inventory</h2>
+            <h2 className="font-bold text-lg border-b border-primary-100 pb-3">Inventory &amp; GST Details</h2>
+            <div>
+              <label className="block text-sm font-medium mb-2">HSN / SAC Code (Optional)</label>
+              <input name="hsnCode" className="input-field" placeholder="e.g. 9617 or 8504" defaultValue={product?.hsn_code || ''} />
+              <p className="text-[10px] text-primary-400 mt-1">Harmonized System of Nomenclature code printed on Tax Invoices.</p>
+            </div>
             <div>
               <label className="block text-sm font-medium mb-2">SKU</label>
               <input name="sku" className="input-field" placeholder="e.g. FYX-001" defaultValue={product?.sku || ''} />

@@ -34,6 +34,13 @@ export default async function AdminOrderDetailPage({ params }) {
     if (dbOffers) optedOffersDetails = dbOffers;
   }
 
+  // Check if invoice already exists
+  const { data: existingInvoice } = await supabase
+    .from('invoices')
+    .select('invoice_number')
+    .eq('order_id', order.id)
+    .maybeSingle();
+
   return (
     <div className="space-y-8 pb-12">
       {/* Header */}
@@ -49,7 +56,12 @@ export default async function AdminOrderDetailPage({ params }) {
             <Calendar className="w-4 h-4" /> {new Date(order.created_at).toLocaleString()}
           </p>
         </div>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <OrderInvoiceButton 
+            orderId={order.id} 
+            orderStatus={order.order_status} 
+            existingInvoiceNumber={existingInvoice?.invoice_number} 
+          />
           <div className="bg-white p-2 rounded-lg border border-primary-100 flex items-center gap-3 shadow-sm">
             <span className="text-xs font-bold uppercase text-primary-400 pl-2">Status</span>
             <OrderStatusDropdown orderId={order.id} currentStatus={order.order_status} />

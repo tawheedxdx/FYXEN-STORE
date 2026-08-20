@@ -47,6 +47,7 @@ export async function createProduct(formData) {
   const description = formData.get('description');
   const brand = formData.get('brand');
   const sku = formData.get('sku') || null;
+  const hsnCode = formData.get('hsnCode') ? formData.get('hsnCode').trim() : null;
   const price = parseFloat(formData.get('price'));
   const compareAtPrice = formData.get('compareAtPrice') ? parseFloat(formData.get('compareAtPrice')) : null;
   const stockQuantity = parseInt(formData.get('stockQuantity') || '0');
@@ -74,6 +75,7 @@ export async function createProduct(formData) {
       description,
       brand,
       sku,
+      hsn_code: hsnCode,
       price,
       compare_at_price: compareAtPrice,
       shipping_price: shippingPrice,
@@ -205,6 +207,7 @@ export async function updateProduct(productId, formData) {
   const boxContents = formData.get('boxContents') ? JSON.parse(formData.get('boxContents')) : [];
   const shippingPrice = parseFloat(formData.get('shippingPrice') || '0');
   const taxRate = parseFloat(formData.get('taxRate') || '0');
+  const hsnCode = formData.get('hsnCode') ? formData.get('hsnCode').trim() : null;
 
   const { error } = await adminSupabase.from('products').update({
     title,
@@ -213,6 +216,7 @@ export async function updateProduct(productId, formData) {
     description: formData.get('description'),
     brand: formData.get('brand'),
     sku: formData.get('sku') || null,
+    hsn_code: hsnCode,
     price: parseFloat(formData.get('price')),
     compare_at_price: formData.get('compareAtPrice') ? parseFloat(formData.get('compareAtPrice')) : null,
     shipping_price: shippingPrice,

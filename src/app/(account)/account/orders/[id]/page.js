@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, Package, MapPin, CreditCard, Calendar, Truck, CheckCircle2, Clock, AlertCircle, Star, RotateCcw, Gift } from 'lucide-react';
+import { ChevronLeft, Package, MapPin, CreditCard, Calendar, Truck, CheckCircle2, Clock, AlertCircle, Star, RotateCcw, Gift, Receipt } from 'lucide-react';
 import PayNowButton from '@/components/account/PayNowButton';
 import CancelOrderButton from '@/components/account/CancelOrderButton';
 
@@ -107,6 +107,13 @@ export default async function OrderDetailsPage({ params }) {
     return status;
   };
 
+  // Fetch invoice if generated
+  const { data: invoice } = await supabaseAdmin
+    .from('invoices')
+    .select('invoice_number')
+    .eq('order_id', order.id)
+    .maybeSingle();
+
   return (
     <div className="max-w-4xl mx-auto pb-20">
       <Link 
@@ -130,12 +137,26 @@ export default async function OrderDetailsPage({ params }) {
             </span>
           </div>
         </div>
-        {order.order_status !== 'cancelled' && (
-          <div className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-bold uppercase ${getStatusColor(order.payment_status)}`}>
-            {order.payment_status === 'paid' || order.payment_status === 'partial_paid' ? <CheckCircle2 className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
-            Payment: {getPaymentStatusText(order.payment_status)}
-          </div>
-        )}
+        
+        <div className="flex flex-wrap items-center gap-3">
+          {invoice?.invoice_number && (
+            <Link
+              href={`/invoice/${encodeURIComponent(invoice.invoice_number)}`}
+              target="_blank"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-neutral-900 dark:bg-white text-white dark:text-neutral-950 text-xs font-bold hover:opacity-90 transition-all shadow-xs"
+            >
+              <Receipt className="w-4 h-4 text-[#c6a87c]" />
+              <span>Download Tax Invoice</span>
+            </Link>
+          )}
+
+          {order.order_status !== 'cancelled' && (
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-2xl border text-sm font-bold uppercase ${getStatusColor(order.payment_status)}`}>
+              {order.payment_status === 'paid' || order.payment_status === 'partial_paid' ? <CheckCircle2 className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
+              Payment: {getPaymentStatusText(order.payment_status)}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

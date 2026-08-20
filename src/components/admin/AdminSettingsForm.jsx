@@ -32,16 +32,89 @@ export default function AdminSettingsForm({ settings }) {
       <div className="bg-white dark:bg-neutral-900 p-6 rounded-xl border border-primary-100 dark:border-neutral-800 shadow-sm space-y-5">
         <h2 className="font-bold text-lg border-b border-primary-100 dark:border-neutral-800 pb-3">Brand Information</h2>
         <div>
-          <label className="block text-sm font-medium mb-2">Store Name</label>
-          <input name="companyName" className="input-field" defaultValue={settings?.company_name || 'Fyxen'} />
+          <label className="block text-sm font-medium mb-2">Store Brand Name</label>
+          <input name="companyName" className="input-field" defaultValue={settings?.company_name || 'FYXEN'} />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">Parent Company Name</label>
+          <label className="block text-sm font-medium mb-2">Parent Company (Legal Entity)</label>
           <input name="parentCompanyName" className="input-field" defaultValue={settings?.parent_company_name || 'Bytread International Private Limited'} />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2">GST Number</label>
-          <input name="gstNumber" className="input-field" placeholder="e.g. 27AABCU9603R1ZX" defaultValue={settings?.gst_number || ''} />
+          <label className="block text-sm font-medium mb-2">GSTIN Number</label>
+          <input name="gstNumber" className="input-field" placeholder="e.g. 19ABCDE1234F1Z5" defaultValue={settings?.gst_number || ''} />
+        </div>
+      </div>
+
+      {/* Tax Invoice & Seller Details */}
+      <div className="bg-white dark:bg-neutral-900 p-6 rounded-xl border border-primary-100 dark:border-neutral-800 shadow-sm space-y-5">
+        <h2 className="font-bold text-lg border-b border-primary-100 dark:border-neutral-800 pb-3 flex items-center gap-2">
+          <ShieldCheck className="w-5 h-5 text-[#c6a87c]" /> Tax Invoice &amp; Seller Configuration
+        </h2>
+        <p className="text-xs text-neutral-500">
+          These details are printed on all official GST Tax Invoices generated for online orders and offline sales.
+        </p>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Seller Legal Name (Parent Co.) *</label>
+            <input name="sellerLegalName" required className="input-field" defaultValue={settings?.seller_legal_name || 'Bytread International Private Limited'} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Seller Trade / Brand Name *</label>
+            <input name="sellerTradeName" required className="input-field" defaultValue={settings?.seller_trade_name || 'FYXEN'} />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Seller Registered Address *</label>
+          <textarea name="sellerAddress" rows={2} required className="input-field resize-none" defaultValue={settings?.seller_address || 'Jangipur, Murshidabad, West Bengal - 742213, India'} />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Seller State *</label>
+            <input name="sellerState" required className="input-field" defaultValue={settings?.seller_state || 'West Bengal'} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">State Code (GST) *</label>
+            <input name="sellerStateCode" required className="input-field" defaultValue={settings?.seller_state_code || '19'} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">PIN Code *</label>
+            <input name="sellerPincode" required className="input-field" defaultValue={settings?.seller_pincode || '742213'} />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Seller GSTIN *</label>
+            <input name="sellerGstin" required className="input-field font-mono" placeholder="19ABCDE1234F1Z5" defaultValue={settings?.seller_gstin || '19ABCDE1234F1Z5'} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Seller PAN Number</label>
+            <input name="sellerPan" className="input-field font-mono" placeholder="ABCDE1234F" defaultValue={settings?.seller_pan || 'ABCDE1234F'} />
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-primary-50 dark:border-neutral-800">
+          <div>
+            <label className="block text-sm font-medium mb-2">Default Store GST Rate (%)</label>
+            <input name="defaultGstRate" type="number" step="0.01" min="0" className="input-field" defaultValue={settings?.default_gst_rate ?? 18} />
+            <p className="text-[10px] text-neutral-400 mt-1">Fallback if product has no GST specified.</p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Invoice Prefix</label>
+            <input name="invoicePrefix" className="input-field font-mono" defaultValue={settings?.invoice_prefix || 'FYX-INV-'} />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Next Invoice Number</label>
+            <input name="nextInvoiceNumber" type="number" min="1" className="input-field font-mono" defaultValue={settings?.next_invoice_number ?? 1001} />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-2">Invoice Terms &amp; Declarations</label>
+          <textarea name="invoiceTerms" rows={3} className="input-field text-xs font-mono resize-none" defaultValue={settings?.invoice_terms || '1. Goods once sold are covered under FYXEN return and replacement policy.\n2. Subject to Jangipur, West Bengal jurisdiction.\n3. This is a computer-generated Tax Invoice and requires no physical signature.'} />
         </div>
       </div>
 

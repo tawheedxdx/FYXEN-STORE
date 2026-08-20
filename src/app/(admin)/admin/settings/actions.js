@@ -38,8 +38,8 @@ export async function upsertSettings(formData) {
   ];
 
   const payload = {
-    company_name: formData.get('companyName'),
-    parent_company_name: formData.get('parentCompanyName'),
+    company_name: formData.get('companyName') || 'FYXEN',
+    parent_company_name: formData.get('parentCompanyName') || 'Bytread International Private Limited',
     support_email: formData.get('supportEmail'),
     support_phone: formData.get('supportPhone'),
     address: formData.get('address'),
@@ -50,6 +50,20 @@ export async function upsertSettings(formData) {
     partial_payment_enabled: formData.get('partialPaymentEnabled') === 'true',
     partial_payment_percentage: parseInt(formData.get('partialPaymentPercentage')) || 10,
     
+    // Tax Invoice & Seller Details
+    seller_legal_name: formData.get('sellerLegalName') || 'Bytread International Private Limited',
+    seller_trade_name: formData.get('sellerTradeName') || 'FYXEN',
+    seller_address: formData.get('sellerAddress') || 'Jangipur, Murshidabad, West Bengal - 742213, India',
+    seller_state: formData.get('sellerState') || 'West Bengal',
+    seller_state_code: formData.get('sellerStateCode') || '19',
+    seller_pincode: formData.get('sellerPincode') || '742213',
+    seller_gstin: formData.get('sellerGstin') || '19ABCDE1234F1Z5',
+    seller_pan: formData.get('sellerPan') || 'ABCDE1234F',
+    default_gst_rate: parseFloat(formData.get('defaultGstRate')) || 18,
+    invoice_prefix: formData.get('invoicePrefix') || 'FYX-INV-',
+    next_invoice_number: parseInt(formData.get('nextInvoiceNumber')) || 1001,
+    invoice_terms: formData.get('invoiceTerms'),
+
     // Shipping & Delivery Options
     founder_delivery_enabled: formData.get('founderDeliveryEnabled') === 'true',
     founder_delivery_fee: parseFloat(formData.get('founderDeliveryFee')) || 10000,
