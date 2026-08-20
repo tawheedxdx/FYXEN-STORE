@@ -32,6 +32,7 @@ export async function adminCreateReview(formData) {
     const rating = parseInt(formData.get('rating'), 10);
     const comment = formData.get('comment')?.toString().trim();
     const isVerified = formData.get('isVerified') === 'true' || formData.get('isVerified') === 'on';
+    const featuredOnHome = formData.get('featuredOnHome') === 'true' || formData.get('featuredOnHome') === 'on';
     const createdAt = formData.get('createdAt') || new Date().toISOString();
 
     if (!productId) {
@@ -58,6 +59,7 @@ export async function adminCreateReview(formData) {
         rating,
         comment,
         is_verified: isVerified,
+        featured_on_home: featuredOnHome,
         created_at: new Date(createdAt).toISOString(),
       });
 
@@ -76,6 +78,33 @@ export async function adminCreateReview(formData) {
     if (product?.slug) {
       revalidatePath(`/product/${product.slug}`, 'page');
     }
+    revalidatePath('/', 'page');
+    revalidatePath('/admin/reviews', 'page');
+
+    return { success: true };
+  } catch (err) {
+    return { error: err.message || 'An unexpected error occurred.' };
+  }
+}
+
+export async function adminToggleFeaturedOnHome(reviewId, featuredOnHome) {
+  try {
+    await checkAdmin();
+
+    if (!reviewId) return { error: 'Review ID is required.' };
+
+    const adminClient = createAdminClient();
+
+    const { error } = await adminClient
+      .from('reviews')
+      .update({ featured_on_home: Boolean(featuredOnHome) })
+      .eq('id', reviewId);
+
+    if (error) {
+      console.error('Error toggling featured review:', error);
+      return { error: error.message || 'Failed to update homepage status.' };
+    }
+
     revalidatePath('/', 'page');
     revalidatePath('/admin/reviews', 'page');
 

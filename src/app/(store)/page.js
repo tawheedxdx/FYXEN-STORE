@@ -30,7 +30,7 @@ export default async function HomePage() {
     getProducts({ bestSeller: true }),
     getCategories(),
     supabase.from('offers').select('*').eq('active', true).lte('starts_at', now).gte('ends_at', now).order('created_at', { ascending: false }),
-    supabase.from('reviews').select('*, products(id, title, slug), profiles(full_name)').order('created_at', { ascending: false }).limit(8),
+    supabase.from('reviews').select('*, products(id, title, slug), profiles(full_name)').eq('featured_on_home', true).order('created_at', { ascending: false }),
   ]);
 
   const websiteSchema = {
@@ -115,7 +115,7 @@ export default async function HomePage() {
       {/* 5. Active Offers & Flash Drop Events */}
       <ActiveOffersGrid offers={offers || []} />
 
-      {/* 6. Customer Love & Regional Social Proof Wall (Real DB Reviews Only) */}
+      {/* 6. Customer Love & Regional Social Proof Wall (Admin Curated Reviews Only) */}
       <HomeReviewsWall reviews={realReviews || []} />
 
       {/* 7. VIP Inner Circle Newsletter */}
