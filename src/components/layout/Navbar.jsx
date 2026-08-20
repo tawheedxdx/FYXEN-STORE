@@ -7,6 +7,7 @@ import { ShoppingBag, User, Menu, X, Wallet, Search, Sparkles, Home, Grid } from
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '@/components/ui/ThemeToggle';
 import SearchBar from '@/components/ui/SearchBar';
+import GooeyNav from '@/components/ui/GooeyNav';
 import { useCart } from '@/context/CartContext';
 
 const navLinks = [
@@ -76,36 +77,18 @@ export default function Navbar({ cartCount: initialCartCount = 0 }) {
             </Link>
           </div>
 
-          {/* Center: Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1.5 bg-neutral-100/60 dark:bg-neutral-900/60 px-3 py-1.5 rounded-full border border-black/5 dark:border-white/5 backdrop-blur-md">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`relative px-3.5 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 flex items-center gap-1.5 ${
-                    isActive
-                      ? 'text-neutral-950 dark:text-white bg-white dark:bg-neutral-800 shadow-xs'
-                      : 'text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-white hover:bg-white/50 dark:hover:bg-neutral-800/50'
-                  }`}
-                >
-                  <span>{link.label}</span>
-                  {link.badge && (
-                    <span className={`text-[9px] font-black uppercase px-1.5 py-0.2 rounded-full ${
-                      link.badge === 'Sale'
-                        ? 'bg-rose-500 text-white'
-                        : link.badge === 'New'
-                          ? 'bg-emerald-500 text-white'
-                          : 'bg-[#c6a87c] text-white'
-                    }`}>
-                      {link.badge}
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
+          {/* Center: Desktop Navigation with GooeyNav */}
+          <div className="hidden lg:flex items-center">
+            <GooeyNav 
+              items={navLinks} 
+              particleCount={15}
+              particleDistances={[90, 10]}
+              particleR={100}
+              animationTime={500}
+              timeVariance={250}
+              colors={[1, 2, 3, 1, 2, 4]}
+            />
+          </div>
 
           {/* Right: Actions (Search, Theme, Account, Cart Drawer) */}
           <div className="flex items-center gap-1 sm:gap-2">
