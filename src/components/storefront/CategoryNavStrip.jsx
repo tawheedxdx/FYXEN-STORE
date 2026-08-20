@@ -1,164 +1,53 @@
 "use client";
 
 import Link from 'next/link';
-import { useRef, useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import { useRef, useEffect } from 'react';
+import { Sparkles, Award, Flame, Grid, Compass } from 'lucide-react';
 
 const specialLinks = [
-  { href: '/shop', label: 'All' },
-  { href: '/category/best-sellers', label: 'Best Sellers' },
-  { href: '/category/new-arrivals', label: 'New Arrivals' },
-  { href: '/category/sale', label: 'Sale' },
+  { href: '/shop', label: 'All Catalogue', icon: Grid },
+  { href: '/category/best-sellers', label: 'Best Sellers', icon: Award },
+  { href: '/category/new-arrivals', label: 'New Arrivals', icon: Sparkles },
+  { href: '/category/sale', label: 'Special Offers', icon: Flame },
 ];
 
 export default function CategoryNavStrip({ categories = [] }) {
-  const scrollRef = useRef(null);
   const containerRef = useRef(null);
-  const isInteractingRef = useRef(false);
-  const isProgrammaticScrollRef = useRef(false);
-  const lastInteractionTimeRef = useRef(0);
+  const pathname = usePathname();
 
   const allLinks = [
     ...specialLinks,
-    ...categories.map(c => ({ href: `/category/${c.slug}`, label: c.name })),
+    ...categories.map(c => ({ href: `/category/${c.slug}`, label: c.name, icon: Compass })),
   ];
 
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    let animationFrameId;
-    const scrollSpeed = 0.6; // Scroll speed in pixels per frame
-
-    const step = () => {
-      const isInteracting = isInteractingRef.current;
-      const timeSinceLastInteraction = Date.now() - lastInteractionTimeRef.current;
-
-      // Only auto-scroll if user is not currently touching/hovering AND at least 2 seconds passed since manual scroll
-      if (!isInteracting && timeSinceLastInteraction > 2000) {
-        const halfWidth = container.scrollWidth / 2;
-
-        isProgrammaticScrollRef.current = true;
-        container.scrollLeft += scrollSpeed;
-
-        // Wrap around check for infinite scrolling (forward)
-        if (container.scrollLeft >= halfWidth) {
-          container.scrollLeft -= halfWidth;
-        }
-
-        // Reset the programmatic scroll flag in the next tick
-        setTimeout(() => {
-          isProgrammaticScrollRef.current = false;
-        }, 50);
-      }
-
-      animationFrameId = requestAnimationFrame(step);
-    };
-
-    animationFrameId = requestAnimationFrame(step);
-
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-    };
-  }, []);
-
-  const handleScroll = () => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const halfWidth = container.scrollWidth / 2;
-
-    // Wrap around dynamically for manual scroll in both directions
-    if (container.scrollLeft >= halfWidth) {
-      isProgrammaticScrollRef.current = true;
-      container.scrollLeft -= halfWidth;
-      setTimeout(() => { isProgrammaticScrollRef.current = false; }, 50);
-    } else if (container.scrollLeft <= 0) {
-      isProgrammaticScrollRef.current = true;
-      container.scrollLeft += halfWidth;
-      setTimeout(() => { isProgrammaticScrollRef.current = false; }, 50);
-    }
-
-    // If it's a manual scroll (user sliding/inertia), update interaction timestamp
-    if (!isProgrammaticScrollRef.current) {
-      lastInteractionTimeRef.current = Date.now();
-    }
-  };
-
-  const handleTouchStart = () => {
-    isInteractingRef.current = true;
-    lastInteractionTimeRef.current = Date.now();
-  };
-
-  const handleTouchEnd = () => {
-    isInteractingRef.current = false;
-    lastInteractionTimeRef.current = Date.now();
-  };
-
   return (
-    <nav className="bg-white dark:bg-black border-b border-primary-100 dark:border-white/10 select-none">
-      {/* Mobile Scrollable Ticker View */}
-      <div className="relative overflow-hidden w-full md:hidden">
-        {/* Soft edge fade overlays for premium look */}
-        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent dark:from-black z-10 pointer-events-none" />
-        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent dark:from-black z-10 pointer-events-none" />
-
+    <nav className="bg-white/80 dark:bg-[#09090b]/80 backdrop-blur-md border-b border-neutral-100 dark:border-neutral-900 sticky top-16 md:top-20 z-30 select-none">
+      <div className="container-custom">
         <div
           ref={containerRef}
-          className="flex overflow-x-auto scrollbar-hide select-none py-1 active:cursor-grabbing"
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-          onTouchCancel={handleTouchEnd}
-          onMouseDown={handleTouchStart}
-          onMouseUp={handleTouchEnd}
-          onMouseLeave={handleTouchEnd}
-          onScroll={handleScroll}
+          className="flex items-center gap-2 overflow-x-auto scrollbar-hide py-3"
         >
-          {/* First Group */}
-          <div className="flex shrink-0 items-center">
-            {allLinks.map((link, idx) => (
+          {allLinks.map((link) => {
+            const isActive = pathname === link.href;
+            const Icon = link.icon;
+            return (
               <Link
-                key={`m1-${link.href}-${idx}`}
+                key={link.href}
                 href={link.href}
-                className="shrink-0 px-5 py-3.5 text-sm font-semibold text-primary-500 dark:text-primary-400 hover:text-primary-900 dark:hover:text-white transition-all whitespace-nowrap"
+                className={`shrink-0 px-4 py-2 rounded-full text-xs font-bold transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap border ${
+                  isActive
+                    ? 'bg-neutral-950 text-white border-neutral-950 dark:bg-white dark:text-neutral-950 dark:border-white shadow-xs'
+                    : 'bg-neutral-50 dark:bg-neutral-900/60 text-neutral-600 dark:text-neutral-400 border-neutral-200/60 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-800 hover:text-neutral-950 dark:hover:text-white'
+                }`}
               >
-                {link.label}
+                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-[#c6a87c]' : 'text-neutral-400'}`} />
+                <span>{link.label}</span>
               </Link>
-            ))}
-          </div>
-          {/* Duplicate Group for Infinite Loop */}
-          <div className="flex shrink-0 items-center" aria-hidden="true">
-            {allLinks.map((link, idx) => (
-              <Link
-                key={`m2-${link.href}-${idx}`}
-                href={link.href}
-                className="shrink-0 px-5 py-3.5 text-sm font-semibold text-primary-500 dark:text-primary-400 hover:text-primary-900 dark:hover:text-white transition-all whitespace-nowrap"
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop Static View */}
-      <div className="hidden md:block container-custom">
-        <div
-          ref={scrollRef}
-          className="flex items-center gap-0 overflow-x-auto scrollbar-hide"
-        >
-          {allLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="shrink-0 px-5 py-4 text-sm font-semibold text-primary-500 dark:text-primary-400 hover:text-primary-900 dark:hover:text-white border-b-2 border-transparent hover:border-primary-900 dark:hover:border-white transition-all whitespace-nowrap"
-            >
-              {link.label}
-            </Link>
-          ))}
+            );
+          })}
         </div>
       </div>
     </nav>
   );
 }
-
-

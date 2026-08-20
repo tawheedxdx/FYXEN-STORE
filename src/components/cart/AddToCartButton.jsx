@@ -1,16 +1,18 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-import { ShoppingBag, Minus, Plus } from 'lucide-react';
+import { useState } from 'react';
+import { ShoppingBag, Minus, Plus, Loader2, Check } from 'lucide-react';
 import { addToCart } from '@/app/(store)/cart/actions';
 import { useRouter } from 'next/navigation';
+import { useCart } from '@/context/CartContext';
 
 export default function AddToCartButton({ product, selectedVariant = null, showQuantity = true }) {
   const router = useRouter();
   const [quantity, setQuantity] = useState(1);
   const [isAdding, setIsAdding] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState(null);
+  const { openCart, refreshCart } = useCart();
 
   const currentStock = selectedVariant ? (selectedVariant.stock_quantity || 0) : (product.stock_quantity || 0);
   const isOutOfStock = currentStock <= 0;
@@ -26,16 +28,19 @@ export default function AddToCartButton({ product, selectedVariant = null, showQ
     
     if (res?.error) {
       if (res.error.includes('sign in')) {
-        router.push('/login');
+        router.push('/login?redirect=/product/' + product.slug);
       } else {
         setError(res.error);
       }
       setIsAdding(false);
     } else {
-      startTransition(() => {
-        router.push('/cart');
-      });
-      setIsAdding(false);
+      setIsSuccess(true);
+      await refreshCart();
+      openCart();
+      setTimeout(() => {
+        setIsAdding(false);
+        setIsSuccess(false);
+      }, 1500);
     }
   };
 
@@ -44,22 +49,26 @@ export default function AddToCartButton({ product, selectedVariant = null, showQ
 
   return (
     <div className={`flex flex-col gap-2 ${showQuantity ? 'flex-[1.2]' : 'flex-1'}`}>
-      {error && <p className="text-red-500 text-[10px] absolute -top-4">{error}</p>}
+      {error && <p className="text-rose-500 text-xs font-semibold">{error}</p>}
       <div className="flex gap-2">
         {showQuantity && (
-          <div className="flex items-center border border-primary-200 dark:border-white/20 rounded-lg h-12 w-24 shrink-0 overflow-hidden">
+          <div className="flex items-center border border-neutral-200 dark:border-neutral-800 rounded-xl h-12 w-28 shrink-0 overflow-hidden bg-neutral-50 dark:bg-neutral-900">
             <button 
+              type="button"
               onClick={handleDecrease}
               disabled={isOutOfStock || requiresSelection}
-              className="flex-1 h-full flex items-center justify-center text-primary-500 hover:bg-primary-50 transition-colors"
+              className="flex-1 h-full flex items-center justify-center text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors"
+              aria-label="Decrease"
             >
               <Minus className="w-3.5 h-3.5" />
             </button>
-            <span className="w-8 text-center font-bold text-sm">{quantity}</span>
+            <span className="w-8 text-center font-black text-sm text-neutral-900 dark:text-white">{quantity}</span>
             <button 
+              type="button"
               onClick={handleIncrease}
               disabled={isOutOfStock || requiresSelection || quantity >= currentStock}
-              className="flex-1 h-full flex items-center justify-center text-primary-500 hover:bg-primary-50 transition-colors"
+              className="flex-1 h-full flex items-center justify-center text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors"
+              aria-label="Increase"
             >
               <Plus className="w-3.5 h-3.5" />
             </button>
@@ -67,14 +76,25 @@ export default function AddToCartButton({ product, selectedVariant = null, showQ
         )}
         
         <button 
+          type="button"
           onClick={handleAddToCart}
-          disabled={isOutOfStock || requiresSelection || isAdding || isPending}
-          className="btn-primary flex-1 h-12 px-2 text-xs md:text-sm whitespace-nowrap"
+          disabled={isOutOfStock || requiresSelection || isAdding}
+          className={`btn-primary flex-1 h-12 px-4 text-xs sm:text-sm font-bold uppercase tracking-wider rounded-xl transition-all ${
+            isSuccess ? 'bg-emerald-600 dark:bg-emerald-600 text-white' : ''
+          }`}
         >
-          {isAdding || isPending ? 'Adding...' : (
-            <span className="flex items-center justify-center gap-1.5 font-bold">
+          {isAdding ? (
+            <span className="flex items-center justify-center gap-2">
+              <Loader2 className="w-4 h-4 animate-spin" /> Adding...
+            </span>
+          ) : isSuccess ? (
+            <span className="flex items-center justify-center gap-2">
+              <Check className="w-4 h-4" /> Added to Bag
+            </span>
+          ) : (
+            <span className="flex items-center justify-center gap-2">
               <ShoppingBag className="w-4 h-4" />
-              {requiresSelection ? 'Select Option' : isOutOfStock ? 'Out of Stock' : 'Add to Cart'}
+              {requiresSelection ? 'Select Options' : isOutOfStock ? 'Out of Stock' : 'Add to Bag'}
             </span>
           )}
         </button>
@@ -82,4 +102,3 @@ export default function AddToCartButton({ product, selectedVariant = null, showQ
     </div>
   );
 }
-

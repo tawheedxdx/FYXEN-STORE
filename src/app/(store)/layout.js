@@ -6,6 +6,8 @@ import MaintenancePage from '@/components/common/MaintenancePage';
 import { AlertTriangle } from 'lucide-react';
 import WelcomeModal from '@/components/modals/WelcomeModal';
 import OffersPopup from '@/components/modals/OffersPopup';
+import SlideCart from '@/components/cart/SlideCart';
+import { CartProvider } from '@/context/CartContext';
 import { getCart } from '@/app/(store)/cart/actions';
 
 export default async function StoreLayout({ children }) {
@@ -53,7 +55,7 @@ export default async function StoreLayout({ children }) {
   }
 
   return (
-    <>
+    <CartProvider initialCartCount={cartCount}>
       {mode === 'maintenance' && isAdmin && (
         <div className="bg-amber-500 text-white py-2 px-4 text-center text-xs font-bold flex items-center justify-center gap-2 sticky top-0 z-[60]">
           <AlertTriangle className="w-3 h-3" />
@@ -62,10 +64,11 @@ export default async function StoreLayout({ children }) {
       )}
       <AnnouncementBanner />
       <Navbar cartCount={cartCount} />
-      <main>{children}</main>
+      <main className="min-h-screen pb-16 md:pb-0">{children}</main>
       <Footer settings={settings} />
       <WelcomeModal show={showWelcome} />
       <OffersPopup offers={offers || []} />
-    </>
+      <SlideCart />
+    </CartProvider>
   );
 }

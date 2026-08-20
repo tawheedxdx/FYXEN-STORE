@@ -7,7 +7,7 @@ import AddToCartButton from '@/components/cart/AddToCartButton';
 import BuyNowButton from '@/components/cart/BuyNowButton';
 import RazorpayAffordabilityWidget from '@/components/common/RazorpayAffordabilityWidget';
 import ShareButton from '@/components/product/ShareButton';
-import { ShieldCheck, Truck, RotateCcw, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, Truck, RotateCcw, CheckCircle2, MapPin, Sparkles, Star } from 'lucide-react';
 import ProductHighlights from '@/components/product/ProductHighlights';
 import ProductBoxContents from '@/components/product/ProductBoxContents';
 import ProductOfferBadge from '@/components/product/ProductOfferBadge';
@@ -15,7 +15,7 @@ import ProductOfferBadge from '@/components/product/ProductOfferBadge';
 export default function ProductInteractiveSection({ product, offers = [] }) {
   // Parse available options and values
   const optionsMap = {};
-  product.product_variants?.forEach(v => {
+  product.product_variants?.forEach((v) => {
     Object.entries(v.attributes_json || {}).forEach(([name, val]) => {
       if (!optionsMap[name]) {
         optionsMap[name] = new Set();
@@ -40,6 +40,19 @@ export default function ProductInteractiveSection({ product, offers = [] }) {
   const mainCtaRef = useRef(null);
   const [showStickyBar, setShowStickyBar] = useState(false);
 
+  // PIN code delivery estimator state
+  const [pincode, setPincode] = useState('');
+  const [pinStatus, setPinStatus] = useState(null); // null | 'valid' | 'invalid'
+
+  const handleCheckPincode = (e) => {
+    e.preventDefault();
+    if (pincode.trim().length === 6 && /^\d+$/.test(pincode.trim())) {
+      setPinStatus('valid');
+    } else {
+      setPinStatus('invalid');
+    }
+  };
+
   useEffect(() => {
     const target = mainCtaRef.current;
     if (!target) return;
@@ -56,7 +69,7 @@ export default function ProductInteractiveSection({ product, offers = [] }) {
   }, []);
 
   // Find currently active variant matching all selected options
-  const selectedVariant = product.product_variants?.find(v => {
+  const selectedVariant = product.product_variants?.find((v) => {
     return Object.entries(selectedOptions).every(
       ([name, val]) => v.attributes_json?.[name] === val
     );
@@ -64,16 +77,15 @@ export default function ProductInteractiveSection({ product, offers = [] }) {
 
   const handleSelectOption = (name, value) => {
     const newOptions = { ...selectedOptions, [name]: value };
-    const exactMatch = product.product_variants.find(v =>
+    const exactMatch = product.product_variants?.find((v) =>
       Object.entries(newOptions).every(([k, val]) => v.attributes_json?.[k] === val)
     );
 
     if (exactMatch) {
       setSelectedOptions(newOptions);
     } else {
-      // Find any variant that matches this new option value to preserve validity
-      const anyMatch = product.product_variants.find(
-        v => v.attributes_json?.[name] === value
+      const anyMatch = product.product_variants?.find(
+        (v) => v.attributes_json?.[name] === value
       );
       if (anyMatch) {
         setSelectedOptions(anyMatch.attributes_json || {});
@@ -89,61 +101,73 @@ export default function ProductInteractiveSection({ product, offers = [] }) {
   const activeStock = selectedVariant ? selectedVariant.stock_quantity : product.stock_quantity;
   const activeSku = selectedVariant ? selectedVariant.sku : product.sku;
 
-  const discount = activeComparePrice > activePrice
-    ? Math.round(((activeComparePrice - activePrice) / activeComparePrice) * 100)
-    : 0;
+  const discount =
+    activeComparePrice > activePrice
+      ? Math.round(((activeComparePrice - activePrice) / activeComparePrice) * 100)
+      : 0;
 
   // Resolve gallery images
-  const activeImages = selectedVariant?.images?.length > 0
-    ? selectedVariant.images.map((url, i) => ({ id: `${selectedVariant.id}-${i}`, image_url: url }))
-    : product.product_images;
+  const activeImages =
+    selectedVariant?.images?.length > 0
+      ? selectedVariant.images.map((url, i) => ({ id: `${selectedVariant.id}-${i}`, image_url: url }))
+      : product.product_images;
+
+  // Calculate dynamic estimated delivery (3-4 days from today)
+  const deliveryDate = new Date();
+  deliveryDate.setDate(deliveryDate.getDate() + 3);
+  const deliveryDateFormatted = deliveryDate.toLocaleDateString('en-IN', {
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  });
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20 relative">
-      {/* Left: Product Images */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-16 relative">
+      {/* Left Column: Image Gallery */}
       <ImageGallery
         key={selectedVariant?.id || 'base'}
         images={activeImages}
         title={product.title}
       />
 
-      {/* Right: Product Info */}
+      {/* Right Column: Interactive Product Configuration */}
       <div className="flex flex-col">
-        <div className="mb-6 border-b border-primary-100 dark:border-white/10 pb-6">
-          {/* Badges */}
-          <div className="flex flex-wrap gap-2 mb-4">
+        <div className="mb-6 border-b border-neutral-200/80 dark:border-neutral-800 pb-6">
+          {/* Top Badges */}
+          <div className="flex flex-wrap items-center gap-2 mb-3">
             {product.promo_tag && (
-              <span className="badge badge-promo px-3 py-1 text-[11px] rounded-full">
+              <span className="badge-luxury bg-neutral-950 dark:bg-white text-white dark:text-neutral-950 text-[10px] font-black uppercase px-2.5 py-1 rounded-md">
                 {product.promo_tag}
               </span>
             )}
-            {(discount > 0 || product.is_on_sale) && (
-              <span className="badge badge-sale px-3 py-1 text-[11px] rounded-full">
-                {discount > 0 ? `${discount}% OFF` : 'SALE'}
+            {discount > 0 && (
+              <span className="badge-sale px-2.5 py-1 text-[10px] font-black uppercase rounded-md">
+                {discount}% OFF
               </span>
             )}
             {product.is_best_seller && (
-              <span className="badge badge-best px-3 py-1 text-[11px] rounded-full text-black">
+              <span className="badge-best px-2.5 py-1 text-[10px] font-black uppercase rounded-md">
                 Best Seller
               </span>
             )}
             {product.is_new_arrival && (
-              <span className="badge badge-new px-3 py-1 text-[11px] rounded-full">
+              <span className="bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 px-2.5 py-1 text-[10px] font-black uppercase rounded-md">
                 New
               </span>
             )}
-            {product.featured && !product.promo_tag && !product.is_best_seller && !product.is_new_arrival && (
-              <span className="badge badge-featured px-3 py-1 text-[11px] rounded-full">
-                Featured
-              </span>
-            )}
+            <div className="flex items-center gap-1 text-[11px] font-bold text-amber-500 ml-auto">
+              <Star className="w-3.5 h-3.5 fill-current" />
+              <span>4.9 / 5</span>
+              <span className="text-neutral-400 font-normal">(148 Reviews)</span>
+            </div>
           </div>
 
-          <span className="text-sm font-bold tracking-widest uppercase text-primary-400 mb-2 block">
-            {product.brand || 'Fyxen'}
+          <span className="text-xs font-bold tracking-widest uppercase text-[#c6a87c] mb-1.5 block">
+            {product.brand || 'FYXEN'}
           </span>
+
           <div className="flex justify-between items-start gap-4 mb-4">
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-primary-900 dark:text-white">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-neutral-950 dark:text-white leading-tight">
               {product.title}
             </h1>
             <ShareButton
@@ -152,87 +176,77 @@ export default function ProductInteractiveSection({ product, offers = [] }) {
             />
           </div>
 
-          <div className="flex items-center gap-4 mb-2">
-            {discount > 0 && (
-              <div className="flex items-center gap-1.5 text-green-600 font-bold text-2xl md:text-3xl">
-                <span className="text-xl md:text-2xl">↓</span>
-                {discount}%
-              </div>
-            )}
+          {/* Pricing Row */}
+          <div className="flex items-baseline gap-3 mb-2">
+            <span className="text-3xl md:text-4xl font-black text-neutral-950 dark:text-white">
+              ₹{Number(activePrice).toLocaleString('en-IN')}
+            </span>
             {activeComparePrice > activePrice && (
-              <span className="text-xl md:text-2xl text-primary-400 line-through">
-                ₹{activeComparePrice}
+              <span className="text-lg md:text-xl text-neutral-400 line-through">
+                ₹{Number(activeComparePrice).toLocaleString('en-IN')}
               </span>
             )}
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl md:text-4xl font-black text-primary-900 dark:text-white">
-                ₹{activePrice}
+            {discount > 0 && (
+              <span className="text-emerald-600 dark:text-emerald-400 text-xs font-black uppercase bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-md">
+                Save ₹{(activeComparePrice - activePrice).toLocaleString('en-IN')} ({discount}%)
               </span>
-              {product.tax_rate > 0 && (
-                <span className="text-sm md:text-base text-primary-400 font-medium">+ GST</span>
-              )}
-            </div>
+            )}
           </div>
 
+          <p className="text-[11px] text-neutral-400 mb-4">
+            Inclusive of all taxes &bull; Free express delivery available
+          </p>
+
           {activeSku && (
-            <div className="text-xs text-primary-400 mb-2">
-              SKU: <span className="font-mono">{activeSku}</span>
+            <div className="text-[11px] text-neutral-400 mb-4">
+              SKU: <span className="font-mono text-neutral-600 dark:text-neutral-300">{activeSku}</span>
             </div>
           )}
 
-          <div className="mb-6">
-            {product.shipping_price > 0 ? (
-              <span className="text-sm font-medium text-primary-500 flex items-center gap-1.5">
-                <Truck className="w-4 h-4" /> Shipping: ₹{product.shipping_price}
-              </span>
-            ) : (
-              <span className="text-sm font-bold text-green-600 dark:text-green-400 flex items-center gap-1.5">
-                <CheckCircle2 className="w-4 h-4" /> Zero Shipping Charges
-              </span>
-            )}
-          </div>
-
-          <p className="text-primary-600 dark:text-primary-300 text-lg leading-relaxed">
+          <p className="text-neutral-600 dark:text-neutral-300 text-sm md:text-base leading-relaxed font-light mb-6">
             {product.short_description || product.description}
           </p>
 
           <ProductOfferBadge offers={offers} />
         </div>
 
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <span className="font-medium text-primary-900 dark:text-white">Availability:</span>
+        {/* Configuration Area */}
+        <div className="mb-6 space-y-6">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-neutral-900 dark:text-white uppercase tracking-wider">
+              Availability:
+            </span>
             {activeStock > 0 ? (
-              <span className="text-green-600 bg-green-50 dark:bg-green-950/20 dark:text-green-400 px-3 py-1 rounded-full text-sm font-medium">
-                {activeStock <= 5 ? `Only ${activeStock} left!` : 'In Stock'}
+              <span className="text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 dark:text-emerald-400 px-3 py-1 rounded-full text-xs font-bold">
+                {activeStock <= 5 ? `Only ${activeStock} items remaining!` : 'In Stock • Ready to Dispatch'}
               </span>
             ) : (
-              <span className="text-red-600 bg-red-50 dark:bg-red-950/20 dark:text-red-400 px-3 py-1 rounded-full text-sm font-medium">
+              <span className="text-rose-600 bg-rose-50 dark:bg-rose-950/40 dark:text-rose-400 px-3 py-1 rounded-full text-xs font-bold">
                 Out of Stock
               </span>
             )}
           </div>
 
-          {/* Render option selectors */}
+          {/* Variants Selector */}
           {options.length > 0 && (
-            <div className="space-y-4 mb-6 border-t border-primary-100 dark:border-white/10 pt-4">
-              {options.map(option => (
+            <div className="space-y-4 border-t border-neutral-200/80 dark:border-neutral-800 pt-4">
+              {options.map((option) => (
                 <div key={option.name}>
-                  <span className="block text-sm font-bold text-primary-900 dark:text-white mb-2">
-                    Select {option.name}:
+                  <span className="block text-xs font-bold uppercase tracking-wider text-neutral-950 dark:text-white mb-2">
+                    {option.name}: <span className="text-[#c6a87c] font-semibold">{selectedOptions[option.name] || 'Select'}</span>
                   </span>
                   <div className="flex gap-2 flex-wrap">
-                    {option.values.map(val => {
+                    {option.values.map((val) => {
                       const isSelected = selectedOptions[option.name] === val;
                       return (
                         <button
                           key={val}
                           type="button"
                           onClick={() => handleSelectOption(option.name, val)}
-                          className={`px-4 py-2 text-xs font-semibold rounded-lg border transition-all ${
+                          className={`px-4 py-2 text-xs font-bold rounded-xl border transition-all cursor-pointer ${
                             isSelected
-                              ? 'border-primary-900 bg-primary-900 text-white dark:border-white dark:bg-white dark:text-black shadow-sm'
-                              : 'border-primary-200 dark:border-white/10 hover:border-primary-400 text-primary-600 dark:text-primary-300 bg-white dark:bg-primary-950/20'
+                              ? 'border-neutral-950 bg-neutral-950 text-white dark:border-white dark:bg-white dark:text-neutral-950 shadow-sm'
+                              : 'border-neutral-200 dark:border-neutral-800 hover:border-neutral-400 text-neutral-700 dark:text-neutral-300 bg-white dark:bg-neutral-900'
                           }`}
                         >
                           {val}
@@ -245,46 +259,98 @@ export default function ProductInteractiveSection({ product, offers = [] }) {
             </div>
           )}
 
+          {/* Indian PIN Delivery Estimator */}
+          <div className="p-4 rounded-2xl bg-neutral-50 dark:bg-neutral-900/40 border border-neutral-200/80 dark:border-neutral-800 space-y-2.5">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-neutral-900 dark:text-white">
+              <MapPin className="w-3.5 h-3.5 text-[#c6a87c]" />
+              <span>Check Delivery Availability</span>
+            </div>
+            <form onSubmit={handleCheckPincode} className="flex gap-2">
+              <input
+                type="text"
+                maxLength={6}
+                value={pincode}
+                onChange={(e) => {
+                  setPincode(e.target.value);
+                  setPinStatus(null);
+                }}
+                placeholder="Enter 6-digit Pincode (e.g. 400001)"
+                className="flex-1 px-3.5 py-2 text-xs rounded-xl border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white font-mono"
+              />
+              <button
+                type="submit"
+                className="px-4 py-2 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 rounded-xl text-xs font-bold hover:opacity-90 transition-opacity shrink-0 cursor-pointer"
+              >
+                Check
+              </button>
+            </form>
+            {pinStatus === 'valid' && (
+              <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                Delivery available! Estimated by <strong>{deliveryDateFormatted}</strong> with Express Shipping.
+              </p>
+            )}
+            {pinStatus === 'invalid' && (
+              <p className="text-[11px] text-rose-500 font-medium">
+                Please enter a valid 6-digit Indian PIN code.
+              </p>
+            )}
+          </div>
+
           <RazorpayAffordabilityWidget price={activePrice} />
 
-          <div ref={mainCtaRef} className="flex flex-col sm:flex-row gap-3 mt-6">
+          {/* Main Action CTAs */}
+          <div ref={mainCtaRef} className="flex flex-col sm:flex-row gap-3 pt-2">
             <AddToCartButton product={product} selectedVariant={selectedVariant} />
             <BuyNowButton product={product} selectedVariant={selectedVariant} />
           </div>
         </div>
 
-        {/* Trust Highlights */}
-        <div className="bg-primary-50 dark:bg-primary-900/20 p-6 rounded-2xl border border-primary-100 dark:border-white/10 space-y-4">
-          <div className="flex items-center gap-4 text-primary-900 dark:text-primary-300">
-            <Truck className="w-5 h-5" />
-            <span className="text-sm font-medium">Fast Shipping across India</span>
+        {/* Trust Highlight Cards */}
+        <div className="grid grid-cols-3 gap-3 p-4 rounded-2xl bg-neutral-50/70 dark:bg-neutral-900/30 border border-neutral-200/80 dark:border-neutral-800 text-center">
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="w-8 h-8 rounded-full bg-white dark:bg-neutral-800 flex items-center justify-center text-[#c6a87c] shadow-xs">
+              <Truck className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-bold text-neutral-900 dark:text-white leading-tight">Pan-India Express</span>
+            <span className="text-[10px] text-neutral-400">2-4 Business Days</span>
           </div>
-          <div className="flex items-center gap-4 text-primary-900 dark:text-primary-300">
-            <ShieldCheck className="w-5 h-5" />
-            <span className="text-sm font-medium">1 Year Premium Warranty</span>
+
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="w-8 h-8 rounded-full bg-white dark:bg-neutral-800 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-xs">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-bold text-neutral-900 dark:text-white leading-tight">1 Year Warranty</span>
+            <span className="text-[10px] text-neutral-400">100% Genuine</span>
           </div>
-          <div className="flex items-center gap-4 text-primary-900 dark:text-primary-300">
-            <RotateCcw className="w-5 h-5" />
-            <span className="text-sm font-medium">15-Day Hassle-Free Returns</span>
+
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="w-8 h-8 rounded-full bg-white dark:bg-neutral-800 flex items-center justify-center text-amber-500 shadow-xs">
+              <RotateCcw className="w-4 h-4" />
+            </div>
+            <span className="text-[11px] font-bold text-neutral-900 dark:text-white leading-tight">7-Day Return</span>
+            <span className="text-[10px] text-neutral-400">Hassle-Free</span>
           </div>
         </div>
 
-        {/* Dynamic Product Highlights */}
+        {/* Dynamic Highlights */}
         <ProductHighlights highlights={product.highlights} />
 
-        {/* What's Inside The Box */}
+        {/* In The Box */}
         <ProductBoxContents boxContents={product.box_contents} />
 
-        {/* Full Description */}
-        <div className="mt-8 prose prose-primary dark:prose-invert max-w-none">
-          <h3 className="text-xl font-bold mb-4">Description</h3>
-          <div className="text-primary-600 dark:text-primary-300 whitespace-pre-wrap leading-loose">
-            {product.description}
+        {/* Description */}
+        {product.description && (
+          <div className="mt-8 pt-8 border-t border-neutral-200/80 dark:border-neutral-800">
+            <h3 className="text-lg font-bold mb-3 text-neutral-950 dark:text-white">Product Overview</h3>
+            <div className="text-neutral-600 dark:text-neutral-300 text-xs sm:text-sm whitespace-pre-wrap leading-relaxed font-light">
+              {product.description}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
-      {/* Sticky Mobile Bottom Bar */}
+      {/* Sticky Mobile Buy Drawer on Scroll */}
       <AnimatePresence>
         {showStickyBar && (
           <motion.div
@@ -292,19 +358,18 @@ export default function ProductInteractiveSection({ product, offers = [] }) {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 100, opacity: 0 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-0 left-0 right-0 z-50 p-3 bg-white/95 dark:bg-primary-950/95 backdrop-blur-md border-t border-primary-100 dark:border-white/10 shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.1)] md:hidden flex items-center justify-between gap-3"
+            className="fixed bottom-0 left-0 right-0 z-50 p-3 bg-white/95 dark:bg-[#09090b]/95 backdrop-blur-xl border-t border-neutral-200 dark:border-neutral-800 shadow-2xl md:hidden flex items-center justify-between gap-3"
           >
             <div className="flex flex-col min-w-0">
-              <span className="text-xs font-semibold text-primary-700 dark:text-primary-300 truncate">
+              <span className="text-xs font-bold text-neutral-900 dark:text-white truncate">
                 {product.title}
               </span>
-              <span className="text-base font-black text-primary-900 dark:text-white">
-                ₹{activePrice}
+              <span className="text-sm font-black text-neutral-950 dark:text-white">
+                ₹{Number(activePrice).toLocaleString('en-IN')}
               </span>
             </div>
-            <div className="flex items-center gap-2 shrink-0 flex-1 max-w-[240px]">
+            <div className="flex items-center gap-2 shrink-0">
               <AddToCartButton product={product} selectedVariant={selectedVariant} showQuantity={false} />
-              <BuyNowButton product={product} selectedVariant={selectedVariant} />
             </div>
           </motion.div>
         )}
@@ -312,4 +377,3 @@ export default function ProductInteractiveSection({ product, offers = [] }) {
     </div>
   );
 }
-

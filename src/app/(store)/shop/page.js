@@ -2,7 +2,7 @@ import { getProducts, getCategories } from '@/services/products';
 import ProductCard from '@/components/product/ProductCard';
 import ShopFilters from '@/components/storefront/ShopFilters';
 import Link from 'next/link';
-import { SlidersHorizontal, X, PackageSearch } from 'lucide-react';
+import { SlidersHorizontal, X, PackageSearch, Sparkles } from 'lucide-react';
 
 export const metadata = {
   title: 'Shop All Products | FYXEN — Premium Essentials',
@@ -39,7 +39,7 @@ export default async function ShopPage({ searchParams }) {
     getCategories(),
   ]);
 
-  const hasActiveFilters = q || category || minPrice || maxPrice || sort;
+  const hasActiveFilters = Boolean(q || category || minPrice || maxPrice || sort);
   const currentParams = { q, category, minPrice, maxPrice, sort };
 
   const activeChips = [];
@@ -67,35 +67,43 @@ export default async function ShopPage({ searchParams }) {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-white dark:bg-[#09090b]">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(shopSchema) }}
       />
+
       {/* Page Header */}
-      <div className="border-b border-primary-100 dark:border-white/5 py-12 md:py-16 bg-white dark:bg-black">
+      <div className="border-b border-neutral-100 dark:border-neutral-900 py-12 md:py-16 bg-neutral-50/50 dark:bg-neutral-950/50">
         <div className="container-custom">
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-primary-400 mb-3">Catalogue</p>
-          <h1 className="text-5xl md:text-7xl font-black tracking-tighter text-primary-900 dark:text-white leading-[0.9]">
-            Shop the<br /><span className="italic font-light">Collection</span>
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="w-3.5 h-3.5 text-[#c6a87c]" />
+            <p className="text-xs font-bold uppercase tracking-[0.25em] text-[#c6a87c]">
+              Curated Catalogue
+            </p>
+          </div>
+          <h1 className="text-4xl md:text-6xl font-black tracking-tight text-neutral-950 dark:text-white leading-[1.05]">
+            Shop the <span className="font-light italic text-neutral-500">Collection</span>
           </h1>
-          <p className="text-primary-500 dark:text-primary-400 mt-4 text-base max-w-lg">
-            Explore our full range of premium essentials designed for modern living.
-          </p>
-          <p className="text-sm text-primary-400 mt-2 font-medium">
-            {products.length} product{products.length !== 1 ? 's' : ''} found
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-3">
+            <p className="text-neutral-500 dark:text-neutral-400 text-sm max-w-lg font-light">
+              Explore our full range of premium everyday home and lifestyle utilities.
+            </p>
+            <span className="text-xs font-bold text-neutral-600 dark:text-neutral-400 bg-white dark:bg-neutral-900 px-3 py-1.5 rounded-full border border-neutral-200/80 dark:border-neutral-800 w-fit">
+              {products.length} product{products.length !== 1 ? 's' : ''} available
+            </span>
+          </div>
         </div>
       </div>
 
       <div className="container-custom py-8 md:py-12">
         {/* Active Filter Chips */}
         {hasActiveFilters && (
-          <div className="flex flex-wrap items-center gap-2 mb-8">
-            <span className="text-xs font-bold text-primary-500 uppercase tracking-wider flex items-center gap-1.5">
-              <SlidersHorizontal className="w-3.5 h-3.5" /> Active Filters:
+          <div className="flex flex-wrap items-center gap-2 mb-8 p-3 rounded-2xl bg-neutral-50 dark:bg-neutral-900/50 border border-neutral-200/60 dark:border-neutral-800">
+            <span className="text-xs font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-1.5">
+              <SlidersHorizontal className="w-3.5 h-3.5 text-[#c6a87c]" /> Filters:
             </span>
-            {activeChips.map(chip => {
+            {activeChips.map((chip) => {
               const clearUrl = (() => {
                 const p = { ...currentParams };
                 if (chip.param === 'q') delete p.q;
@@ -109,40 +117,47 @@ export default async function ShopPage({ searchParams }) {
                 <Link
                   key={chip.param}
                   href={clearUrl}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-primary-900 dark:bg-white text-white dark:text-primary-900 rounded-full text-xs font-semibold hover:bg-primary-700 transition-colors capitalize"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 rounded-full text-xs font-bold hover:opacity-90 transition-colors capitalize shadow-xs"
                 >
                   {chip.label} <X className="w-3 h-3" />
                 </Link>
               );
             })}
-            <Link href="/shop" className="text-xs font-semibold text-primary-400 hover:text-red-500 transition-colors underline underline-offset-2 ml-1">
+            <Link
+              href="/shop"
+              className="text-xs font-bold text-rose-500 hover:text-rose-600 transition-colors ml-auto underline underline-offset-4"
+            >
               Clear all
             </Link>
           </div>
         )}
 
-        <div className="flex flex-col md:flex-row gap-10 w-full">
+        <div className="flex flex-col md:flex-row gap-8 lg:gap-10 w-full">
           {/* Filters sidebar */}
           <ShopFilters categories={categories} currentParams={currentParams} />
 
           {/* Product Grid */}
           <div className="flex-1 w-full min-w-0">
             {products.length === 0 ? (
-              <div className="flex flex-col items-center justify-center text-center py-28 border border-dashed border-primary-200 dark:border-white/10 rounded-3xl">
-                <div className="w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center mb-5">
-                  <PackageSearch className="w-7 h-7 text-primary-400" />
+              <div className="flex flex-col items-center justify-center text-center py-24 border border-dashed border-neutral-200 dark:border-neutral-800 rounded-3xl p-6">
+                <div className="w-16 h-16 rounded-2xl bg-neutral-100 dark:bg-neutral-900 flex items-center justify-center mb-4 text-[#c6a87c]">
+                  <PackageSearch className="w-8 h-8" />
                 </div>
-                <h2 className="text-2xl font-bold mb-2">No products found</h2>
-                <p className="text-primary-500 max-w-xs text-sm mb-6">
-                  {hasActiveFilters ? 'Try adjusting or clearing your search filters.' : 'Check back soon for new arrivals.'}
+                <h2 className="text-xl font-bold mb-1 text-neutral-950 dark:text-white">No products found</h2>
+                <p className="text-neutral-500 max-w-xs text-xs mb-6 font-light">
+                  {hasActiveFilters
+                    ? 'Try adjusting or clearing your search filters to find what you are looking for.'
+                    : 'Check back soon for upcoming product drops.'}
                 </p>
                 {hasActiveFilters && (
-                  <Link href="/shop" className="btn-outline rounded-full">Clear Filters</Link>
+                  <Link href="/shop" className="btn-primary px-6 py-2.5 rounded-xl text-xs font-bold">
+                    Clear All Filters
+                  </Link>
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-7">
-                {products.map(product => (
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {products.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>

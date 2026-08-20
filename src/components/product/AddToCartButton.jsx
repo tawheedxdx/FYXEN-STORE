@@ -4,11 +4,13 @@ import { useState } from 'react';
 import { ShoppingBag, Check, Loader2 } from 'lucide-react';
 import { addToCart } from '@/app/(store)/cart/actions';
 import { useRouter } from 'next/navigation';
+import { useCart } from '@/context/CartContext';
 
 export default function AddToCartButton({ productId, stockQuantity = 0, className = '' }) {
   const [state, setState] = useState('idle'); // idle | loading | success | error
   const [errorMsg, setErrorMsg] = useState('');
   const router = useRouter();
+  const { openCart, refreshCart } = useCart();
 
   const isOutOfStock = stockQuantity <= 0;
 
@@ -31,7 +33,9 @@ export default function AddToCartButton({ productId, stockQuantity = 0, classNam
       setTimeout(() => setState('idle'), 3000);
     } else {
       setState('success');
-      setTimeout(() => setState('idle'), 2000);
+      await refreshCart();
+      openCart();
+      setTimeout(() => setState('idle'), 1500);
     }
   };
 
@@ -39,7 +43,7 @@ export default function AddToCartButton({ productId, stockQuantity = 0, classNam
     return (
       <button
         disabled
-        className={`w-full py-2.5 text-xs font-bold uppercase tracking-widest text-primary-400 bg-primary-100 dark:bg-primary-800 rounded-lg cursor-not-allowed ${className}`}
+        className={`w-full py-2.5 text-xs font-bold uppercase tracking-wider text-neutral-400 bg-neutral-100 dark:bg-neutral-800 rounded-xl cursor-not-allowed ${className}`}
       >
         Out of Stock
       </button>
@@ -50,22 +54,22 @@ export default function AddToCartButton({ productId, stockQuantity = 0, classNam
     <div className={className}>
       <button
         onClick={handleClick}
-        disabled={state === 'loading' || state === 'success'}
-        className={`w-full py-2.5 text-xs font-bold uppercase tracking-widest rounded-lg transition-all flex items-center justify-center gap-2
+        disabled={state === 'loading'}
+        className={`w-full py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer shadow-sm
           ${state === 'success'
-            ? 'bg-green-600 text-white'
+            ? 'bg-emerald-600 text-white'
             : state === 'error'
-            ? 'bg-red-100 text-red-600 dark:bg-red-900/30'
-            : 'bg-primary-900 dark:bg-white text-white dark:text-primary-900 hover:bg-primary-700 dark:hover:bg-gray-100 active:scale-95'
+            ? 'bg-rose-100 text-rose-600 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800'
+            : 'bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-black dark:hover:bg-neutral-100 active:scale-98'
           }`}
       >
         {state === 'loading' && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
         {state === 'success' && <Check className="w-3.5 h-3.5" />}
         {state === 'idle' && <ShoppingBag className="w-3.5 h-3.5" />}
-        {state === 'loading' ? 'Adding...' : state === 'success' ? 'Added!' : state === 'error' ? 'Failed' : 'Add to Cart'}
+        {state === 'loading' ? 'Adding...' : state === 'success' ? 'Added to Bag' : state === 'error' ? 'Failed' : 'Add to Bag'}
       </button>
       {state === 'error' && errorMsg && (
-        <p className="text-[10px] text-red-500 mt-1 text-center">{errorMsg}</p>
+        <p className="text-[10px] text-rose-500 mt-1 text-center font-medium">{errorMsg}</p>
       )}
     </div>
   );

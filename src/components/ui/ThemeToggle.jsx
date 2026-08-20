@@ -1,45 +1,52 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useSyncExternalStore } from 'react';
 import { Sun, Moon } from 'lucide-react';
 
+const emptySubscribe = () => () => {};
+
 export default function ThemeToggle() {
+  const [mounted, setMounted] = useState(false);
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    // Check initial theme from localStorage or system preference
-    // Default to light as requested if no preference is found
+    setMounted(true);
+    const isDarkClass = document.documentElement.classList.contains('dark');
     const savedTheme = localStorage.getItem('theme');
-    
-    if (savedTheme === 'dark') {
-      setIsDark(true);
+    const activeDark = savedTheme === 'dark' || (!savedTheme && isDarkClass);
+    setIsDark(activeDark);
+    if (activeDark) {
       document.documentElement.classList.add('dark');
     } else {
-      setIsDark(false);
       document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
     }
   }, []);
 
   const toggleTheme = () => {
-    if (isDark) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-      setIsDark(false);
-    } else {
+    const nextDark = !isDark;
+    setIsDark(nextDark);
+    if (nextDark) {
       document.documentElement.classList.add('dark');
       localStorage.setItem('theme', 'dark');
-      setIsDark(true);
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
   };
+
+  if (!mounted) {
+    return (
+      <div className="w-9 h-9 p-2" aria-hidden="true" />
+    );
+  }
 
   return (
     <button 
       onClick={toggleTheme}
-      className="p-2 text-primary-900 dark:text-white hover:text-accent transition-colors"
+      className="p-2 rounded-xl text-neutral-700 dark:text-neutral-300 hover:text-neutral-950 dark:hover:text-white hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors cursor-pointer"
       aria-label="Toggle theme"
     >
-      {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+      {isDark ? <Sun className="w-5 h-5 text-amber-400" /> : <Moon className="w-5 h-5" />}
     </button>
   );
 }

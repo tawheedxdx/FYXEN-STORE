@@ -3,31 +3,29 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, X, AlertCircle } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function OffersPopup({ offers = [] }) {
   const [isOpen, setIsOpen] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
-  const [currentOffer, setCurrentOffer] = useState(null);
+
+  const currentOffer = offers && offers.length > 0 ? offers[0] : null;
 
   useEffect(() => {
-    if (offers && offers.length > 0) {
-      // Find the latest active offer (already ordered by created_at desc from database query)
-      const latestOffer = offers[0];
-      setCurrentOffer(latestOffer);
+    if (!currentOffer) return;
 
-      const lastPopupTime = localStorage.getItem('fyxen_last_offer_popup_time');
-      const now = Date.now();
-      
-      // Show if 24 hours have passed since last seen
-      if (!lastPopupTime || now - Number(lastPopupTime) > 24 * 60 * 60 * 1000) {
-        const timer = setTimeout(() => {
-          setIsOpen(true);
-        }, 1500); // Show 1.5 seconds after page load
-        return () => clearTimeout(timer);
-      }
+    const lastPopupTime = localStorage.getItem('fyxen_last_offer_popup_time');
+    const now = Date.now();
+    
+    // Show if 24 hours have passed since last seen
+    if (!lastPopupTime || now - Number(lastPopupTime) > 24 * 60 * 60 * 1000) {
+      const timer = setTimeout(() => {
+        setIsOpen(true);
+      }, 1500); // Show 1.5 seconds after page load
+      return () => clearTimeout(timer);
     }
-  }, [offers]);
+  }, [currentOffer]);
 
   const handleClose = () => {
     setIsOpen(false);
@@ -54,80 +52,77 @@ export default function OffersPopup({ offers = [] }) {
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            className="relative w-full max-w-lg bg-white dark:bg-primary-950 rounded-[2.5rem] shadow-2xl overflow-hidden border border-primary-100 dark:border-white/10"
+            className="relative w-full max-w-md bg-white dark:bg-[#0c0c0e] rounded-3xl shadow-2xl overflow-hidden border border-neutral-200 dark:border-neutral-800"
           >
             {/* Top Image or Pattern */}
             {currentOffer.image_url ? (
-              <div className="h-56 w-full relative bg-primary-100 dark:bg-primary-900">
-                <img 
+              <div className="h-52 w-full relative bg-neutral-100 dark:bg-neutral-900">
+                <Image 
                   src={currentOffer.image_url} 
                   alt={currentOffer.title} 
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 450px"
+                  className="object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/35 to-transparent pointer-events-none" />
-                <div className="absolute bottom-6 left-6 right-6 text-white">
-                  <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-accent text-white uppercase tracking-wider mb-2 inline-block">
-                    Limited Time Offer
+                <div className="absolute bottom-5 left-5 right-5 text-white">
+                  <span className="px-3 py-1 rounded-full text-[10px] font-black bg-[#c6a87c] text-white uppercase tracking-wider mb-2 inline-block shadow-md">
+                    Limited Time Event
                   </span>
-                  <h3 className="text-2xl font-black leading-tight drop-shadow-md">
+                  <h3 className="text-xl font-bold leading-tight drop-shadow-md">
                     {currentOffer.title}
                   </h3>
                 </div>
               </div>
             ) : (
-              <div className="bg-gradient-to-br from-primary-900 to-black p-10 text-center relative overflow-hidden">
-                {/* Decorative glow */}
-                <div className="absolute -top-12 -left-12 w-44 h-44 rounded-full bg-accent/20 blur-3xl pointer-events-none" />
-                <div className="absolute -bottom-12 -right-12 w-44 h-44 rounded-full bg-accent/20 blur-3xl pointer-events-none" />
-                
-                <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-accent text-white uppercase tracking-wider mb-4 inline-block">
+              <div className="bg-gradient-to-br from-neutral-950 to-neutral-900 p-8 text-center relative overflow-hidden text-white">
+                <div className="absolute -top-12 -left-12 w-44 h-44 rounded-full bg-[#c6a87c]/20 blur-3xl pointer-events-none" />
+                <span className="px-3 py-1 rounded-full text-[10px] font-black bg-[#c6a87c] text-white uppercase tracking-wider mb-3 inline-block">
                   Special Campaign
                 </span>
-                
-                <Gift className="w-16 h-16 text-accent mx-auto mb-4 animate-bounce" />
-                
-                <h3 className="text-3xl font-black text-white leading-tight">
+                <Gift className="w-12 h-12 text-[#c6a87c] mx-auto mb-3 animate-pulse" />
+                <h3 className="text-2xl font-black leading-tight">
                   {currentOffer.title}
                 </h3>
               </div>
             )}
 
             {/* Modal Body */}
-            <div className="p-8 relative">
+            <div className="p-6 sm:p-8 relative">
               <button 
                 onClick={handleClose}
-                className="absolute top-4 right-4 p-2 rounded-full hover:bg-primary-100 dark:hover:bg-white/10 transition-colors"
+                className="absolute top-4 right-4 p-2 rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors"
                 title="Close"
               >
-                <X className="w-5 h-5 text-primary-400" />
+                <X className="w-5 h-5 text-neutral-400" />
               </button>
 
               <div className="space-y-4">
                 {currentOffer.subtitle && (
-                  <p className="text-xs font-bold text-accent uppercase tracking-widest">
+                  <p className="text-xs font-bold text-[#c6a87c] uppercase tracking-widest">
                     {currentOffer.subtitle}
                   </p>
                 )}
 
                 {currentOffer.description && !showTerms && (
-                  <p className="text-primary-600 dark:text-primary-300 text-sm leading-relaxed">
+                  <p className="text-neutral-600 dark:text-neutral-300 text-xs sm:text-sm leading-relaxed font-light">
                     {currentOffer.description}
                   </p>
                 )}
 
                 {showTerms ? (
-                  <div className="border border-primary-100 dark:border-white/5 rounded-2xl p-4 bg-primary-50/50 dark:bg-white/2 max-h-40 overflow-y-auto text-xs text-primary-500 space-y-2">
-                    <p className="font-bold text-primary-700 dark:text-white uppercase tracking-wider mb-2">Terms & Conditions</p>
-                    <p className="whitespace-pre-line">{currentOffer.terms || 'No specific terms provided. Site-wide promotion rules apply.'}</p>
+                  <div className="border border-neutral-200 dark:border-neutral-800 rounded-2xl p-4 bg-neutral-50 dark:bg-neutral-900/50 max-h-40 overflow-y-auto text-xs text-neutral-500 space-y-2">
+                    <p className="font-bold text-neutral-900 dark:text-white uppercase tracking-wider mb-1 text-[11px]">Terms &amp; Conditions</p>
+                    <p className="whitespace-pre-line leading-relaxed">{currentOffer.terms || 'No specific terms provided. Site-wide promotion rules apply.'}</p>
                   </div>
                 ) : (
                   currentOffer.terms && (
                     <button
                       onClick={() => setShowTerms(true)}
-                      className="text-xs font-bold text-primary-400 hover:text-accent flex items-center gap-1.5 transition-colors"
+                      className="text-xs font-bold text-neutral-400 hover:text-[#c6a87c] flex items-center gap-1.5 transition-colors cursor-pointer"
                     >
                       <AlertCircle className="w-3.5 h-3.5" />
-                      View Terms & Conditions
+                      View Terms &amp; Conditions
                     </button>
                   )
                 )}
@@ -135,9 +130,9 @@ export default function OffersPopup({ offers = [] }) {
                 {showTerms && (
                   <button
                     onClick={() => setShowTerms(false)}
-                    className="text-xs font-bold text-accent hover:underline"
+                    className="text-xs font-bold text-[#c6a87c] hover:underline cursor-pointer"
                   >
-                    ← Back to Offer Details
+                    &larr; Back to Offer Details
                   </button>
                 )}
 
@@ -146,7 +141,7 @@ export default function OffersPopup({ offers = [] }) {
                   <Link
                     href={currentOffer.eligible_product_ids && currentOffer.eligible_product_ids.length > 0 ? `/shop` : `/`}
                     onClick={handleClose}
-                    className="btn-primary w-full py-4 text-center text-md font-bold rounded-2xl shadow-xl shadow-accent/20 hover:scale-[1.01] active:scale-98 transition-all block"
+                    className="btn-primary w-full py-3.5 text-center text-xs font-bold uppercase tracking-wider rounded-xl transition-all block"
                   >
                     {currentOffer.eligible_product_ids && currentOffer.eligible_product_ids.length > 0
                       ? 'Shop Eligible Products'
