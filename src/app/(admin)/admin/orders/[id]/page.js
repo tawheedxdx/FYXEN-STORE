@@ -125,9 +125,21 @@ export default async function AdminOrderDetailPage({ params }) {
                 <span>-₹{order.discount_amount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-primary-500">
-                <span>Shipping</span>
-                <span>₹{order.shipping_amount.toFixed(2)}</span>
+                <span>
+                  {order.delivery_type === 'founder'
+                    ? 'Founder In-Hand Delivery'
+                    : order.delivery_type === 'express'
+                      ? 'Express Delivery'
+                      : 'Standard Shipping'}
+                </span>
+                <span>{order.shipping_amount === 0 ? 'FREE' : `₹${order.shipping_amount.toFixed(2)}`}</span>
               </div>
+              {order.cod_fee > 0 && (
+                <div className="flex justify-between text-amber-700 font-semibold">
+                  <span>COD Compliance Fee</span>
+                  <span>+₹{order.cod_fee.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-2xl font-black text-primary-900 pt-4 border-t border-primary-100">
                 <span>Total</span>
                 <span>₹{order.grand_total.toFixed(2)}</span>

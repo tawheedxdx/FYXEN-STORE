@@ -7,7 +7,6 @@ import Razorpay from 'razorpay';
 import crypto from 'crypto';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
-
 import { headers } from 'next/headers';
 
 const razorpay = new Razorpay({
@@ -91,17 +90,15 @@ export async function createCheckoutSession(formData) {
 
   const { data: settings } = await supabaseAdmin
     .from('settings')
-    .select('partial_payment_enabled, partial_payment_percentage')
+    .select('*')
     .single();
-  const partialPaymentEnabled = settings?.partial_payment_enabled || false;
-  const partialPaymentPercentage = settings?.partial_payment_percentage || 10;
 
-  const { items, subtotal, totalShipping, totalTax } = await getCart();
+  const { items, subtotal, totalTax } = await getCart();
   if (items.length === 0) {
     return { error: 'Cart is empty' };
   }
 
-  // 1. Final Stock Check before order creation
+  // 1. Stock Check
   for (const item of items) {
     if (item.quantity > item.stockQuantity) {
       return { error: `Insufficient stock for ${item.title}. Only ${item.stockQuantity} available.` };
@@ -109,8 +106,79 @@ export async function createCheckoutSession(formData) {
   }
 
   const paymentMethod = formData.get('paymentMethod') || 'ONLINE';
+  const deliveryType = formData.get('deliveryType') || 'standard';
 
-  // Check for coupon in formData
+  // Extract address info
+  const houseNo = formData.get('houseNo');
+  const street = formData.get('street');
+  const landmark = formData.get('landmark');
+  const line1 = houseNo ? `${houseNo}, ${street}` : (street || '');
+  const line2 = landmark || '';
+
+  const shippingInfo = {
+    full_name: formData.get('fullName'),
+    phone: formData.get('phone'),
+    line1,
+    line2,
+    city: formData.get('city') || '',
+    state: formData.get('state') || '',
+    postal_code: formData.get('postalCode') || '',
+    country: 'India',
+  };
+
+  // 2. Delivery Type & Kolkata Verification
+  let deliveryFee = 0;
+  const founderEnabled = settings?.founder_delivery_enabled ?? true;
+  const founderFee = Number(settings?.founder_delivery_fee ?? 10000);
+  const stdFee = Number(settings?.standard_delivery_fee ?? 30);
+  const freeThreshold = Number(settings?.standard_delivery_free_threshold ?? 499);
+  const expFee = Number(settings?.express_delivery_fee ?? 50);
+  const codComplianceFee = Number(settings?.cod_compliance_fee ?? 15);
+
+  if (deliveryType === 'founder') {
+    if (!founderEnabled) {
+      return { error: 'Hand Delivered By Founder is currently unavailable. Please choose Standard or Express Delivery.' };
+    }
+
+    // Kolkata check: city or PIN code
+    const cityStr = (shippingInfo.city || '').toLowerCase().trim();
+    const stateStr = (shippingInfo.state || '').toLowerCase().trim();
+    const pinStr = (shippingInfo.postal_code || '').trim();
+
+    const isKolkata = 
+      cityStr.includes('kolkata') || 
+      cityStr.includes('calcutta') || 
+      (stateStr.includes('west bengal') && (cityStr.includes('howrah') || cityStr.includes('salt lake') || cityStr.includes('new town') || cityStr.includes('bidhannagar'))) ||
+      pinStr.startsWith('700') ||
+      pinStr.startsWith('711');
+
+    if (!isKolkata) {
+      return { 
+        error: 'Hand Delivered By Founder is strictly available for Kolkata delivery addresses only. Please select Standard/Express Delivery or provide a Kolkata address.' 
+      };
+    }
+
+    if (paymentMethod === 'COD') {
+      return {
+        error: 'Hand Delivered By Founder requires Prepaid (Online) payment. COD is not available for this service.'
+      };
+    }
+
+    deliveryFee = founderFee;
+  } else if (deliveryType === 'express') {
+    deliveryFee = expFee;
+  } else {
+    // Standard delivery
+    deliveryFee = subtotal >= freeThreshold ? 0 : stdFee;
+  }
+
+  // 3. COD Fee
+  let codFee = 0;
+  if (paymentMethod === 'COD') {
+    codFee = codComplianceFee;
+  }
+
+  // 4. Coupon validation
   const couponCode = formData.get('couponCode');
   let discount = 0;
   let couponId = null;
@@ -123,7 +191,7 @@ export async function createCheckoutSession(formData) {
     }
   }
 
-  // Wallet Balance Logic
+  // 5. Wallet balance logic
   const useWallet = formData.get('useWallet') === 'true';
   let walletAmountUsed = 0;
   
@@ -135,47 +203,19 @@ export async function createCheckoutSession(formData) {
       .single();
 
     if (profile && profile.wallet_balance > 0) {
-      const remainingAfterCoupons = Math.max(0, subtotal - discount + totalShipping + totalTax);
+      const remainingAfterCoupons = Math.max(0, subtotal - discount + deliveryFee + totalTax + codFee);
       walletAmountUsed = Math.min(profile.wallet_balance, remainingAfterCoupons);
     }
   }
 
-  // Calculate totals
-  const shipping = totalShipping;
+  // 6. Calculate grand total
   const tax = totalTax;
-  let grandTotal = Math.max(0, subtotal - discount - walletAmountUsed + shipping + tax);
+  let grandTotal = Math.max(0, subtotal - discount - walletAmountUsed + deliveryFee + tax + codFee);
 
-  // Calculate potential wallet cashback (₹2 per ₹100 spent)
+  // Potential cashback
   const walletCashbackAmount = Math.floor(grandTotal / 100) * 2;
 
-  const houseNo = formData.get('houseNo');
-  const street = formData.get('street');
-  const landmark = formData.get('landmark');
-  const line1 = houseNo ? `${houseNo}, ${street}` : (street || '');
-  const line2 = landmark || '';
-
-  // Extract address info
-  const shippingInfo = {
-    full_name: formData.get('fullName'),
-    phone: formData.get('phone'),
-    line1,
-    line2,
-    city: formData.get('city'),
-    state: formData.get('state'),
-    postal_code: formData.get('postalCode'),
-    country: 'India',
-  };
-
-  const isPartial = paymentMethod === 'PARTIAL' && partialPaymentEnabled;
-  let partialPaymentAmount = 0;
-  let codBalanceAmount = 0;
-
-  if (isPartial) {
-    partialPaymentAmount = Math.round((grandTotal * (partialPaymentPercentage / 100)) * 100) / 100;
-    codBalanceAmount = Math.round((grandTotal - partialPaymentAmount) * 100) / 100;
-  }
-
-  // Validate and get opted offers
+  // Validate opted offers
   const optedOffers = formData.getAll('opted_offers') || [];
   let validatedOptedOffers = [];
 
@@ -203,7 +243,7 @@ export async function createCheckoutSession(formData) {
     }
   }
 
-  // 1. Create Order in DB
+  // 7. Create Order in Database
   const orderNumber = generateOrderNumber();
   
   const { data: order, error: orderError } = await supabaseAdmin
@@ -213,7 +253,10 @@ export async function createCheckoutSession(formData) {
       user_id: user.id,
       subtotal,
       discount_amount: discount,
-      shipping_amount: shipping,
+      shipping_amount: deliveryFee,
+      delivery_type: deliveryType,
+      delivery_fee: deliveryFee,
+      cod_fee: codFee,
       tax_amount: tax,
       grand_total: grandTotal,
       payment_status: paymentMethod === 'COD' ? 'cod' : 'pending',
@@ -232,8 +275,8 @@ export async function createCheckoutSession(formData) {
       coupon_id: couponId,
       wallet_amount_used: walletAmountUsed,
       wallet_cashback_amount: walletCashbackAmount,
-      partial_payment_amount: partialPaymentAmount,
-      cod_balance_amount: isPartial ? codBalanceAmount : (paymentMethod === 'COD' ? grandTotal : 0),
+      partial_payment_amount: 0,
+      cod_balance_amount: paymentMethod === 'COD' ? grandTotal : 0,
       terms_accepted: true,
       terms_accepted_at: new Date().toISOString(),
       terms_version: 'v1.0',
@@ -245,10 +288,10 @@ export async function createCheckoutSession(formData) {
 
   if (orderError || !order) {
     console.error('Create Order Error:', orderError);
-    return { error: 'Failed to create order' };
+    return { error: 'Failed to create order. Please try again.' };
   }
 
-  // 2. Insert Order Items
+  // 8. Insert Order Items
   const orderItemsData = items.map(item => ({
     order_id: order.id,
     product_id: item.productId,
@@ -263,9 +306,9 @@ export async function createCheckoutSession(formData) {
 
   await supabaseAdmin.from('order_items').insert(orderItemsData);
 
-  // If COD, we are done
+  // 9. COD Execution
   if (paymentMethod === 'COD') {
-    // 2. Decrement Stock for COD
+    // Decrement Stock
     for (const item of items) {
       const { data: success } = await supabaseAdmin.rpc('decrement_stock', {
         p_product_id: item.productId,
@@ -273,21 +316,20 @@ export async function createCheckoutSession(formData) {
         p_variant_id: item.variantId
       });
       if (!success) {
-        // This shouldn't happen often due to check above, but for safety:
         await deleteOrder(order.id);
-        return { error: `Stock for ${item.title} ran out just now. Please update your cart.` };
+        return { error: `Stock for ${item.title} ran out. Please update your cart.` };
       }
     }
 
     // Clear Cart
     await supabase.from('carts').delete().eq('user_id', user.id);
     
-    // Increment coupon usage if any
+    // Increment coupon usage
     if (couponId) {
       await supabaseAdmin.rpc('increment_coupon_usage', { coupon_uuid: couponId });
     }
 
-    // If wallet was used, deduct it now for COD
+    // Deduct wallet if used
     if (walletAmountUsed > 0) {
       await supabaseAdmin.rpc('adjust_wallet_balance', {
         p_user_id: user.id,
@@ -312,17 +354,19 @@ export async function createCheckoutSession(formData) {
     };
   }
 
-  // 3. Create Razorpay Order (for ONLINE or PARTIAL)
+  // 10. Razorpay Online Order Creation
   try {
-    const chargeAmount = paymentMethod === 'PARTIAL' ? partialPaymentAmount : grandTotal;
     const rzpOrder = await razorpay.orders.create({
-      amount: Math.round(chargeAmount * 100), // in paise, must be integer
+      amount: Math.round(grandTotal * 100), // in paise
       currency: 'INR',
       receipt: order.id,
-      notes: { orderNumber, couponCode: couponCode || 'none' }
+      notes: { 
+        orderNumber, 
+        couponCode: couponCode || 'none',
+        deliveryType
+      }
     });
 
-    // Update our DB order with RZP Order ID
     await supabaseAdmin
       .from('orders')
       .update({ razorpay_order_id: rzpOrder.id })
@@ -336,11 +380,11 @@ export async function createCheckoutSession(formData) {
       key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID,
       userEmail: user.email,
       shippingInfo,
-      paymentMethod
+      paymentMethod: 'ONLINE'
     };
   } catch (error) {
     console.error('Razorpay Error:', error);
-    return { error: 'Failed to initialize payment gateway' };
+    return { error: 'Failed to initialize Razorpay payment gateway.' };
   }
 }
 
@@ -362,29 +406,18 @@ export async function verifyPayment(paymentData) {
     .digest('hex');
 
   if (generatedSignature === razorpay_signature) {
-    // Payment verified
-    
-    // Get existing order payment_method
-    const { data: existingOrder } = await supabaseAdmin
-      .from('orders')
-      .select('payment_method')
-      .eq('id', orderId)
-      .single();
-
-    const isPartial = existingOrder?.payment_method === 'PARTIAL';
-
-    // Update Order Status and fetch details in one step
+    // Update Order Status
     const { data: order, error: orderUpdateError } = await supabaseAdmin
       .from('orders')
       .update({ 
-        payment_status: isPartial ? 'partial_paid' : 'paid', 
+        payment_status: 'paid', 
         order_status: 'confirmed',
         razorpay_payment_id,
         razorpay_signature,
         placed_at: new Date().toISOString()
       })
       .eq('id', orderId)
-      .select('id, user_id, grand_total, wallet_amount_used, order_number, coupon_id, partial_payment_amount')
+      .select('id, user_id, grand_total, wallet_amount_used, order_number, coupon_id')
       .single();
 
     if (orderUpdateError || !order) {
@@ -427,7 +460,7 @@ export async function verifyPayment(paymentData) {
       });
     }
 
-    // If a coupon was used, increment its count
+    // If coupon used
     if (order.coupon_id) {
       await supabaseAdmin.rpc('increment_coupon_usage', { coupon_uuid: order.coupon_id });
     }
@@ -440,7 +473,7 @@ export async function verifyPayment(paymentData) {
         provider_order_id: razorpay_order_id,
         provider_payment_id: razorpay_payment_id,
         status: 'captured',
-        amount: isPartial ? order.partial_payment_amount : order.grand_total,
+        amount: order.grand_total,
       });
 
     // Clear Cart
@@ -472,7 +505,6 @@ export async function retryPayment(orderId) {
     return { error: 'Not authenticated' };
   }
 
-  // 1. Fetch order details
   const { data: order, error: orderError } = await supabaseAdmin
     .from('orders')
     .select('*')
@@ -484,14 +516,12 @@ export async function retryPayment(orderId) {
     return { error: 'Order not found' };
   }
 
-  if (order.payment_status === 'paid' || order.payment_status === 'partial_paid') {
+  if (order.payment_status === 'paid') {
     return { error: 'Order already paid' };
   }
 
-  // 2. Create Razorpay Order
   try {
-    const isPartial = order.payment_method === 'PARTIAL';
-    const paymentAmount = isPartial ? order.partial_payment_amount : order.grand_total;
+    const paymentAmount = order.grand_total;
 
     const rzpOrder = await razorpay.orders.create({
       amount: Math.round(paymentAmount * 100),
@@ -500,7 +530,6 @@ export async function retryPayment(orderId) {
       notes: { orderNumber: order.order_number }
     });
 
-    // Update our DB order with NEW RZP Order ID
     await supabaseAdmin
       .from('orders')
       .update({ razorpay_order_id: rzpOrder.id })
@@ -533,7 +562,6 @@ export async function deleteOrder(orderId) {
     return { error: 'Not authenticated' };
   }
 
-  // Verify order exists, belongs to the user, and payment_status is 'pending' / 'unpaid'
   const { data: order, error: orderFetchError } = await supabaseAdmin
     .from('orders')
     .select('user_id, payment_status')
@@ -544,7 +572,6 @@ export async function deleteOrder(orderId) {
     return { error: 'Order not found' };
   }
 
-  // Security check: Only allow deleting pending orders belonging to the user
   if (order.user_id !== user.id) {
     return { error: 'Unauthorized' };
   }
@@ -553,10 +580,7 @@ export async function deleteOrder(orderId) {
     return { error: 'Cannot delete a paid order' };
   }
 
-  // 1. Delete order items first (foreign key)
   await supabaseAdmin.from('order_items').delete().eq('order_id', orderId);
-  
-  // 2. Delete the order
   const { error } = await supabaseAdmin.from('orders').delete().eq('id', orderId);
   
   if (error) {

@@ -332,9 +332,21 @@ export default async function OrderDetailsPage({ params }) {
                 </div>
               )}
               <div className="flex justify-between text-primary-300">
-                <span>Shipping</span>
+                <span>
+                  {order.delivery_type === 'founder'
+                    ? 'Founder In-Hand Delivery'
+                    : order.delivery_type === 'express'
+                      ? 'Express Delivery'
+                      : 'Standard Shipping'}
+                </span>
                 <span>{order.shipping_amount === 0 ? 'FREE' : `₹${order.shipping_amount}`}</span>
               </div>
+              {order.cod_fee > 0 && (
+                <div className="flex justify-between text-amber-300 font-semibold">
+                  <span>COD Compliance Fee</span>
+                  <span>+₹{order.cod_fee}</span>
+                </div>
+              )}
               <div className="pt-4 border-t border-white/10 flex justify-between items-center">
                 <span className="font-bold text-base">Grand Total</span>
                 <span className="font-bold text-2xl tracking-tight">₹{order.grand_total.toLocaleString('en-IN')}</span>

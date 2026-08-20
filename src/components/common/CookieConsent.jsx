@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, X, ChevronRight, Settings, Info } from 'lucide-react';
+import { ShieldCheck, X, Settings } from 'lucide-react';
 
 export default function CookieConsent() {
   const [showBanner, setShowBanner] = useState(false);
@@ -14,19 +14,20 @@ export default function CookieConsent() {
   });
 
   useEffect(() => {
-    const consent = localStorage.getItem('fyxen-cookie-consent');
-    if (!consent) {
-      // Small delay for better UX
-      const timer = setTimeout(() => setShowBanner(true), 1500);
-      return () => clearTimeout(timer);
-    } else {
+    const timer = setTimeout(() => {
       try {
-        const savedPrefs = JSON.parse(consent);
-        setPreferences(savedPrefs);
-      } catch (e) {
+        const consent = localStorage.getItem('fyxen-cookie-consent');
+        if (!consent) {
+          setShowBanner(true);
+        } else {
+          setPreferences(JSON.parse(consent));
+        }
+      } catch {
         setShowBanner(true);
       }
-    }
+    }, 1000);
+
+    return () => clearTimeout(timer);
   }, []);
 
   const handleAcceptAll = () => {
@@ -44,12 +45,15 @@ export default function CookieConsent() {
   };
 
   const saveConsent = (prefs) => {
-    localStorage.setItem('fyxen-cookie-consent', JSON.stringify(prefs));
+    try {
+      localStorage.setItem('fyxen-cookie-consent', JSON.stringify(prefs));
+    } catch (e) {
+      console.error(e);
+    }
     setPreferences(prefs);
     setShowBanner(false);
     setShowSettings(false);
     
-    // Dispatch event for other components (like Analytics) to react
     window.dispatchEvent(new CustomEvent('cookie-consent-updated', { detail: prefs }));
   };
 
@@ -64,7 +68,6 @@ export default function CookieConsent() {
           className="fixed bottom-6 left-6 right-6 z-[100] flex justify-center pointer-events-none"
         >
           <div className="bg-white dark:bg-black/90 backdrop-blur-xl border border-primary-100 dark:border-white/10 p-5 md:p-6 rounded-2xl shadow-2xl shadow-black/20 max-w-4xl w-full pointer-events-auto overflow-hidden relative">
-            {/* Glossy background effect */}
             <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary-500 via-primary-300 to-primary-600 opacity-50" />
             
             <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
@@ -77,7 +80,7 @@ export default function CookieConsent() {
                   Privacy Preferences
                 </h3>
                 <p className="text-sm text-primary-500 dark:text-primary-400 leading-relaxed max-w-2xl">
-                  We use cookies to enhance your shopping experience, analyze site traffic, and deliver personalized content. By clicking "Accept All", you consent to our use of cookies.
+                  We use cookies to enhance your shopping experience, analyze site traffic, and deliver personalized content. By clicking &ldquo;Accept All&rdquo;, you consent to our use of cookies.
                 </p>
               </div>
               

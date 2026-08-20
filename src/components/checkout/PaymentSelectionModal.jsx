@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CreditCard, Truck, ArrowRight, Check, X, Star, Gift } from 'lucide-react';
+import { CreditCard, Truck, ArrowRight, X, Star, Gift } from 'lucide-react';
 
 export default function PaymentSelectionModal({ 
   isOpen, 
@@ -17,19 +17,18 @@ export default function PaymentSelectionModal({
   const [maxDrag, setMaxDrag] = useState(0);
   const trackRef = useRef(null);
 
-  useEffect(() => {
-    if (!isOpen) {
-      setStep('choice');
-      setSelectedMethod(null);
-    }
-  }, [isOpen]);
+  const handleClose = () => {
+    setStep('choice');
+    setSelectedMethod(null);
+    onClose();
+  };
 
   useEffect(() => {
     if (step === 'confirm' && trackRef.current) {
       const timer = setTimeout(() => {
         if (trackRef.current) {
           const trackWidth = trackRef.current.offsetWidth;
-          setMaxDrag(trackWidth - 56 - 8); // button width is 56, padding is 4px on each side (total 8px)
+          setMaxDrag(trackWidth - 56 - 8);
         }
       }, 50);
       return () => clearTimeout(timer);
@@ -60,7 +59,7 @@ export default function PaymentSelectionModal({
         {/* Header */}
         <div className="px-6 py-4 flex items-center justify-between border-b border-primary-100 dark:border-white/5 bg-primary-50/50 dark:bg-white/5">
           <h3 className="text-lg font-bold">Payment Method</h3>
-          <button onClick={onClose} className="p-2 hover:bg-primary-100 dark:hover:bg-white/10 rounded-full transition-colors">
+          <button onClick={handleClose} className="p-2 hover:bg-primary-100 dark:hover:bg-white/10 rounded-full transition-colors cursor-pointer">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -76,7 +75,7 @@ export default function PaymentSelectionModal({
                 className="space-y-4"
               >
                 <p className="text-center text-primary-600 dark:text-primary-400 font-medium mb-6">
-                  Which mode you preffer?
+                  Which mode you prefer?
                 </p>
 
                 <div className="grid grid-cols-1 gap-4">
@@ -138,7 +137,6 @@ export default function PaymentSelectionModal({
                         </div>
                       </div>
 
-                      {/* Accepted Payment Method Icons */}
                       <div className="mt-2.5 flex items-center gap-1.5 flex-wrap">
                         <span className="text-[9px] font-black text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/10 tracking-wider">UPI</span>
                         <span className="text-[9px] font-bold text-orange-500 bg-orange-500/10 px-2 py-0.5 rounded border border-orange-500/10">Cards</span>
@@ -220,7 +218,7 @@ export default function PaymentSelectionModal({
 
                   <button 
                     onClick={() => setStep('choice')}
-                    className="w-full mt-6 text-sm text-primary-500 hover:text-primary-900 dark:hover:text-white font-medium transition-colors"
+                    className="w-full mt-6 text-sm text-primary-500 hover:text-primary-900 dark:hover:text-white font-medium transition-colors cursor-pointer"
                   >
                     Change Payment Method
                   </button>

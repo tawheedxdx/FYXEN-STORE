@@ -49,6 +49,15 @@ export async function upsertSettings(formData) {
     return_fee_under_1000: parseFloat(formData.get('returnFeeUnder1000')) || 0,
     partial_payment_enabled: formData.get('partialPaymentEnabled') === 'true',
     partial_payment_percentage: parseInt(formData.get('partialPaymentPercentage')) || 10,
+    
+    // Shipping & Delivery Options
+    founder_delivery_enabled: formData.get('founderDeliveryEnabled') === 'true',
+    founder_delivery_fee: parseFloat(formData.get('founderDeliveryFee')) || 10000,
+    standard_delivery_fee: parseFloat(formData.get('standardDeliveryFee')) || 30,
+    standard_delivery_free_threshold: parseFloat(formData.get('standardDeliveryFreeThreshold')) || 499,
+    express_delivery_fee: parseFloat(formData.get('expressDeliveryFee')) || 50,
+    cod_compliance_fee: parseFloat(formData.get('codComplianceFee')) || 15,
+
     curated_section_enabled: formData.get('curatedSectionEnabled') === 'true',
     curated_section_title: formData.get('curatedSectionTitle') || 'Curated For You',
     curated_section_heading: formData.get('curatedSectionHeading') || 'Fyxen Favourites',
@@ -65,5 +74,6 @@ export async function upsertSettings(formData) {
 
   if (error) return { error: error.message };
   revalidatePath('/admin/settings');
+  revalidatePath('/checkout');
   return { success: true };
 }
