@@ -166,7 +166,7 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {/* Bottom Curve (Ending) */}
+        {/* Bottom Curve (Ending - Concave Scoop) */}
         <div className="w-full overflow-hidden leading-none -mt-px">
           <svg 
             viewBox="0 0 1440 60" 
@@ -175,11 +175,11 @@ export default async function HomePage() {
             className="w-full h-8 sm:h-11 md:h-16 block text-neutral-950"
           >
             <path 
-              d="M0,0 L1440,0 C960,60 480,60 0,0 Z" 
+              d="M0,0 L1440,0 L1440,60 C960,0 480,0 0,60 Z" 
               fill="currentColor" 
             />
             <path 
-              d="M1440,0 C960,60 480,60 0,0" 
+              d="M1440,60 C960,0 480,0 0,60" 
               fill="none" 
               stroke="rgba(198,168,124,0.35)" 
               strokeWidth="1.5" 
