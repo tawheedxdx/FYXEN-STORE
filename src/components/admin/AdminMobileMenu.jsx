@@ -15,7 +15,6 @@ const navLinks = [
   { href: '/admin/returns', icon: RotateCcw, label: 'Returns' },
   { href: '/admin/subscribers', icon: Mail, label: 'VIP Subscribers' },
   { href: '/admin/inquiries', icon: MessageSquare, label: 'Inquiries' },
-  { href: '/admin/pages', icon: FileText, label: 'Site Pages' },
   { href: '/admin/announcements', icon: Megaphone, label: 'Announcements' },
   { href: '/admin/promo-banner', icon: Layout, label: 'Promo Banners' },
   { href: '/admin/coupons', icon: Tag, label: 'Coupons' },
