@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { CreditCard } from 'lucide-react';
 import { addToCart } from '@/app/(store)/cart/actions';
+import { createCheckoutSession } from '@/services/checkout/session';
 import { useRouter } from 'next/navigation';
 
 export default function BuyNowButton({ product, selectedVariant = null }) {
@@ -28,11 +29,30 @@ export default function BuyNowButton({ product, selectedVariant = null }) {
       }
       setIsProcessing(false);
     } else {
-      // 2. Redirect to checkout immediately
-      startTransition(() => {
+      // 2. Create 5-minute checkout session token & redirect
+      try {
+        const sessionRes = await createCheckoutSession();
+        if (sessionRes?.error) {
+          if (sessionRes.error === 'auth_required' && sessionRes.redirectUrl) {
+            router.push(sessionRes.redirectUrl);
+            return;
+          }
+          alert(sessionRes.message || 'Unable to initiate checkout session.');
+          setIsProcessing(false);
+          return;
+        }
+
+        if (sessionRes?.redirectUrl) {
+          window.location.href = sessionRes.redirectUrl;
+        } else {
+          router.push('/checkout');
+        }
+      } catch (err) {
+        console.error('Buy Now session error:', err);
         router.push('/checkout');
-      });
-      setIsProcessing(false);
+      } finally {
+        setIsProcessing(false);
+      }
     }
   };
 

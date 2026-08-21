@@ -4,18 +4,32 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import CheckoutItemsManager from '@/components/checkout/CheckoutItemsManager';
 import CheckoutOffersBadge from '@/components/checkout/CheckoutOffersBadge';
+import { validateCheckoutSession } from '@/services/checkout/session';
 
 export const metadata = {
   title: 'Secure Checkout | FYXEN',
   description: 'Complete your order securely with FYXEN standard, express, or founder hand delivery.',
 };
 
-export default async function CheckoutPage() {
+export default async function CheckoutPage({ searchParams }) {
+  const resolvedParams = await searchParams;
+  const sessionId = resolvedParams?.session_id || resolvedParams?.sessionid;
+
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login?redirect=/checkout');
+    redirect(`/login?redirect=${encodeURIComponent(sessionId ? `/checkout?session_id=${sessionId}` : '/cart')}`);
+  }
+
+  // 1. Session token validation (5-minute expiry & authorization check)
+  if (!sessionId) {
+    redirect('/cart?error=no_session');
+  }
+
+  const sessionValidation = await validateCheckoutSession(sessionId, user.id);
+  if (!sessionValidation.valid) {
+    redirect(`/cart?error=${sessionValidation.error || 'session_expired'}`);
   }
 
   const { items, subtotal, totalShipping, totalTax } = await getCart();
@@ -66,6 +80,9 @@ export default async function CheckoutPage() {
               settings={settings}
               offers={offers || []}
               items={items}
+              sessionId={sessionId}
+              expiresAt={sessionValidation.expiresAt}
+              remainingSeconds={sessionValidation.remainingSeconds}
             />
           </div>
           

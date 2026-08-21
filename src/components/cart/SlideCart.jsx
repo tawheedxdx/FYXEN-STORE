@@ -4,8 +4,9 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, ShieldCheck, Truck, Sparkles } from 'lucide-react';
+import { X, ShoppingBag, Plus, Minus, Trash2, ArrowRight, ShieldCheck, Truck, Sparkles, Lock } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+import ProceedToCheckoutButton from '@/components/cart/ProceedToCheckoutButton';
 
 const FREE_SHIPPING_THRESHOLD = 499;
 
@@ -213,14 +214,14 @@ export default function SlideCart() {
                   </div>
                 </div>
 
-                {/* Direct Checkout CTA */}
-                <Link
-                  href="/checkout"
-                  onClick={closeCart}
-                  className="btn-primary w-full py-3.5 rounded-xl shadow-lg shadow-black/5 flex items-center justify-center gap-2 text-sm font-bold"
+                {/* Direct Checkout CTA with 5-min Session Token */}
+                <ProceedToCheckoutButton
+                  onInitiated={closeCart}
+                  className="w-full py-3.5 rounded-xl shadow-lg shadow-black/5 flex items-center justify-center gap-2 text-sm font-bold"
                 >
+                  <Lock className="w-3.5 h-3.5" />
                   Checkout Now <ArrowRight className="w-4 h-4" />
-                </Link>
+                </ProceedToCheckoutButton>
 
                 <div className="text-center">
                   <Link

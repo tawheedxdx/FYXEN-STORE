@@ -3,18 +3,39 @@ import CartList from '@/components/cart/CartList';
 import Link from 'next/link';
 import { getCartRecommendations } from '@/services/products/recommendations';
 import RecommendationCarousel from '@/components/product/RecommendationCarousel';
+import ProceedToCheckoutButton from '@/components/cart/ProceedToCheckoutButton';
+
+import { AlertCircle, Lock } from 'lucide-react';
 
 export const metadata = {
   title: 'Your Cart',
 };
 
-export default async function CartPage() {
+export default async function CartPage({ searchParams }) {
+  const resolvedParams = await searchParams;
+  const errorParam = resolvedParams?.error;
+
   const { items, subtotal } = await getCart();
   const cartProductIds = items.map(item => item.productId).filter(Boolean);
   const recommendations = await getCartRecommendations(cartProductIds, 8);
 
   return (
     <div className="container-custom py-12">
+      {/* Session Expiry or Access Notice */}
+      {errorParam === 'session_expired' && (
+        <div className="mb-6 p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-xs font-semibold flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 shrink-0 text-amber-600 dark:text-amber-400" />
+          <span>Your previous checkout session has expired (sessions are valid for 5 minutes for payment security). Please click "Proceed to Checkout" to initiate a fresh session.</span>
+        </div>
+      )}
+
+      {errorParam === 'no_session' && (
+        <div className="mb-6 p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-xs font-semibold flex items-center gap-3">
+          <Lock className="w-5 h-5 shrink-0 text-blue-600 dark:text-blue-400" />
+          <span>Direct access to secure checkout is protected. Please click "Proceed to Checkout" below to start your verified checkout session.</span>
+        </div>
+      )}
+
       <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
       
       {items.length === 0 ? (
@@ -67,9 +88,7 @@ export default async function CartPage() {
                     </button>
                   </div>
                 ) : (
-                  <Link href="/checkout" className="btn-primary w-full text-center">
-                    Proceed to Checkout
-                  </Link>
+                  <ProceedToCheckoutButton className="w-full text-center py-3 rounded-xl font-bold" />
                 )}
               </div>
             </div>

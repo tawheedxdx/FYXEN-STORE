@@ -12,6 +12,8 @@ import {
 import WalletRedemption from './WalletRedemption';
 import OfferCountdown from '@/components/common/OfferCountdown';
 
+import { createCheckoutSession as createSessionAction } from '@/services/checkout/session';
+
 export default function CheckoutForm({ 
   subtotal, 
   tax = 0, 
@@ -19,7 +21,10 @@ export default function CheckoutForm({
   user, 
   settings, 
   offers = [], 
-  items = [] 
+  items = [],
+  sessionId = '',
+  expiresAt = null,
+  remainingSeconds = 300
 }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -27,6 +32,44 @@ export default function CheckoutForm({
   const [rzpReady, setRzpReady] = useState(false);
   const [acceptedPolicies, setAcceptedPolicies] = useState(false);
   const paymentStatusRef = useRef('none'); // 'none', 'success', 'failed'
+
+  // 5-Minute Session Security Countdown
+  const [secondsLeft, setSecondsLeft] = useState(remainingSeconds || 300);
+  const [isRenewingSession, setIsRenewingSession] = useState(false);
+
+  useEffect(() => {
+    if (secondsLeft <= 0) return;
+    const interval = setInterval(() => {
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [secondsLeft]);
+
+  const formatTime = (secs) => {
+    const mins = Math.floor(secs / 60);
+    const s = secs % 60;
+    return `${mins.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const handleRenewSession = async () => {
+    setIsRenewingSession(true);
+    try {
+      const res = await createSessionAction();
+      if (res?.redirectUrl) {
+        window.location.href = res.redirectUrl;
+      } else {
+        window.location.reload();
+      }
+    } catch (err) {
+      window.location.reload();
+    }
+  };
 
   // Delivery Type Selection ('standard' | 'express' | 'founder')
   const [deliveryType, setDeliveryType] = useState('standard');
@@ -341,6 +384,7 @@ export default function CheckoutForm({
           razorpay_payment_id: response.razorpay_payment_id,
           razorpay_signature: response.razorpay_signature,
           orderId: res.orderId,
+          sessionId: sessionId,
         });
 
         if (verifyRes.success) {
@@ -431,6 +475,50 @@ export default function CheckoutForm({
         }} 
         className="bg-white dark:bg-[#0c0c0e] p-6 sm:p-8 rounded-3xl border border-neutral-200/80 dark:border-neutral-800 shadow-xs space-y-8"
       >
+        {/* 5-Minute Session Expiry & Security Badge */}
+        <div className={`p-3.5 rounded-2xl border text-xs flex items-center justify-between flex-wrap gap-2 transition-all ${
+          secondsLeft > 60 
+            ? 'bg-neutral-50 dark:bg-neutral-900/60 border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300'
+            : secondsLeft > 0
+              ? 'bg-amber-50 dark:bg-amber-950/30 border-amber-300 dark:border-amber-800/60 text-amber-800 dark:text-amber-300'
+              : 'bg-rose-50 dark:bg-rose-950/40 border-rose-300 dark:border-rose-800 text-rose-800 dark:text-rose-300'
+        }`}>
+          <div className="flex items-center gap-2 font-medium">
+            <Lock className={`w-4 h-4 shrink-0 ${secondsLeft > 60 ? 'text-[#c6a87c]' : secondsLeft > 0 ? 'text-amber-500' : 'text-rose-500'}`} />
+            <span className="font-bold">Encrypted Checkout Session</span>
+            {sessionId && (
+              <span className="hidden sm:inline font-mono text-[10px] text-neutral-400 dark:text-neutral-500">
+                ({sessionId.slice(0, 14)}...)
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            {secondsLeft > 0 ? (
+              <span className="font-mono font-bold text-xs flex items-center gap-1.5">
+                <span className={`w-2 h-2 rounded-full ${secondsLeft > 60 ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500 animate-ping'}`} />
+                Expires in {formatTime(secondsLeft)}
+              </span>
+            ) : (
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-rose-600 dark:text-rose-400">Session Expired</span>
+                <button
+                  type="button"
+                  onClick={handleRenewSession}
+                  disabled={isRenewingSession}
+                  className="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[11px] font-bold transition-colors flex items-center gap-1 shadow-sm"
+                >
+                  {isRenewingSession ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                  Renew Session
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Hidden Session Token Input */}
+        <input type="hidden" name="session_id" value={sessionId || ''} />
+
         {/* Error Banner */}
         {error && (
           <div className="p-4 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-700 dark:text-rose-400 rounded-2xl text-xs font-semibold flex items-center gap-3">

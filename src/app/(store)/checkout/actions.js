@@ -8,6 +8,7 @@ import crypto from 'crypto';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
+import { invalidateCheckoutSession } from '@/services/checkout/session';
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_dummy',
@@ -352,6 +353,16 @@ export async function createCheckoutSession(formData) {
       });
     }
 
+    // Invalidate checkout session token
+    const sessionId = formData.get('session_id') || formData.get('sessionId');
+    if (sessionId) {
+      try {
+        await invalidateCheckoutSession(sessionId);
+      } catch (err) {
+        console.error('Failed to invalidate checkout session:', err);
+      }
+    }
+
     revalidatePath('/cart');
     revalidatePath('/account');
     
@@ -488,6 +499,16 @@ export async function verifyPayment(paymentData) {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       await supabase.from('carts').delete().eq('user_id', user.id);
+    }
+
+    // Invalidate checkout session token
+    const sessionId = paymentData?.sessionId || paymentData?.session_id;
+    if (sessionId) {
+      try {
+        await invalidateCheckoutSession(sessionId);
+      } catch (err) {
+        console.error('Failed to invalidate checkout session:', err);
+      }
     }
 
     revalidatePath('/cart');

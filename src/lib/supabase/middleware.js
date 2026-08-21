@@ -23,8 +23,17 @@ export async function updateSession(request) {
       rewriteUrl = url
     }
   } else if (isCheckoutSubdomain) {
+    // Check if session token exists in query parameter (session_id or sessionid)
+    const sessionId = url.searchParams.get('session_id') || url.searchParams.get('sessionid')
+
     // If accessed via secure checkout subdomain:
-    if (url.pathname === '/' || url.pathname === '/checkout') {
+    if (url.pathname === '/' || url.pathname === '/checkout' || url.pathname.startsWith('/session/')) {
+      // If someone visits securecheckout.fyxen.in directly without a session id, deny access
+      if (!sessionId && !url.pathname.startsWith('/session/')) {
+        const redirectHost = isProd ? 'https://www.fyxen.in' : ''
+        return NextResponse.redirect(new URL('/cart?error=no_session', redirectHost || request.url))
+      }
+
       url.pathname = '/checkout'
       rewriteUrl = url
     } else if (url.pathname.startsWith('/order/')) {
@@ -45,9 +54,14 @@ export async function updateSession(request) {
       const cleanPath = url.pathname.replace(/^\/admin/, '') || '/'
       return NextResponse.redirect(new URL(cleanPath + url.search, 'https://admin.fyxen.in'))
     }
-    // If accessed via main domain fyxen.in/checkout, redirect to securecheckout.fyxen.in in production
+    // If accessed via main domain fyxen.in/checkout without session_id in production, redirect to cart or secure checkout with session
     if (url.pathname === '/checkout' && isProd) {
-      return NextResponse.redirect(new URL('/' + url.search, 'https://securecheckout.fyxen.in'))
+      const sessionId = url.searchParams.get('session_id') || url.searchParams.get('sessionid')
+      if (sessionId) {
+        return NextResponse.redirect(new URL(`/checkout?session_id=${sessionId}`, 'https://securecheckout.fyxen.in'))
+      } else {
+        return NextResponse.redirect(new URL('/cart', 'https://www.fyxen.in'))
+      }
     }
   }
 
