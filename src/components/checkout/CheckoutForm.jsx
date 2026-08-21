@@ -1174,7 +1174,7 @@ export default function CheckoutForm({
             /* PREPAID ONLINE BUTTON */
             <button
               type="submit"
-              disabled={isLoading || !acceptedPolicies || (deliveryType === 'founder' && !isKolkataLocation)}
+              disabled={isLoading || !acceptedPolicies || (deliveryType === 'founder' && !isWestBengalLocation)}
               className="btn-primary w-full py-4 rounded-2xl text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {isLoading ? (
