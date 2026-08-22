@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Mail, Phone, Instagram, Facebook, Youtube, Linkedin, ShieldCheck, Truck, RotateCcw, CreditCard, Sparkles } from 'lucide-react';
+import CurvedSectionDivider from '@/components/common/CurvedSectionDivider';
 
 export default function Footer({ settings }) {
   const currentYear = new Date().getFullYear();
@@ -9,7 +10,10 @@ export default function Footer({ settings }) {
   const supportPhone = settings?.support_phone;
 
   return (
-    <footer className="bg-neutral-950 text-neutral-300 border-t border-neutral-850">
+    <footer className="bg-neutral-950 text-neutral-300 relative overflow-hidden">
+      {/* Top Symmetrical Curved Entrance */}
+      <CurvedSectionDivider variant="top-concave" />
+
       {/* 1. Value Props Strip */}
       <div className="border-b border-white/5 bg-neutral-900/40">
         <div className="container-custom py-10">

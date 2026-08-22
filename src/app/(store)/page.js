@@ -5,6 +5,7 @@ import BrandBentoGrid from '@/components/storefront/BrandBentoGrid';
 import HomeReviewsWall from '@/components/storefront/HomeReviewsWall';
 import ActiveOffersGrid from '@/components/storefront/ActiveOffersGrid';
 import NewsletterForm from '@/components/storefront/NewsletterForm';
+import CurvedSectionDivider from '@/components/common/CurvedSectionDivider';
 import { getProducts, getCategories } from '@/services/products';
 import { createClient } from '@/lib/supabase/server';
 
@@ -118,28 +119,10 @@ export default async function HomePage() {
       {/* 6. Customer Love & Regional Social Proof Wall (Admin Curated Reviews Only) */}
       <HomeReviewsWall reviews={realReviews || []} />
 
-      {/* 7. VIP Inner Circle Newsletter with Curved Opening & Ending */}
+      {/* 7. VIP Inner Circle Newsletter with Symmetrical Curved Opening & Ending */}
       <section className="relative overflow-hidden w-full bg-white dark:bg-[#09090b]">
         {/* Top Curve (Opening) */}
-        <div className="w-full overflow-hidden leading-none -mb-px">
-          <svg 
-            viewBox="0 0 1440 60" 
-            fill="none" 
-            preserveAspectRatio="none" 
-            className="w-full h-8 sm:h-11 md:h-16 block text-neutral-950"
-          >
-            <path 
-              d="M0,0 C480,60 960,60 1440,0 L1440,60 L0,60 Z" 
-              fill="currentColor" 
-            />
-            <path 
-              d="M0,0 C480,60 960,60 1440,0" 
-              fill="none" 
-              stroke="rgba(198,168,124,0.35)" 
-              strokeWidth="1.5" 
-            />
-          </svg>
-        </div>
+        <CurvedSectionDivider variant="top-concave" />
 
         {/* Section Body */}
         <div className="py-14 md:py-20 bg-neutral-950 text-white relative overflow-hidden">
@@ -166,26 +149,8 @@ export default async function HomePage() {
           </div>
         </div>
 
-        {/* Bottom Curve (Ending - Concave Scoop) */}
-        <div className="w-full overflow-hidden leading-none -mt-px">
-          <svg 
-            viewBox="0 0 1440 60" 
-            fill="none" 
-            preserveAspectRatio="none" 
-            className="w-full h-8 sm:h-11 md:h-16 block text-neutral-950"
-          >
-            <path 
-              d="M0,0 L1440,0 L1440,60 C960,0 480,0 0,60 Z" 
-              fill="currentColor" 
-            />
-            <path 
-              d="M1440,60 C960,0 480,0 0,60" 
-              fill="none" 
-              stroke="rgba(198,168,124,0.35)" 
-              strokeWidth="1.5" 
-            />
-          </svg>
-        </div>
+        {/* Bottom Curve (Ending) */}
+        <CurvedSectionDivider variant="bottom-concave" />
       </section>
     </div>
   );
