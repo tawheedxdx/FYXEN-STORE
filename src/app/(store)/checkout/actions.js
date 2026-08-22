@@ -8,7 +8,7 @@ import crypto from 'crypto';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
-import { invalidateCheckoutSession } from '@/services/checkout/session';
+import { validateCheckoutSession, invalidateCheckoutSession } from '@/services/checkout/session';
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_dummy',
@@ -77,6 +77,17 @@ export async function createCheckoutSession(formData) {
 
   if (!user) {
     return { error: 'Not authenticated' };
+  }
+
+  // Strictly enforce 5-minute temporary session validity
+  const sessionId = formData.get('session_id') || formData.get('sessionId');
+  if (!sessionId) {
+    return { error: 'Checkout session is missing or invalid. Please refresh and try again.' };
+  }
+
+  const sessionValidation = await validateCheckoutSession(sessionId, user.id);
+  if (!sessionValidation.valid) {
+    return { error: 'Your checkout session has expired (valid for 5 minutes). Please renew your session to place the order.' };
   }
 
   const acceptPolicies = formData.get('acceptPolicies') === 'on' || formData.get('acceptPolicies') === 'true';
@@ -417,12 +428,14 @@ export async function verifyPayment(paymentData) {
     orderId
   } = paymentData;
 
-  const secret = process.env.RAZORPAY_KEY_SECRET || 'dummy_secret';
-  
-  const generatedSignature = crypto
-    .createHmac('sha256', secret)
-    .update(razorpay_order_id + '|' + razorpay_payment_id)
-    .digest('hex');
+  const sessionId = paymentData?.sessionId || paymentData?.session_id;
+  if (sessionId) {
+    const { data: { user } } = await supabase.auth.getUser();
+    const sessionValidation = await validateCheckoutSession(sessionId, user?.id);
+    if (!sessionValidation.valid) {
+      return { error: 'Checkout session expired. Payment verification rejected.' };
+    }
+  }
 
   if (generatedSignature === razorpay_signature) {
     // Update Order Status

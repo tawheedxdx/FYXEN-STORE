@@ -36,6 +36,7 @@ export default function CheckoutForm({
   // 5-Minute Session Security Countdown
   const [secondsLeft, setSecondsLeft] = useState(remainingSeconds || 300);
   const [isRenewingSession, setIsRenewingSession] = useState(false);
+  const isExpired = secondsLeft <= 0;
 
   useEffect(() => {
     if (secondsLeft <= 0) return;
@@ -271,24 +272,22 @@ export default function CheckoutForm({
 
   // Coupon Handlers
   async function handleApplyCoupon() {
-    if (!couponCode) return;
+    if (!couponCode || isExpired) return;
     setIsValidating(true);
     setCouponError(null);
     
     const res = await validateCoupon(couponCode.toUpperCase(), subtotal);
     if (res.error) {
       setCouponError(res.error);
-      setAppliedCoupon(null);
-      setCurrentDiscount(0);
-    } else {
+    } else if (res.success && res.coupon) {
       setAppliedCoupon(res.coupon);
       setCurrentDiscount(res.coupon.discountAmount);
-      setCouponError(null);
     }
     setIsValidating(false);
   }
 
   function removeCoupon() {
+    if (isExpired) return;
     setAppliedCoupon(null);
     setCouponCode('');
     setCurrentDiscount(0);
@@ -296,6 +295,11 @@ export default function CheckoutForm({
 
   // Validate Form Data Helper
   const validateFormAndGetFormData = () => {
+    if (isExpired) {
+      setError('Your checkout session has expired. Please renew your session to continue.');
+      return null;
+    }
+
     if (!formRef.current) return null;
     const formElement = formRef.current;
     
@@ -433,7 +437,7 @@ export default function CheckoutForm({
 
   // COD Slide to Confirm Handler
   async function handleCodSlideConfirm(event, info) {
-    if (isLoading) return;
+    if (isLoading || isExpired) return;
     
     // Check if dragged at least 80%
     if (info.offset.x >= maxDrag * 0.8) {
@@ -527,8 +531,10 @@ export default function CheckoutForm({
           </div>
         )}
 
-        {/* 1. SHIPPING ADDRESS */}
-        <div>
+        {/* Form Fields Locked when Expired */}
+        <fieldset disabled={isExpired || isLoading} className="space-y-8 disabled:opacity-60 disabled:pointer-events-none transition-all">
+          {/* 1. SHIPPING ADDRESS */}
+          <div>
           <div className="flex items-center gap-2 mb-6 border-b border-neutral-100 dark:border-neutral-800 pb-4">
             <MapPin className="w-5 h-5 text-[#c6a87c]" />
             <h2 className="text-xl font-black text-neutral-950 dark:text-white tracking-tight">
@@ -1174,7 +1180,7 @@ export default function CheckoutForm({
             /* PREPAID ONLINE BUTTON */
             <button
               type="submit"
-              disabled={isLoading || !acceptedPolicies || (deliveryType === 'founder' && !isWestBengalLocation)}
+              disabled={isLoading || isExpired || !acceptedPolicies || (deliveryType === 'founder' && !isWestBengalLocation)}
               className="btn-primary w-full py-4 rounded-2xl text-sm font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {isLoading ? (
@@ -1246,7 +1252,73 @@ export default function CheckoutForm({
             </div>
           )}
         </div>
+        </fieldset>
       </form>
+
+      {/* Session Expired Full Screen / Overlay Lock Modal */}
+      <AnimatePresence>
+        {isExpired && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-white dark:bg-[#0f0f12] rounded-3xl p-6 sm:p-8 max-w-md w-full text-center border border-neutral-200 dark:border-neutral-800 shadow-2xl space-y-6"
+            >
+              <div className="w-16 h-16 bg-rose-100 dark:bg-rose-950/60 rounded-2xl flex items-center justify-center mx-auto text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-800">
+                <Lock className="w-8 h-8" />
+              </div>
+              
+              <div className="space-y-2">
+                <h3 className="text-xl sm:text-2xl font-black text-neutral-950 dark:text-white">
+                  Checkout Session Expired
+                </h3>
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
+                  For your security and real-time inventory reservation, checkout sessions are strictly active for 5 minutes. Details and payment processing are locked until renewed.
+                </p>
+              </div>
+
+              <div className="p-3.5 bg-rose-50/70 dark:bg-rose-950/30 rounded-2xl border border-rose-200/80 dark:border-rose-900/50 text-xs font-semibold text-rose-800 dark:text-rose-300 flex items-center justify-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
+                <span>Filling details & placing orders are currently disabled.</span>
+              </div>
+
+              <div className="flex flex-col gap-2.5 pt-2">
+                <button
+                  type="button"
+                  onClick={handleRenewSession}
+                  disabled={isRenewingSession}
+                  className="btn-primary w-full py-4 rounded-xl font-bold flex items-center justify-center gap-2 shadow-lg cursor-pointer"
+                >
+                  {isRenewingSession ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin text-[#c6a87c]" />
+                      <span>Renewing Session...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-4 h-4" />
+                      <span>Renew Checkout Session</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => window.location.href = '/cart'}
+                  className="w-full py-2.5 text-xs font-bold text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer"
+                >
+                  Return to Bag
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }
